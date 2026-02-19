@@ -13,8 +13,11 @@ export class ProjectsService {
     private readonly projectRepository: Repository<Project>,
   ) {}
 
-  async create(createProjectDto: CreateProjectDto): Promise<Project> {
-    const project = this.projectRepository.create(createProjectDto);
+  async create(createProjectDto: CreateProjectDto, userId?: string): Promise<Project> {
+    const project = this.projectRepository.create({
+      ...createProjectDto,
+      user: { id: userId } as any,
+    });
     return this.projectRepository.save(project);
   }
 
@@ -39,5 +42,10 @@ export class ProjectsService {
   async remove(id: string): Promise<void> {
     const project = await this.findOne(id);
     await this.projectRepository.remove(project);
+  }
+
+  async count(): Promise<{ total: number }> {
+    const total = await this.projectRepository.count();
+    return { total };
   }
 }

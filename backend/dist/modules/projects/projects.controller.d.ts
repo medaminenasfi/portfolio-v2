@@ -5,9 +5,12 @@ import { ProjectsService } from './projects.service';
 export declare class ProjectsController {
     private readonly projectsService;
     constructor(projectsService: ProjectsService);
-    create(createProjectDto: CreateProjectDto): Promise<Project>;
+    create(createProjectDto: CreateProjectDto, req: any): Promise<Project>;
     findAll(): Promise<Project[]>;
     findOne(id: string): Promise<Project>;
     update(id: string, updateProjectDto: UpdateProjectDto): Promise<Project>;
+    count(): Promise<{
+        total: number;
+    }>;
     remove(id: string): Promise<void>;
 }

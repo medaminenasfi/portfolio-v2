@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Project = void 0;
 const typeorm_1 = require("typeorm");
 const base_entity_1 = require("../../../common/entities/base.entity");
+const user_entity_1 = require("../../auth/entities/user.entity");
 let Project = class Project extends base_entity_1.BaseEntity {
 };
 exports.Project = Project;
@@ -39,6 +40,10 @@ __decorate([
     (0, typeorm_1.Column)('varchar', { array: true, default: '{}' }),
     __metadata("design:type", Array)
 ], Project.prototype, "technologies", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, (user) => user.projects),
+    __metadata("design:type", user_entity_1.User)
+], Project.prototype, "user", void 0);
 exports.Project = Project = __decorate([
     (0, typeorm_1.Entity)({ name: 'projects' })
 ], Project);

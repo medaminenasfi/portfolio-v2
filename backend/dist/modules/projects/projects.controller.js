@@ -17,12 +17,13 @@ const common_1 = require("@nestjs/common");
 const create_project_dto_1 = require("./dto/create-project.dto");
 const update_project_dto_1 = require("./dto/update-project.dto");
 const projects_service_1 = require("./projects.service");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 let ProjectsController = class ProjectsController {
     constructor(projectsService) {
         this.projectsService = projectsService;
     }
-    create(createProjectDto) {
-        return this.projectsService.create(createProjectDto);
+    create(createProjectDto, req) {
+        return this.projectsService.create(createProjectDto, req.user.userId);
     }
     findAll() {
         return this.projectsService.findAll();
@@ -33,6 +34,9 @@ let ProjectsController = class ProjectsController {
     update(id, updateProjectDto) {
         return this.projectsService.update(id, updateProjectDto);
     }
+    count() {
+        return this.projectsService.count();
+    }
     remove(id) {
         return this.projectsService.remove(id);
     }
@@ -40,9 +44,11 @@ let ProjectsController = class ProjectsController {
 exports.ProjectsController = ProjectsController;
 __decorate([
     (0, common_1.Post)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_project_dto_1.CreateProjectDto]),
+    __metadata("design:paramtypes", [create_project_dto_1.CreateProjectDto, Object]),
     __metadata("design:returntype", Promise)
 ], ProjectsController.prototype, "create", null);
 __decorate([
@@ -60,12 +66,19 @@ __decorate([
 ], ProjectsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_project_dto_1.UpdateProjectDto]),
     __metadata("design:returntype", Promise)
 ], ProjectsController.prototype, "update", null);
+__decorate([
+    (0, common_1.Get)('count'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ProjectsController.prototype, "count", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),

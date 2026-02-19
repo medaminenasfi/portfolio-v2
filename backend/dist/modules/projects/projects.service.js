@@ -21,8 +21,11 @@ let ProjectsService = class ProjectsService {
     constructor(projectRepository) {
         this.projectRepository = projectRepository;
     }
-    async create(createProjectDto) {
-        const project = this.projectRepository.create(createProjectDto);
+    async create(createProjectDto, userId) {
+        const project = this.projectRepository.create({
+            ...createProjectDto,
+            user: { id: userId },
+        });
         return this.projectRepository.save(project);
     }
     findAll() {
@@ -43,6 +46,10 @@ let ProjectsService = class ProjectsService {
     async remove(id) {
         const project = await this.findOne(id);
         await this.projectRepository.remove(project);
+    }
+    async count() {
+        const total = await this.projectRepository.count();
+        return { total };
     }
 };
 exports.ProjectsService = ProjectsService;

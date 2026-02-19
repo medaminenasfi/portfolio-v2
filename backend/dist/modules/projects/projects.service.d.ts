@@ -5,9 +5,12 @@ import { Project } from './entities/project.entity';
 export declare class ProjectsService {
     private readonly projectRepository;
     constructor(projectRepository: Repository<Project>);
-    create(createProjectDto: CreateProjectDto): Promise<Project>;
+    create(createProjectDto: CreateProjectDto, userId?: string): Promise<Project>;
     findAll(): Promise<Project[]>;
     findOne(id: string): Promise<Project>;
     update(id: string, updateProjectDto: UpdateProjectDto): Promise<Project>;
     remove(id: string): Promise<void>;
+    count(): Promise<{
+        total: number;
+    }>;
 }

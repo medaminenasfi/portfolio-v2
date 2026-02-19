@@ -1,6 +1,7 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 
 import { BaseEntity } from '../../../common/entities/base.entity';
+import { User } from '../../auth/entities/user.entity';
 
 @Entity({ name: 'projects' })
 export class Project extends BaseEntity {
@@ -21,4 +22,7 @@ export class Project extends BaseEntity {
 
   @Column('varchar', { array: true, default: '{}' })
   technologies!: string[];
+
+  @ManyToOne(() => User, (user) => user.projects)
+  user!: User;
 }
