@@ -21,7 +21,7 @@ exports.DatabaseModule = DatabaseModule = __decorate([
                 inject: [config_1.ConfigService],
                 useFactory: async (configService) => {
                     const database = configService.getOrThrow('database');
-                    const env = configService.get('app.env', 'development');
+                    const appConfig = configService.getOrThrow('app');
                     return {
                         type: 'postgres',
                         host: database.host,
@@ -30,7 +30,7 @@ exports.DatabaseModule = DatabaseModule = __decorate([
                         password: database.password,
                         database: database.name,
                         logging: database.logging,
-                        synchronize: env !== 'production',
+                        synchronize: appConfig.env !== 'production',
                         autoLoadEntities: true,
                     };
                 },

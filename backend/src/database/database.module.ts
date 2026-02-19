@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { DataSourceOptions } from 'typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 
-import { AppConfiguration, DatabaseConfig } from '../config/configuration';
+import { AppConfig, AppConfiguration, DatabaseConfig } from '../config/configuration';
 
 @Module({
   imports: [
@@ -12,9 +11,9 @@ import { AppConfiguration, DatabaseConfig } from '../config/configuration';
       inject: [ConfigService],
       useFactory: async (
         configService: ConfigService<AppConfiguration>,
-      ): Promise<DataSourceOptions> => {
+      ): Promise<TypeOrmModuleOptions> => {
         const database = configService.getOrThrow<DatabaseConfig>('database');
-        const env = configService.get<string>('app.env', 'development');
+        const appConfig = configService.getOrThrow<AppConfig>('app');
 
         return {
           type: 'postgres',
@@ -24,7 +23,7 @@ import { AppConfiguration, DatabaseConfig } from '../config/configuration';
           password: database.password,
           database: database.name,
           logging: database.logging,
-          synchronize: env !== 'production',
+          synchronize: appConfig.env !== 'production',
           autoLoadEntities: true,
         };
       },
