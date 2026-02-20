@@ -5,6 +5,7 @@ import { Project } from './entities/project.entity';
 export declare class ProjectsService {
     private readonly projectRepository;
     constructor(projectRepository: Repository<Project>);
+    private generateSlug;
     create(createProjectDto: CreateProjectDto, userId?: string): Promise<Project>;
     findAll(): Promise<Project[]>;
     findOne(id: string): Promise<Project>;

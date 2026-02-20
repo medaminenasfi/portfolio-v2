@@ -15,5 +15,10 @@ export declare class AuthService {
         total: number;
     }>;
     userExists(): Promise<boolean>;
+    deleteAllUsers(): Promise<void>;
+    getAllUsers(): Promise<{
+        total: number;
+        users: User[];
+    }>;
     validateUser(username: string, pass: string): Promise<any>;
 }

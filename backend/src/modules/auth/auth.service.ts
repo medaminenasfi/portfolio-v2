@@ -63,17 +63,27 @@ export class AuthService {
     return count > 0;
   }
 
+  async deleteAllUsers(): Promise<void> {
+    await this.userRepository.query('DELETE FROM "users"');
+  }
+
+  async getAllUsers() {
+    const users = await this.userRepository.find({
+      select: ['id', 'username', 'createdAt']
+    });
+    return {
+      total: users.length,
+      users: users
+    };
+  }
+
   async validateUser(username: string, pass: string): Promise<any> {
-    console.log('🔍 Validating user:', username);
     const user = await this.userRepository.findOne({ where: { username } });
-    console.log('🔍 User found:', !!user);
     
     if (user && await bcrypt.compare(pass, user.password)) {
-      console.log('✅ Password match');
       const { password, ...result } = user;
       return result;
     }
-    console.log('❌ Password mismatch or user not found');
     return null;
   }
 }

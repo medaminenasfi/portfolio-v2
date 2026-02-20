@@ -12,5 +12,11 @@ export declare class ProjectsController {
     count(): Promise<{
         total: number;
     }>;
+    uploadImage(file: Express.Multer.File): {
+        filename: string;
+        path: string;
+        originalName: string;
+        size: number;
+    };
     remove(id: string): Promise<void>;
 }

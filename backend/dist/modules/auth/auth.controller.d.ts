@@ -17,4 +17,18 @@ export declare class AuthController {
     getAdminOnly(): {
         message: string;
     };
+    resetUsers(): Promise<{
+        message: string;
+    }>;
+    getAllUsers(): Promise<{
+        total: number;
+        users: import("./entities/user.entity").User[];
+    }>;
+    testLogin(body: any): Promise<{
+        message: string;
+        received: {
+            username: any;
+        };
+        timestamp: string;
+    }>;
 }

@@ -30,21 +30,30 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
-    console.log('🔐 Login attempt for:', loginDto.username);
+    console.log(`[AUTH] Login attempt: ${loginDto.username}`);
+    
+    // Validate input
+    if (!loginDto.username || !loginDto.password) {
+      console.error('[AUTH] Login failed: Missing credentials');
+      throw new Error('Username and password are required');
+    }
     
     // Manual login without passport for now
     const user = await this.authService.validateUser(loginDto.username, loginDto.password);
     if (!user) {
-      console.log('❌ Login failed for:', loginDto.username);
+      console.log(`[AUTH] Login failed: ${loginDto.username}`);
       throw new Error('Invalid credentials');
     }
     
-    console.log('✅ Login successful for:', loginDto.username);
+    console.log(`[AUTH] Login successful: ${user.username}`);
+    
     const payload = { username: user.username, sub: user.id };
+    const token = this.jwtService.sign(payload);
+    
     return {
       message: `${user.username} connected successfully!`,
       username: user.username,
-      access_token: this.jwtService.sign(payload),
+      access_token: token,
     };
   }
 
@@ -58,5 +67,26 @@ export class AuthController {
   @Get('admin')
   getAdminOnly() {
     return { message: 'Admin access granted' };
+  }
+
+  @Post('reset-users')
+  async resetUsers() {
+    await this.authService.deleteAllUsers();
+    return { message: 'All users deleted from database' };
+  }
+
+  @Get('all-users')
+  async getAllUsers() {
+    return await this.authService.getAllUsers();
+  }
+
+  @Post('test-login')
+  async testLogin(@Body() body: any) {
+    console.log('[AUTH] Test endpoint called');
+    return {
+      message: 'Test endpoint working',
+      received: { username: body.username },
+      timestamp: new Date().toISOString()
+    };
   }
 }

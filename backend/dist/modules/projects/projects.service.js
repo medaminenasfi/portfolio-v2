@@ -21,12 +21,42 @@ let ProjectsService = class ProjectsService {
     constructor(projectRepository) {
         this.projectRepository = projectRepository;
     }
+    generateSlug(title) {
+        return title
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+    }
     async create(createProjectDto, userId) {
-        const project = this.projectRepository.create({
-            ...createProjectDto,
-            user: { id: userId },
-        });
-        return this.projectRepository.save(project);
+        try {
+            const slug = createProjectDto.slug || this.generateSlug(createProjectDto.title);
+            const existingProject = await this.projectRepository.findOne({
+                where: { slug },
+            });
+            if (existingProject) {
+                const uniqueSlug = `${slug}-${Date.now()}`;
+                createProjectDto.slug = uniqueSlug;
+            }
+            else {
+                createProjectDto.slug = slug;
+            }
+            const projectData = {
+                ...createProjectDto,
+                category: createProjectDto.category,
+                status: createProjectDto.status,
+                user: { id: userId },
+            };
+            const project = this.projectRepository.create(projectData);
+            const savedProject = await this.projectRepository.save(project);
+            console.log(`[PROJECTS] Project created: ${savedProject.title} (${savedProject.id})`);
+            return savedProject;
+        }
+        catch (error) {
+            console.error('[PROJECTS] Error creating project:', error.message);
+            throw error;
+        }
     }
     findAll() {
         return this.projectRepository.find({ order: { createdAt: 'DESC' } });
@@ -40,7 +70,12 @@ let ProjectsService = class ProjectsService {
     }
     async update(id, updateProjectDto) {
         const project = await this.findOne(id);
-        const updated = this.projectRepository.merge(project, updateProjectDto);
+        const updateData = {
+            ...updateProjectDto,
+            category: updateProjectDto.category,
+            status: updateProjectDto.status,
+        };
+        const updated = this.projectRepository.merge(project, updateData);
         return this.projectRepository.save(updated);
     }
     async remove(id) {

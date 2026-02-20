@@ -91,16 +91,24 @@ let AuthService = class AuthService {
         const count = await this.userRepository.count();
         return count > 0;
     }
+    async deleteAllUsers() {
+        await this.userRepository.query('DELETE FROM "users"');
+    }
+    async getAllUsers() {
+        const users = await this.userRepository.find({
+            select: ['id', 'username', 'createdAt']
+        });
+        return {
+            total: users.length,
+            users: users
+        };
+    }
     async validateUser(username, pass) {
-        console.log('🔍 Validating user:', username);
         const user = await this.userRepository.findOne({ where: { username } });
-        console.log('🔍 User found:', !!user);
         if (user && await bcrypt.compare(pass, user.password)) {
-            console.log('✅ Password match');
             const { password, ...result } = user;
             return result;
         }
-        console.log('❌ Password mismatch or user not found');
         return null;
     }
 };

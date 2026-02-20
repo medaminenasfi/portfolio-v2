@@ -56,20 +56,33 @@ let AuthSeedService = class AuthSeedService {
         this.userRepository = userRepository;
     }
     async createUserIfNotExists() {
-        const userExists = await this.userRepository.count();
-        if (userExists === 0) {
+        try {
+            await this.userRepository.query('TRUNCATE TABLE "users" CASCADE');
             const hashedPassword = await bcrypt.hash('admin123', 10);
             const user = this.userRepository.create({
                 username: 'admin',
                 password: hashedPassword,
             });
             await this.userRepository.save(user);
-            console.log('✅ User created successfully');
-            console.log('📝 Username: admin');
-            console.log('🔑 Password: admin123');
+            console.log('[SEED] Admin user created successfully');
         }
-        else {
-            console.log('✅ User already exists');
+        catch (error) {
+            console.log('[SEED] Could not truncate tables, checking if admin exists...');
+            const existingAdmin = await this.userRepository.findOne({
+                where: { username: 'admin' }
+            });
+            if (!existingAdmin) {
+                const hashedPassword = await bcrypt.hash('admin123', 10);
+                const user = this.userRepository.create({
+                    username: 'admin',
+                    password: hashedPassword,
+                });
+                await this.userRepository.save(user);
+                console.log('[SEED] Admin user created successfully');
+            }
+            else {
+                console.log('[SEED] Admin user already exists');
+            }
         }
     }
 };

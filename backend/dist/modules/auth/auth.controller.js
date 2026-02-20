@@ -33,18 +33,23 @@ let AuthController = class AuthController {
         return this.authService.register(registerDto);
     }
     async login(loginDto) {
-        console.log('🔐 Login attempt for:', loginDto.username);
+        console.log(`[AUTH] Login attempt: ${loginDto.username}`);
+        if (!loginDto.username || !loginDto.password) {
+            console.error('[AUTH] Login failed: Missing credentials');
+            throw new Error('Username and password are required');
+        }
         const user = await this.authService.validateUser(loginDto.username, loginDto.password);
         if (!user) {
-            console.log('❌ Login failed for:', loginDto.username);
+            console.log(`[AUTH] Login failed: ${loginDto.username}`);
             throw new Error('Invalid credentials');
         }
-        console.log('✅ Login successful for:', loginDto.username);
+        console.log(`[AUTH] Login successful: ${user.username}`);
         const payload = { username: user.username, sub: user.id };
+        const token = this.jwtService.sign(payload);
         return {
             message: `${user.username} connected successfully!`,
             username: user.username,
-            access_token: this.jwtService.sign(payload),
+            access_token: token,
         };
     }
     getProfile(req) {
@@ -52,6 +57,21 @@ let AuthController = class AuthController {
     }
     getAdminOnly() {
         return { message: 'Admin access granted' };
+    }
+    async resetUsers() {
+        await this.authService.deleteAllUsers();
+        return { message: 'All users deleted from database' };
+    }
+    async getAllUsers() {
+        return await this.authService.getAllUsers();
+    }
+    async testLogin(body) {
+        console.log('[AUTH] Test endpoint called');
+        return {
+            message: 'Test endpoint working',
+            received: { username: body.username },
+            timestamp: new Date().toISOString()
+        };
     }
 };
 exports.AuthController = AuthController;
@@ -84,6 +104,25 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "getAdminOnly", null);
+__decorate([
+    (0, common_1.Post)('reset-users'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "resetUsers", null);
+__decorate([
+    (0, common_1.Get)('all-users'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "getAllUsers", null);
+__decorate([
+    (0, common_1.Post)('test-login'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "testLogin", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService,

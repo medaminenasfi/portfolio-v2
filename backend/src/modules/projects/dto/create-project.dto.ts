@@ -3,8 +3,13 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsBoolean,
+  IsEnum,
   MaxLength,
+  IsUrl,
 } from 'class-validator';
+
+import { ProjectCategory, ProjectStatus } from '../entities/project.entity';
 
 export class CreateProjectDto {
   @IsString()
@@ -13,22 +18,48 @@ export class CreateProjectDto {
   title!: string;
 
   @IsString()
+  @IsOptional()
+  slug?: string;
+
+  @IsString()
   @IsNotEmpty()
   description!: string;
 
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
-  @IsString()
-  imageUrl?: string;
-
-  @IsOptional()
-  @IsString()
-  repoUrl?: string;
-
-  @IsOptional()
-  @IsString()
-  liveUrl?: string;
+  techStack?: string[] = [];
 
   @IsArray()
   @IsString({ each: true })
-  technologies!: string[];
+  @IsOptional()
+  images?: string[];
+
+  @IsOptional()
+  @IsString()
+  bannerImage?: string;
+
+  @IsOptional()
+  @IsString()
+  cataloguePhoto?: string;
+
+  @IsOptional()
+  @IsUrl()
+  liveDemoUrl?: string;
+
+  @IsOptional()
+  @IsUrl()
+  githubUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isFeatured?: boolean;
 }
