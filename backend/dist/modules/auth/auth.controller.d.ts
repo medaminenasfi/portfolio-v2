@@ -16,7 +16,16 @@ export declare class AuthController {
     getProfile(req: ExpressRequest): Express.User | undefined;
     getAdminOnly(): {
         message: string;
+        system: string;
+        adminUser: string;
     };
+    getSystemInfo(): Promise<{
+        system: string;
+        totalUsers: number;
+        adminUser: string;
+        registrationAllowed: boolean;
+        features: string[];
+    }>;
     resetUsers(): Promise<{
         message: string;
     }>;

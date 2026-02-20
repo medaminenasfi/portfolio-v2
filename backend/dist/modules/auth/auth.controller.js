@@ -28,8 +28,9 @@ let AuthController = class AuthController {
     async register(registerDto) {
         const userExists = await this.authService.userExists();
         if (userExists) {
-            throw new Error('Registration is disabled. User already exists.');
+            throw new Error('Registration disabled. Single admin user already exists.');
         }
+        console.log('[AUTH] Creating single admin user:', registerDto.username);
         return this.authService.register(registerDto);
     }
     async login(loginDto) {
@@ -56,7 +57,28 @@ let AuthController = class AuthController {
         return req.user;
     }
     getAdminOnly() {
-        return { message: 'Admin access granted' };
+        return {
+            message: 'Admin access granted',
+            system: 'Single admin mode',
+            adminUser: 'amine'
+        };
+    }
+    async getSystemInfo() {
+        const userCount = await this.authService.count();
+        const users = await this.authService.getAllUsers();
+        return {
+            system: 'Single Admin Portfolio System',
+            totalUsers: userCount.total,
+            adminUser: users.users.length > 0 ? users.users[0].username : 'none',
+            registrationAllowed: userCount.total === 0,
+            features: [
+                'Single admin user only',
+                'Public project viewing',
+                'Admin-only project management',
+                'JWT authentication',
+                'File uploads'
+            ]
+        };
     }
     async resetUsers() {
         await this.authService.deleteAllUsers();
@@ -104,6 +126,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "getAdminOnly", null);
+__decorate([
+    (0, common_1.Get)('system-info'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "getSystemInfo", null);
 __decorate([
     (0, common_1.Post)('reset-users'),
     __metadata("design:type", Function),

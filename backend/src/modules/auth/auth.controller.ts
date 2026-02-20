@@ -18,13 +18,14 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
-    // Check if any user already exists
+    // Check if any user already exists (single admin system)
     const userExists = await this.authService.userExists();
 
     if (userExists) {
-      throw new Error('Registration is disabled. User already exists.');
+      throw new Error('Registration disabled. Single admin user already exists.');
     }
 
+    console.log('[AUTH] Creating single admin user:', registerDto.username);
     return this.authService.register(registerDto);
   }
 
@@ -66,7 +67,31 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Get('admin')
   getAdminOnly() {
-    return { message: 'Admin access granted' };
+    return { 
+      message: 'Admin access granted',
+      system: 'Single admin mode',
+      adminUser: 'amine'
+    };
+  }
+
+  @Get('system-info')
+  async getSystemInfo() {
+    const userCount = await this.authService.count();
+    const users = await this.authService.getAllUsers();
+    
+    return {
+      system: 'Single Admin Portfolio System',
+      totalUsers: userCount.total,
+      adminUser: users.users.length > 0 ? users.users[0].username : 'none',
+      registrationAllowed: userCount.total === 0,
+      features: [
+        'Single admin user only',
+        'Public project viewing',
+        'Admin-only project management',
+        'JWT authentication',
+        'File uploads'
+      ]
+    };
   }
 
   @Post('reset-users')

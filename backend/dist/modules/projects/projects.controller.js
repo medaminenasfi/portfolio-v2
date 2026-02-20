@@ -36,6 +36,12 @@ let ProjectsController = class ProjectsController {
     findOne(id) {
         return this.projectsService.findOne(id);
     }
+    findAllAdmin() {
+        return this.projectsService.findAll();
+    }
+    findOneAdmin(id) {
+        return this.projectsService.findOne(id);
+    }
     update(id, updateProjectDto) {
         return this.projectsService.update(id, updateProjectDto);
     }
@@ -83,8 +89,23 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ProjectsController.prototype, "findOne", null);
 __decorate([
+    (0, common_1.Get)('admin/all'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ProjectsController.prototype, "findAllAdmin", null);
+__decorate([
+    (0, common_1.Get)('admin/:id'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ProjectsController.prototype, "findOneAdmin", null);
+__decorate([
     (0, common_1.Patch)(':id'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -93,13 +114,14 @@ __decorate([
 ], ProjectsController.prototype, "update", null);
 __decorate([
     (0, common_1.Get)('count'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ProjectsController.prototype, "count", null);
 __decorate([
     (0, common_1.Post)('upload-image'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
         storage: (0, multer_1.diskStorage)({
             destination: (req, file, cb) => {
@@ -130,7 +152,7 @@ __decorate([
 ], ProjectsController.prototype, "uploadImage", null);
 __decorate([
     (0, common_1.Delete)(':id'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

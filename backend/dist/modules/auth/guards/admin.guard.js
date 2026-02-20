@@ -10,6 +10,13 @@ exports.AdminGuard = void 0;
 const common_1 = require("@nestjs/common");
 let AdminGuard = class AdminGuard {
     canActivate(context) {
+        const request = context.switchToHttp().getRequest();
+        const user = request.user;
+        if (!user || user.username !== 'amine') {
+            console.log('[ADMIN] Access denied - not the single admin user:', user?.username);
+            return false;
+        }
+        console.log('[ADMIN] Access granted - single admin user verified');
         return true;
     }
 };

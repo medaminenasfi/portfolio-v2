@@ -31,8 +31,20 @@ export class ProjectsController {
     return this.projectsService.findOne(id);
   }
 
+  @Get('admin/all')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  findAllAdmin(): Promise<Project[]> {
+    return this.projectsService.findAll();
+  }
+
+  @Get('admin/:id')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  findOneAdmin(@Param('id') id: string): Promise<Project> {
+    return this.projectsService.findOne(id);
+  }
+
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   update(
     @Param('id') id: string,
     @Body() updateProjectDto: UpdateProjectDto,
@@ -41,12 +53,13 @@ export class ProjectsController {
   }
 
   @Get('count')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   count(): Promise<{ total: number }> {
     return this.projectsService.count();
   }
 
   @Post('upload-image')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -88,7 +101,7 @@ export class ProjectsController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   remove(@Param('id') id: string): Promise<void> {
     return this.projectsService.remove(id);
   }

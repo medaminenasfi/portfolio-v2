@@ -8,6 +8,8 @@ export declare class ProjectsController {
     create(createProjectDto: CreateProjectDto, req: any): Promise<Project>;
     findAll(): Promise<Project[]>;
     findOne(id: string): Promise<Project>;
+    findAllAdmin(): Promise<Project[]>;
+    findOneAdmin(id: string): Promise<Project>;
     update(id: string, updateProjectDto: UpdateProjectDto): Promise<Project>;
     count(): Promise<{
         total: number;

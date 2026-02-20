@@ -60,29 +60,31 @@ let AuthSeedService = class AuthSeedService {
             await this.userRepository.query('TRUNCATE TABLE "users" CASCADE');
             const hashedPassword = await bcrypt.hash('admin123', 10);
             const user = this.userRepository.create({
-                username: 'admin',
+                username: 'amine',
                 password: hashedPassword,
             });
             await this.userRepository.save(user);
-            console.log('[SEED] Admin user created successfully');
+            console.log('[SEED] Single admin user created: amine');
+            console.log('[SYSTEM] Single admin mode activated');
         }
         catch (error) {
             console.log('[SEED] Could not truncate tables, checking if admin exists...');
             const existingAdmin = await this.userRepository.findOne({
-                where: { username: 'admin' }
+                where: { username: 'amine' }
             });
             if (!existingAdmin) {
                 const hashedPassword = await bcrypt.hash('admin123', 10);
                 const user = this.userRepository.create({
-                    username: 'admin',
+                    username: 'amine',
                     password: hashedPassword,
                 });
                 await this.userRepository.save(user);
-                console.log('[SEED] Admin user created successfully');
+                console.log('[SEED] Single admin user created: amine');
             }
             else {
-                console.log('[SEED] Admin user already exists');
+                console.log('[SEED] Single admin user already exists: amine');
             }
+            console.log('[SYSTEM] Single admin mode active');
         }
     }
 };
