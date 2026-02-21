@@ -7,14 +7,14 @@ import TestimonialForm from './TestimonialForm';
 
 interface Testimonial {
   id: string;
-  name: string;
+  clientName: string;
   company: string;
-  role: string;
-  content: string;
+  position: string;
+  email: string;
   rating: number;
-  image?: string;
+  comment: string;
+  status: 'pending' | 'approved' | 'rejected';
   createdAt: string;
-  status?: string;
 }
 
 export default function TestimonialsSection() {
@@ -30,14 +30,21 @@ export default function TestimonialsSection() {
     try {
       const response = await fetch('http://localhost:3000/api/public/testimonials');
       const data = await response.json();
-      console.log('Testimonials data:', data); // Debug log
+      console.log('=== PUBLIC TESTIMONIALS DEBUG ==='); // Debug log
+      console.log('Raw response:', data); // Debug log
+      console.log('Response JSON:', JSON.stringify(data, null, 2)); // Debug log
       
-      // Filter only approved testimonials
-      const approvedTestimonials = (data.testimonials || data.data || []).filter(
-        (testimonial: Testimonial) => testimonial.status === 'approved'
-      );
+      // The public endpoint should already return only approved testimonials
+      // But let's ensure we're handling the data correctly
+      const testimonials = data.testimonials || data.data || data || [];
+      console.log('Testimonials array:', testimonials); // Debug log
+      console.log('Testimonials count:', testimonials.length); // Debug log
       
-      setTestimonials(approvedTestimonials);
+      if (testimonials.length > 0) {
+        console.log('Sample testimonial:', JSON.stringify(testimonials[0], null, 2)); // Debug log
+      }
+      
+      setTestimonials(testimonials);
     } catch (error) {
       console.error('Failed to fetch testimonials:', error);
     } finally {
@@ -114,10 +121,10 @@ export default function TestimonialsSection() {
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
                         <h4 className="font-semibold text-foreground mb-1">
-                          {testimonial.name}
+                          {testimonial.clientName}
                         </h4>
                         <p className="text-sm text-muted-foreground">
-                          {testimonial.role} at {testimonial.company}
+                          {testimonial.position} at {testimonial.company}
                         </p>
                       </div>
                       {renderStars(testimonial.rating)}
@@ -125,7 +132,7 @@ export default function TestimonialsSection() {
                     
                     <blockquote className="flex-1 mb-4">
                       <p className="text-muted-foreground leading-relaxed italic">
-                        "{testimonial.content}"
+                        "{testimonial.comment}"
                       </p>
                     </blockquote>
                     
