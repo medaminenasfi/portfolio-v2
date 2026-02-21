@@ -5,10 +5,9 @@ import { useState } from 'react';
 
 interface NavigationProps {
   activeSection: string;
-  setActiveSection: (section: string) => void;
 }
 
-export default function Navigation({ activeSection, setActiveSection }: NavigationProps) {
+export default function Navigation({ activeSection }: NavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -36,7 +35,10 @@ export default function Navigation({ activeSection, setActiveSection }: Navigati
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
-              onClick={() => setActiveSection(item.id)}
+              onClick={() => {
+                // Navigation handled by browser scroll
+                setMobileMenuOpen(false);
+              }}
             >
               {item.label}
             </a>
@@ -72,7 +74,7 @@ export default function Navigation({ activeSection, setActiveSection }: Navigati
                   activeSection === item.id ? 'text-primary' : 'text-muted-foreground'
                 }`}
                 onClick={() => {
-                  setActiveSection(item.id);
+                  // Navigation handled by browser scroll
                   setMobileMenuOpen(false);
                 }}
               >

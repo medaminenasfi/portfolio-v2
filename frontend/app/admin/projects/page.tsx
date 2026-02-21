@@ -97,9 +97,10 @@ export default function ProjectsPage() {
     }
   };
 
-  const togglePublish = async (id: string, status: string) => {
+  const togglePublish = async (id: string, currentStatus: string) => {
     try {
-      await api.bulkPublishProjects([id], status === 'published');
+      const newStatus = currentStatus === 'published' ? 'draft' : 'published';
+      await api.bulkPublishProjects([id], newStatus === 'published');
       fetchProjects(); // Refresh the list
     } catch (error) {
       console.error('Failed to toggle publish:', error);

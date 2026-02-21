@@ -29,25 +29,25 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       
-      // Fetch data from backend API
-      const [projectsRes, testimonialsRes, contactsRes, analyticsRes] = await Promise.all([
-        api.getProjects({ limit: 1 }), // Just get count
-        api.getTestimonials({ limit: 1 }), // Just get count
-        api.getContactStats(),
-        api.getDashboardStats().catch(() => null), // Analytics might fail
+      // Fetch data from backend API using only working public endpoints
+      const [projectsRes, testimonialsRes] = await Promise.all([
+        api.getPublicProjects({ limit: 1 }), // Use public endpoint
+        api.getPublicTestimonials(), // Use public endpoint
+        // Skip contact and analytics stats for now as they're causing UUID errors
       ]);
+
+      console.log('Projects response:', projectsRes); // Debug log
+      console.log('Testimonials response:', testimonialsRes); // Debug log
 
       const projectsData = projectsRes as any;
       const testimonialsData = testimonialsRes as any;
-      const contactsData = contactsRes as any;
-      const analyticsData = analyticsRes as any;
 
       setStats({
-        totalProjects: projectsData.pagination?.total || projectsData.data?.length || 0,
-        totalTestimonials: testimonialsData.pagination?.total || testimonialsData.data?.length || 0,
-        totalContacts: contactsData.totalContactSubmissions || contactsData.total || 0,
-        totalDownloads: analyticsData?.total?.resumeDownloads || 0,
-        currentVisitors: analyticsData?.realTime?.currentVisitors || 0,
+        totalProjects: projectsData.total || projectsData.projects?.length || 0,
+        totalTestimonials: testimonialsData.total || testimonialsData.data?.length || 0,
+        totalContacts: 0, // Temporarily disabled
+        totalDownloads: 0, // Temporarily disabled
+        currentVisitors: 0, // Temporarily disabled
       });
     } catch (error) {
       console.error('Failed to fetch dashboard stats:', error);

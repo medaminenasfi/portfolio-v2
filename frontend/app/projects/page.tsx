@@ -9,17 +9,20 @@ import Footer from '@/components/portfolio/Footer';
 interface Project {
   id: string;
   title: string;
-  short_description: string;
+  shortSummary: string;
   description: string;
-  technologies: string[];
+  techStack: string[];
   category: string;
-  featured: boolean;
+  isFeatured: boolean;
+  liveDemoUrl?: string;
+  githubRepoUrl?: string;
+  status?: string;
+  created_at: string;
 }
 
 export default function AllProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeSection, setActiveSection] = useState('projects');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
@@ -29,9 +32,15 @@ export default function AllProjectsPage() {
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch('/api/projects');
+      const response = await fetch('http://localhost:3000/api/public/projects');
       const data = await response.json();
-      setProjects(data.data || []);
+      console.log('Projects page - Raw data:', data); // Debug log
+      console.log('Projects page - Projects:', data.projects); // Debug log
+      console.log('Projects page - Count:', data.projects?.length); // Debug log
+      console.log('Project 0:', data.projects?.[0]); // Debug log
+      
+      // Show all projects on public site (remove published filter)
+      setProjects(data.projects || []);
     } catch (error) {
       console.error('Failed to fetch projects:', error);
     } finally {
@@ -43,14 +52,14 @@ export default function AllProjectsPage() {
   
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.short_description.toLowerCase().includes(searchTerm.toLowerCase());
+                         project.shortSummary.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || project.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   return (
     <main className="min-h-screen bg-background">
-      <Navigation activeSection={activeSection} setActiveSection={setActiveSection} />
+      <Navigation activeSection="projects" />
 
       {/* Hero */}
       <section className="py-20 px-4 bg-gradient-to-b from-background to-card/20">
@@ -116,7 +125,7 @@ export default function AllProjectsPage() {
                       <span className="px-3 py-1 bg-cyan-500/20 text-cyan-300 rounded-full text-xs font-semibold border border-cyan-500/30">
                         {project.category}
                       </span>
-                      {project.featured && (
+                      {project.isFeatured && (
                         <span className="px-3 py-1 bg-violet-500/20 text-violet-300 rounded-full text-xs font-semibold border border-violet-500/30">
                           Featured
                         </span>
@@ -128,18 +137,18 @@ export default function AllProjectsPage() {
                     </h3>
 
                     <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
-                      {project.short_description}
+                      {project.shortSummary}
                     </p>
 
                     <div className="flex flex-wrap gap-2 mb-6">
-                      {project.technologies.slice(0, 3).map((tech, idx) => (
+                      {(project.techStack || []).slice(0, 3).map((tech: string, idx: number) => (
                         <span key={idx} className="text-xs bg-cyan-500/10 text-cyan-300 px-2 py-1 rounded border border-cyan-500/30">
                           {tech}
                         </span>
                       ))}
-                      {project.technologies.length > 3 && (
+                      {(project.techStack || []).length > 3 && (
                         <span className="text-xs bg-cyan-500/10 text-cyan-300 px-2 py-1 rounded border border-cyan-500/30">
-                          +{project.technologies.length - 3}
+                          +{(project.techStack || []).length - 3}
                         </span>
                       )}
                     </div>

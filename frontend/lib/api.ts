@@ -163,7 +163,10 @@ export class ApiClient {
   async bulkPublishProjects(projectIds: string[], publish: boolean) {
     return this.request('/projects/bulk/publish', {
       method: 'PATCH',
-      body: JSON.stringify({ projectIds, publish }),
+      body: JSON.stringify({ 
+        projectIds, 
+        status: publish ? 'published' : 'draft' 
+      }),
     });
   }
 
@@ -216,6 +219,20 @@ export class ApiClient {
   async getTestimonials(params?: any) {
     const query = params ? `?${new URLSearchParams(params)}` : '';
     return this.request(`/testimonials${query}`);
+  }
+
+  async createTestimonial(data: any) {
+    return this.request('/testimonials', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateTestimonial(id: string, data: any) {
+    return this.request(`/testimonials/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
   }
 
   async approveTestimonial(id: string) {

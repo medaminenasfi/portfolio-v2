@@ -5,6 +5,7 @@ import { Plus, Trash2, Edit2, Star } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { api } from '@/lib/api';
 
 interface Testimonial {
   id: string;
@@ -29,13 +30,12 @@ export default function TestimonialsPage() {
   const fetchTestimonials = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/testimonials');
-      if (!response.ok) throw new Error('Failed to fetch testimonials');
-      const data = await response.json();
-      setTestimonials(data.testimonials || []);
+      const data = await api.getTestimonials() as any;
+      console.log('Testimonials data:', data); // Debug log
+      setTestimonials(data.testimonials || data.data || []);
     } catch (err) {
       setError('Failed to load testimonials');
-      console.error(err);
+      console.error('Failed to fetch testimonials:', err);
     } finally {
       setLoading(false);
     }
@@ -45,14 +45,11 @@ export default function TestimonialsPage() {
     if (!confirm('Are you sure you want to delete this testimonial?')) return;
 
     try {
-      const response = await fetch(`/api/testimonials/${id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) throw new Error('Failed to delete');
-      setTestimonials(testimonials.filter(t => t.id !== id));
+      await api.deleteTestimonial(id);
+      fetchTestimonials(); // Refresh the list
     } catch (err) {
       setError('Failed to delete testimonial');
-      console.error(err);
+      console.error('Failed to delete testimonial:', err);
     }
   };
 

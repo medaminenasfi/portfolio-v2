@@ -278,7 +278,7 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
         }
       };
 
-      // Prepare form data with proper validation
+      // First, create the project
       const submitData = {
         ...formData,
         // Ensure description meets minimum length
@@ -296,12 +296,44 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
           ...formData.seoData,
           keywords: formData.seoData?.keywords?.filter(k => k.trim()) || [],
         },
+        // Don't include file arrays in initial submission
+        bannerImages: [],
+        categoryPhotos: [],
+        videoUrl: '',
+        videoThumbnail: '',
       };
 
+      let createdProject;
       if (projectId) {
-        await api.updateProject(projectId, submitData);
+        createdProject = await api.updateProject(projectId, submitData);
       } else {
-        await api.createProject(submitData);
+        createdProject = await api.createProject(submitData);
+      }
+
+      const projectIdToUse = projectId || (createdProject as any).id;
+
+      // Upload banner images
+      if (bannerFiles.length > 0) {
+        for (const file of bannerFiles) {
+          await uploadFile(projectIdToUse, file, 'banner');
+        }
+      }
+
+      // Upload category photos
+      if (categoryPhotos.length > 0) {
+        for (const file of categoryPhotos) {
+          await uploadFile(projectIdToUse, file, 'category');
+        }
+      }
+
+      // Upload video file
+      if (videoFile) {
+        await uploadFile(projectIdToUse, videoFile, 'video');
+      }
+
+      // Upload video thumbnail
+      if (videoThumbnailFile) {
+        await uploadFile(projectIdToUse, videoThumbnailFile, 'thumbnail');
       }
 
       router.push('/admin/projects');
@@ -310,6 +342,33 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
       alert('Failed to save project: ' + (error as Error).message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Helper function to upload files
+  const uploadFile = async (projectId: string, file: File, type: string) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', type);
+
+    try {
+      const response = await fetch(`http://localhost:3000/api/public/projects/${projectId}/media`, {
+        method: 'POST',
+        body: formData,
+        // Note: Don't set Content-Type header when using FormData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Upload failed: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log(`Uploaded ${type} file:`, result);
+      return result;
+    } catch (error) {
+      console.error(`Failed to upload ${type} file:`, error);
+      throw error;
     }
   };
 
