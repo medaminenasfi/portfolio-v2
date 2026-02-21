@@ -34,7 +34,7 @@ export class ResumeSectionsService {
       orderIndex: createDto.orderIndex ?? (maxOrder?.orderIndex ?? 0) + 1,
     });
 
-    return this.workExperienceRepository.save(workExperience);
+    return (await this.workExperienceRepository.save(workExperience) as unknown) as WorkExperience;
   }
 
   async getAllWorkExperience(): Promise<WorkExperience[]> {
@@ -88,7 +88,7 @@ export class ResumeSectionsService {
       orderIndex: createDto.orderIndex ?? (maxOrder?.orderIndex ?? 0) + 1,
     });
 
-    return this.educationRepository.save(education);
+    return (await this.educationRepository.save(education) as unknown) as Education;
   }
 
   async getAllEducation(): Promise<Education[]> {
@@ -143,7 +143,7 @@ export class ResumeSectionsService {
       orderIndex: createDto.orderIndex ?? (maxOrder?.orderIndex ?? 0) + 1,
     });
 
-    return this.skillsRepository.save(skill);
+    return (await this.skillsRepository.save(skill) as unknown) as Skill;
   }
 
   async getAllSkills(category?: string): Promise<Skill[]> {
@@ -202,7 +202,7 @@ export class ResumeSectionsService {
       orderIndex: createDto.orderIndex ?? (maxOrder?.orderIndex ?? 0) + 1,
     });
 
-    return this.certificationsRepository.save(certification);
+    return (await this.certificationsRepository.save(certification) as unknown) as Certification;
   }
 
   async getAllCertifications(): Promise<Certification[]> {
@@ -256,7 +256,7 @@ export class ResumeSectionsService {
       orderIndex: createDto.orderIndex ?? (maxOrder?.orderIndex ?? 0) + 1,
     });
 
-    return this.languagesRepository.save(language);
+    return (await this.languagesRepository.save(language) as unknown) as Language;
   }
 
   async getAllLanguages(): Promise<Language[]> {

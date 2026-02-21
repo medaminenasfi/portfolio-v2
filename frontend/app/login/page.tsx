@@ -7,13 +7,16 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
+import { Eye, EyeOff } from 'lucide-react';
+import { api } from '@/lib/api';
 
 export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: '',
   });
 
@@ -29,26 +32,18 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+      console.log('Attempting login with:', { username: formData.username });
+      const response = await api.login(formData.username, formData.password);
+      console.log('Login response:', response);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Login failed');
-        return;
-      }
-
-      // Redirect to admin dashboard on successful login
-      if (data.success) {
+      if (response.success) {
         router.push('/admin');
+      } else {
+        setError('Login failed');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
-      setError('An error occurred. Please try again.');
+      setError(error.message || 'An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -70,32 +65,45 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="username">Username</Label>
             <Input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
+              id="username"
+              name="username"
+              type="text"
+              value={formData.username}
               onChange={handleChange}
-              placeholder="admin@portfolio.com"
+              placeholder="admin"
               className="mt-2 bg-secondary/30 border-border"
               required
             />
-            <p className="text-xs text-muted-foreground mt-1">Demo: admin@portfolio.com</p>
+            <p className="text-xs text-muted-foreground mt-1">Demo: admin</p>
           </div>
 
           <div>
             <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              className="mt-2 bg-secondary/30 border-border"
-              required
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                className="mt-2 bg-secondary/30 border-border pr-10"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
             <p className="text-xs text-muted-foreground mt-1">Demo: password</p>
           </div>
 
@@ -118,7 +126,7 @@ export default function LoginPage() {
 
         <div className="mt-6 p-4 bg-secondary/30 rounded-lg border border-border">
           <p className="text-xs text-muted-foreground mb-2">Demo Credentials:</p>
-          <p className="text-xs text-foreground">Email: admin@portfolio.com</p>
+          <p className="text-xs text-foreground">Username: admin</p>
           <p className="text-xs text-foreground">Password: password</p>
         </div>
       </Card>

@@ -7,37 +7,58 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import DashboardStats from '@/components/admin/DashboardStats';
 import RecentProjects from '@/components/admin/RecentProjects';
+import { api } from '@/lib/api';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
     totalProjects: 0,
-    totalExperience: 0,
-    totalVisitors: 0,
+    totalTestimonials: 0,
     totalContacts: 0,
+    totalDownloads: 0,
+    currentVisitors: 0,
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchStats();
+    fetchDashboardStats();
   }, []);
 
-  const fetchStats = async () => {
+  const fetchDashboardStats = async () => {
     try {
-      const [projectsRes, experienceRes] = await Promise.all([
-        fetch('/api/projects'),
-        fetch('/api/experience'),
+      setLoading(true);
+      
+      // Fetch data from backend API
+      const [projectsRes, testimonialsRes, contactsRes, analyticsRes] = await Promise.all([
+        api.getProjects({ limit: 1 }), // Just get count
+        api.getTestimonials({ limit: 1 }), // Just get count
+        api.getContactStats(),
+        api.getDashboardStats().catch(() => null), // Analytics might fail
       ]);
 
-      const projectsData = await projectsRes.json();
-      const experienceData = await experienceRes.json();
+      const projectsData = projectsRes as any;
+      const testimonialsData = testimonialsRes as any;
+      const contactsData = contactsRes as any;
+      const analyticsData = analyticsRes as any;
 
       setStats({
-        totalProjects: projectsData.data?.length || 0,
-        totalExperience: experienceData.data?.length || 0,
-        totalVisitors: 1250,
-        totalContacts: 42,
+        totalProjects: projectsData.pagination?.total || projectsData.data?.length || 0,
+        totalTestimonials: testimonialsData.pagination?.total || testimonialsData.data?.length || 0,
+        totalContacts: contactsData.totalContactSubmissions || contactsData.total || 0,
+        totalDownloads: analyticsData?.total?.resumeDownloads || 0,
+        currentVisitors: analyticsData?.realTime?.currentVisitors || 0,
       });
     } catch (error) {
-      console.error('Failed to fetch stats:', error);
+      console.error('Failed to fetch dashboard stats:', error);
+      // Set fallback values
+      setStats({
+        totalProjects: 0,
+        totalTestimonials: 0,
+        totalContacts: 0,
+        totalDownloads: 0,
+        currentVisitors: 0,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -56,7 +77,7 @@ export default function AdminDashboard() {
         </Link>
       </div>
 
-      <DashboardStats stats={stats} />
+      <DashboardStats stats={stats} loading={loading} />
       <RecentProjects />
     </div>
   );

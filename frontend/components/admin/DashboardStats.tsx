@@ -1,18 +1,20 @@
 'use client';
 
 import { Card } from '@/components/ui/card';
-import { Briefcase, Users, MessageSquare, Eye, TrendingUp } from 'lucide-react';
+import { Briefcase, MessageSquare, Download, Users, Eye, FileText, TrendingUp } from 'lucide-react';
 
 interface DashboardStatsProps {
   stats: {
     totalProjects: number;
-    totalExperience: number;
-    totalVisitors: number;
+    totalTestimonials: number;
     totalContacts: number;
+    totalDownloads: number;
+    currentVisitors: number;
   };
+  loading?: boolean;
 }
 
-export default function DashboardStats({ stats }: DashboardStatsProps) {
+export default function DashboardStats({ stats, loading = false }: DashboardStatsProps) {
   const statCards = [
     {
       icon: Briefcase,
@@ -24,22 +26,13 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
       trend: '+5%',
     },
     {
-      icon: Users,
-      label: 'Experience',
-      value: stats.totalExperience,
+      icon: FileText,
+      label: 'Testimonials',
+      value: stats.totalTestimonials,
       color: 'text-blue-400',
       bgColor: 'bg-gradient-to-br from-blue-500/10 to-blue-600/5',
       borderColor: 'border-blue-500/30',
       trend: '+2%',
-    },
-    {
-      icon: Eye,
-      label: 'Visitors',
-      value: stats.totalVisitors.toLocaleString(),
-      color: 'text-emerald-400',
-      bgColor: 'bg-gradient-to-br from-emerald-500/10 to-emerald-600/5',
-      borderColor: 'border-emerald-500/30',
-      trend: '+12%',
     },
     {
       icon: MessageSquare,
@@ -50,7 +43,39 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
       borderColor: 'border-violet-500/30',
       trend: '+8%',
     },
+    {
+      icon: Download,
+      label: 'Downloads',
+      value: stats.totalDownloads,
+      color: 'text-emerald-400',
+      bgColor: 'bg-gradient-to-br from-emerald-500/10 to-emerald-600/5',
+      borderColor: 'border-emerald-500/30',
+      trend: '+12%',
+    },
+    {
+      icon: Eye,
+      label: 'Live Visitors',
+      value: stats.currentVisitors,
+      color: 'text-orange-400',
+      bgColor: 'bg-gradient-to-br from-orange-500/10 to-orange-600/5',
+      borderColor: 'border-orange-500/30',
+      trend: 'Live',
+      isLive: true,
+    },
   ];
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 w-full">
+        {[...Array(4)].map((_, index) => (
+          <Card key={index} className="p-6 md:p-8 animate-pulse">
+            <div className="h-4 bg-muted rounded w-1/2 mb-4"></div>
+            <div className="h-8 bg-muted rounded w-3/4"></div>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 w-full">
@@ -64,8 +89,17 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
                   <Icon className={`${stat.color} w-5 h-5 md:w-6 md:h-6`} />
                 </div>
                 <div className="flex items-center gap-1 text-xs font-semibold">
-                  <TrendingUp className={`${stat.color} w-3 h-3`} />
-                  <span className={stat.color}>{stat.trend}</span>
+                  {stat.isLive ? (
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                      <span className="text-red-400">Live</span>
+                    </div>
+                  ) : (
+                    <>
+                      <TrendingUp className={`${stat.color} w-3 h-3`} />
+                      <span className={stat.color}>{stat.trend}</span>
+                    </>
+                  )}
                 </div>
               </div>
               

@@ -101,7 +101,7 @@ export class ResumeService {
     let resume: Resume;
 
     if (id) {
-      resume = await this.resumeRepository.findOne({ where: { id } });
+      resume = await this.resumeRepository.findOne({ where: { id } }) as Resume;
       if (!resume) {
         throw new NotFoundException('Resume not found');
       }

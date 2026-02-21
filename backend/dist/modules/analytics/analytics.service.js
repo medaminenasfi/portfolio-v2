@@ -39,7 +39,7 @@ let AnalyticsService = class AnalyticsService {
     }
     async getAnalytics(query) {
         const { startDate, endDate, period = '7d', } = query;
-        const dates = this.getDateRange(period, startDate, endDate);
+        const dates = this.getDateRange(period, startDate ? new Date(startDate) : undefined, endDate ? new Date(endDate) : undefined);
         const [events, summaries] = await Promise.all([
             this.getEvents(dates.startDate, dates.endDate),
             this.getSummaries(dates.startDate, dates.endDate),
@@ -304,7 +304,11 @@ let AnalyticsService = class AnalyticsService {
         const total = Object.values(grouped).reduce((sum, count) => sum + count, 0);
         return Object.entries(grouped)
             .map(([key, value]) => ({ [key]: Math.round((value / total) * 100) }))
-            .sort(([, a], [, b]) => b.value - a.value);
+            .sort((a, b) => {
+            const aValue = Object.values(a)[0];
+            const bValue = Object.values(b)[0];
+            return bValue - aValue;
+        });
     }
     calculateGrowth(oldValue, newValue) {
         if (oldValue === 0)

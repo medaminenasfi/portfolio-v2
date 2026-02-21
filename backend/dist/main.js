@@ -7,6 +7,12 @@ const app_module_1 = require("./app.module");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const configService = app.get(config_1.ConfigService);
+    app.enableCors({
+        origin: ['http://localhost:3001', 'http://localhost:3000'],
+        credentials: false,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+    });
     app.setGlobalPrefix('api', { exclude: ['health'] });
     app.useGlobalPipes(new common_1.ValidationPipe({
         whitelist: true,

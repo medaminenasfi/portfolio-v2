@@ -38,7 +38,7 @@ let ResumeSectionsService = class ResumeSectionsService {
             ...createDto,
             orderIndex: createDto.orderIndex ?? (maxOrder?.orderIndex ?? 0) + 1,
         });
-        return this.workExperienceRepository.save(workExperience);
+        return await this.workExperienceRepository.save(workExperience);
     }
     async getAllWorkExperience() {
         return this.workExperienceRepository.find({
@@ -82,7 +82,7 @@ let ResumeSectionsService = class ResumeSectionsService {
             ...createDto,
             orderIndex: createDto.orderIndex ?? (maxOrder?.orderIndex ?? 0) + 1,
         });
-        return this.educationRepository.save(education);
+        return await this.educationRepository.save(education);
     }
     async getAllEducation() {
         return this.educationRepository.find({
@@ -127,7 +127,7 @@ let ResumeSectionsService = class ResumeSectionsService {
             ...createDto,
             orderIndex: createDto.orderIndex ?? (maxOrder?.orderIndex ?? 0) + 1,
         });
-        return this.skillsRepository.save(skill);
+        return await this.skillsRepository.save(skill);
     }
     async getAllSkills(category) {
         const where = { isActive: true };
@@ -175,7 +175,7 @@ let ResumeSectionsService = class ResumeSectionsService {
             ...createDto,
             orderIndex: createDto.orderIndex ?? (maxOrder?.orderIndex ?? 0) + 1,
         });
-        return this.certificationsRepository.save(certification);
+        return await this.certificationsRepository.save(certification);
     }
     async getAllCertifications() {
         return this.certificationsRepository.find({
@@ -219,7 +219,7 @@ let ResumeSectionsService = class ResumeSectionsService {
             ...createDto,
             orderIndex: createDto.orderIndex ?? (maxOrder?.orderIndex ?? 0) + 1,
         });
-        return this.languagesRepository.save(language);
+        return await this.languagesRepository.save(language);
     }
     async getAllLanguages() {
         return this.languagesRepository.find({

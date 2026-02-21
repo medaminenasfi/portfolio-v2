@@ -40,7 +40,11 @@ export class AnalyticsService {
       period = '7d', // Default to last 7 days
     } = query;
 
-    const dates = this.getDateRange(period, startDate, endDate);
+    const dates = this.getDateRange(
+      period, 
+      startDate ? new Date(startDate) : undefined, 
+      endDate ? new Date(endDate) : undefined
+    );
     
     const [events, summaries] = await Promise.all([
       this.getEvents(dates.startDate, dates.endDate),
@@ -372,7 +376,11 @@ export class AnalyticsService {
     const total = Object.values(grouped).reduce((sum, count) => sum + count, 0);
     return Object.entries(grouped)
       .map(([key, value]) => ({ [key]: Math.round((value / total) * 100) }))
-      .sort(([, a], [, b]) => (b as any).value - (a as any).value);
+      .sort((a, b) => {
+        const aValue = Object.values(a)[0] as number;
+        const bValue = Object.values(b)[0] as number;
+        return bValue - aValue;
+      });
   }
 
   private calculateGrowth(oldValue: number, newValue: number): number {
