@@ -20,6 +20,7 @@ const database_module_1 = require("./database/database.module");
 const health_module_1 = require("./modules/health/health.module");
 const auth_module_1 = require("./modules/auth/auth.module");
 const projects_module_1 = require("./modules/projects/projects.module");
+const testimonials_module_1 = require("./modules/testimonials/testimonials.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -35,6 +36,7 @@ exports.AppModule = AppModule = __decorate([
             health_module_1.HealthModule,
             auth_module_1.AuthModule,
             projects_module_1.ProjectsModule,
+            testimonials_module_1.TestimonialsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
