@@ -9,12 +9,16 @@ import { api } from '@/lib/api';
 
 interface Testimonial {
   id: string;
-  name: string;
+  clientName: string;
   company: string;
-  role: string;
-  content: string;
+  position: string;
+  email: string;
   rating: number;
-  image?: string;
+  comment: string;
+  status: 'pending' | 'approved' | 'rejected';
+  adminNotes?: string;
+  approvedAt?: string;
+  rejectedAt?: string;
   createdAt: string;
 }
 
@@ -50,6 +54,27 @@ export default function TestimonialsPage() {
     } catch (err) {
       setError('Failed to delete testimonial');
       console.error('Failed to delete testimonial:', err);
+    }
+  };
+
+  const handleApprove = async (id: string) => {
+    try {
+      await api.approveTestimonial(id);
+      fetchTestimonials(); // Refresh the list
+    } catch (err) {
+      setError('Failed to approve testimonial');
+      console.error('Failed to approve testimonial:', err);
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    const adminNotes = prompt('Please provide a reason for rejection (optional):');
+    try {
+      await api.rejectTestimonial(id, adminNotes || undefined);
+      fetchTestimonials(); // Refresh the list
+    } catch (err) {
+      setError('Failed to reject testimonial');
+      console.error('Failed to reject testimonial:', err);
     }
   };
 
@@ -92,32 +117,69 @@ export default function TestimonialsPage() {
               <div className="flex justify-between items-start gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-lg font-semibold text-foreground">{testimonial.name}</h3>
+                    <h3 className="text-lg font-semibold text-foreground">{testimonial.clientName}</h3>
                     <div className="flex gap-1">
                       {Array.from({ length: testimonial.rating }).map((_, i) => (
                         <Star key={i} size={16} className="fill-yellow-400 text-yellow-400" />
                       ))}
                     </div>
+                    {/* Status Badge */}
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      testimonial.status === 'approved' 
+                        ? 'bg-green-100 text-green-800' 
+                        : testimonial.status === 'rejected' 
+                        ? 'bg-red-100 text-red-800' 
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {testimonial.status.toUpperCase()}
+                    </span>
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">
-                    {testimonial.role} at {testimonial.company}
+                    {testimonial.position} at {testimonial.company}
                   </p>
-                  <p className="text-foreground">{testimonial.content}</p>
+                  <p className="text-foreground">{testimonial.comment}</p>
+                  {testimonial.adminNotes && (
+                    <p className="text-sm text-muted-foreground mt-2 italic">
+                      Admin Notes: {testimonial.adminNotes}
+                    </p>
+                  )}
                 </div>
-                <div className="flex gap-2">
-                  <Link href={`/admin/testimonials/${testimonial.id}/edit`}>
-                    <Button variant="outline" size="sm">
-                      <Edit2 size={16} />
+                <div className="flex flex-col gap-2">
+                  {/* Action Buttons */}
+                  {testimonial.status === 'pending' && (
+                    <>
+                      <Button
+                        onClick={() => handleApprove(testimonial.id)}
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        onClick={() => handleReject(testimonial.id)}
+                        size="sm"
+                        variant="outline"
+                        className="border-red-600 text-red-600 hover:bg-red-50"
+                      >
+                        Reject
+                      </Button>
+                    </>
+                  )}
+                  <div className="flex gap-2">
+                    <Link href={`/admin/testimonials/${testimonial.id}/edit`}>
+                      <Button variant="outline" size="sm">
+                        <Edit2 size={16} />
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(testimonial.id)}
+                      className="text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 size={16} />
                     </Button>
-                  </Link>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDelete(testimonial.id)}
-                    className="text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 size={16} />
-                  </Button>
+                  </div>
                 </div>
               </div>
             </Card>

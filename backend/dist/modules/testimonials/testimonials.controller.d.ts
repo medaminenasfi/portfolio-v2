@@ -36,4 +36,5 @@ export declare class PublicTestimonialsController {
     private readonly testimonialsService;
     constructor(testimonialsService: TestimonialsService);
     getApprovedTestimonials(limit?: string): Promise<import("./entities/testimonial.entity").Testimonial[]>;
+    createTestimonial(createTestimonialDto: CreateTestimonialDto): Promise<import("./entities/testimonial.entity").Testimonial>;
 }

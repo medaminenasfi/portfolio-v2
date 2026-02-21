@@ -13,6 +13,7 @@ export default function Navigation({ activeSection }: NavigationProps) {
   const navItems = [
     { label: 'About', href: '#about', id: 'about' },
     { label: 'Projects', href: '#projects', id: 'projects' },
+    { label: 'Testimonials', href: '#testimonials', id: 'testimonials' },
     { label: 'Experience', href: '#experience', id: 'experience' },
     { label: 'Skills', href: '#skills', id: 'skills' },
   ];

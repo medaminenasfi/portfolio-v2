@@ -11,16 +11,16 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const projects_service_1 = require("./projects.service");
 const projects_controller_1 = require("./projects.controller");
+const public_media_controller_1 = require("./public-media.controller");
 const project_entity_1 = require("./entities/project.entity");
 const project_media_entity_1 = require("./entities/project-media.entity");
-const projects_controller_2 = require("./projects.controller");
 let ProjectsModule = class ProjectsModule {
 };
 exports.ProjectsModule = ProjectsModule;
 exports.ProjectsModule = ProjectsModule = __decorate([
     (0, common_1.Module)({
         imports: [typeorm_1.TypeOrmModule.forFeature([project_entity_1.Project, project_media_entity_1.ProjectMedia])],
-        controllers: [projects_controller_1.ProjectsController, projects_controller_2.PublicProjectsController],
+        controllers: [projects_controller_1.ProjectsController, public_media_controller_1.PublicProjectsController],
         providers: [projects_service_1.ProjectsService],
         exports: [projects_service_1.ProjectsService],
     })

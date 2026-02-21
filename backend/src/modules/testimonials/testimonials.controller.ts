@@ -94,4 +94,9 @@ export class PublicTestimonialsController {
     const limitNum = limit ? parseInt(limit) : 10;
     return this.testimonialsService.getApprovedTestimonials(limitNum);
   }
+
+  @Post()
+  async createTestimonial(@Body() createTestimonialDto: CreateTestimonialDto) {
+    return this.testimonialsService.create(createTestimonialDto);
+  }
 }

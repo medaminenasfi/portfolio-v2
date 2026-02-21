@@ -4,6 +4,7 @@ import Hero from '@/components/portfolio/Hero';
 import ProjectsSection from '@/components/portfolio/ProjectsSection';
 import ExperienceSection from '@/components/portfolio/ExperienceSection';
 import SkillsSection from '@/components/portfolio/SkillsSection';
+import TestimonialsSection from '@/components/portfolio/TestimonialsSection';
 import Navigation from '@/components/portfolio/Navigation';
 import Footer from '@/components/portfolio/Footer';
 
@@ -16,6 +17,10 @@ export default function Page() {
       
       <div id="projects" className="scroll-mt-20">
         <ProjectsSection />
+      </div>
+      
+      <div id="testimonials" className="scroll-mt-20">
+        <TestimonialsSection />
       </div>
       
       <div id="experience" className="scroll-mt-20">

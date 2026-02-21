@@ -149,6 +149,9 @@ let PublicTestimonialsController = class PublicTestimonialsController {
         const limitNum = limit ? parseInt(limit) : 10;
         return this.testimonialsService.getApprovedTestimonials(limitNum);
     }
+    async createTestimonial(createTestimonialDto) {
+        return this.testimonialsService.create(createTestimonialDto);
+    }
 };
 exports.PublicTestimonialsController = PublicTestimonialsController;
 __decorate([
@@ -158,6 +161,13 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], PublicTestimonialsController.prototype, "getApprovedTestimonials", null);
+__decorate([
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_testimonial_dto_1.CreateTestimonialDto]),
+    __metadata("design:returntype", Promise)
+], PublicTestimonialsController.prototype, "createTestimonial", null);
 exports.PublicTestimonialsController = PublicTestimonialsController = __decorate([
     (0, common_1.Controller)('public/testimonials'),
     __metadata("design:paramtypes", [testimonials_service_1.TestimonialsService])
