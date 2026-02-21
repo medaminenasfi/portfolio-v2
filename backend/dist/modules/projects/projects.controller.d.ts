@@ -8,6 +8,12 @@ export declare class ProjectsController {
     private readonly projectsService;
     constructor(projectsService: ProjectsService);
     create(createProjectDto: CreateProjectDto): Promise<import("./entities/project.entity").Project>;
+    findAll(query: QueryProjectsDto): Promise<{
+        projects: import("./entities/project.entity").Project[];
+        total: number;
+        page: number;
+        limit: number;
+    }>;
     getStatistics(): Promise<{
         total: number;
         published: number;

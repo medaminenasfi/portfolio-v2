@@ -32,6 +32,9 @@ let ProjectsController = class ProjectsController {
     create(createProjectDto) {
         return this.projectsService.create(createProjectDto);
     }
+    findAll(query) {
+        return this.projectsService.findAll(query);
+    }
     getStatistics() {
         return this.projectsService.getStatistics();
     }
@@ -41,8 +44,8 @@ let ProjectsController = class ProjectsController {
     update(id, updateProjectDto) {
         return this.projectsService.update(id, updateProjectDto);
     }
-    remove(id) {
-        return this.projectsService.remove(id);
+    async remove(id) {
+        await this.projectsService.remove(id);
     }
     duplicate(id) {
         return this.projectsService.duplicate(id);
@@ -90,6 +93,13 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ProjectsController.prototype, "create", null);
 __decorate([
+    (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [query_projects_dto_1.QueryProjectsDto]),
+    __metadata("design:returntype", void 0)
+], ProjectsController.prototype, "findAll", null);
+__decorate([
     (0, common_1.Get)('statistics'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
@@ -112,10 +122,11 @@ __decorate([
 ], ProjectsController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], ProjectsController.prototype, "remove", null);
 __decorate([
     (0, common_1.Post)(':id/duplicate'),

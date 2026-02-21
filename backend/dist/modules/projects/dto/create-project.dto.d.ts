@@ -24,4 +24,14 @@ export declare class CreateProjectDto {
     isFeatured?: boolean;
     seoData?: SeoDataDto;
     scheduledPublishAt?: string;
+    bannerImages?: string[];
+    categoryPhotos?: string[];
+    videoUrl?: string;
+    videoThumbnail?: string;
+    projectDuration?: string;
+    clientName?: string;
+    startDate?: string;
+    endDate?: string;
+    teamSize?: string;
+    tools?: string[];
 }

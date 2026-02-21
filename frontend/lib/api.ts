@@ -2,13 +2,12 @@
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
 // API Client with authentication
-class ApiClient {
+export class ApiClient {
   private baseURL: string;
   private token: string | null = null;
 
-  constructor(baseURL: string) {
-    this.baseURL = baseURL;
-    // Load token from localStorage on client side
+  constructor() {
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
     if (typeof window !== 'undefined') {
       this.token = localStorage.getItem('admin_token');
     }
@@ -72,7 +71,13 @@ class ApiClient {
         throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      // Handle empty responses (like 204 No Content)
+      const text = await response.text();
+      if (!text) {
+        return {} as T;
+      }
+      
+      const data = JSON.parse(text);
       console.log('API Data:', data);
       return data;
     } catch (error) {
@@ -146,6 +151,64 @@ class ApiClient {
   async deleteProject(id: string) {
     return this.request(`/projects/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  async duplicateProject(id: string) {
+    return this.request(`/projects/${id}/duplicate`, {
+      method: 'POST',
+    });
+  }
+
+  async bulkPublishProjects(projectIds: string[], publish: boolean) {
+    return this.request('/projects/bulk/publish', {
+      method: 'PATCH',
+      body: JSON.stringify({ projectIds, publish }),
+    });
+  }
+
+  async bulkDeleteProjects(projectIds: string[]) {
+    return this.request('/projects/bulk/delete', {
+      method: 'DELETE',
+      body: JSON.stringify({ projectIds }),
+    });
+  }
+
+  async bulkFeatureProjects(projectIds: string[], featured: boolean) {
+    return this.request('/projects/bulk/feature', {
+      method: 'PATCH',
+      body: JSON.stringify({ projectIds, featured }),
+    });
+  }
+
+  async uploadProjectMedia(projectId: string, file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    return this.request(`/projects/${projectId}/media`, {
+      method: 'POST',
+      body: formData,
+      headers: {}, // Let browser set Content-Type for FormData
+    });
+  }
+
+  async updateProjectMediaOrder(projectId: string, mediaOrders: { id: string; order: number }[]) {
+    return this.request(`/projects/${projectId}/media/order`, {
+      method: 'PATCH',
+      body: JSON.stringify(mediaOrders),
+    });
+  }
+
+  async deleteProjectMedia(mediaId: string) {
+    return this.request(`/projects/media/${mediaId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async setProjectCoverImage(projectId: string, mediaId: string) {
+    return this.request(`/projects/${projectId}/cover-image`, {
+      method: 'PATCH',
+      body: JSON.stringify({ mediaId }),
     });
   }
 
@@ -395,7 +458,7 @@ class ApiClient {
 }
 
 // Create and export API client instance
-export const api = new ApiClient(API_BASE_URL);
+export const api = new ApiClient();
 
 // Export types for TypeScript
 export interface ApiResponse<T = any> {

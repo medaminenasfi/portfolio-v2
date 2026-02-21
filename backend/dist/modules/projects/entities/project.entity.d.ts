@@ -43,6 +43,16 @@ export declare class Project {
     status: ProjectStatus;
     progressStatus: ProjectProgressStatus;
     isFeatured: boolean;
+    bannerImages?: string[];
+    categoryPhotos?: string[];
+    videoUrl?: string;
+    videoThumbnail?: string;
+    projectDuration?: string;
+    clientName?: string;
+    startDate?: Date;
+    endDate?: Date;
+    teamSize?: string;
+    tools?: string[];
     media: ProjectMedia[];
     coverImageId: string;
     seoData: {

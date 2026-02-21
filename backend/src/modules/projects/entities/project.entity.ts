@@ -121,6 +121,37 @@ export class Project {
   @Column({ default: false })
   isFeatured!: boolean;
 
+  // Media and content
+  @Column('simple-array', { nullable: true })
+  bannerImages?: string[];
+
+  @Column('simple-array', { nullable: true })
+  categoryPhotos?: string[];
+
+  @Column({ length: 500, nullable: true })
+  videoUrl?: string;
+
+  @Column({ length: 500, nullable: true })
+  videoThumbnail?: string;
+
+  @Column({ length: 100, nullable: true })
+  projectDuration?: string;
+
+  @Column({ length: 200, nullable: true })
+  clientName?: string;
+
+  @Column({ type: 'date', nullable: true })
+  startDate?: Date;
+
+  @Column({ type: 'date', nullable: true })
+  endDate?: Date;
+
+  @Column({ length: 50, nullable: true })
+  teamSize?: string;
+
+  @Column('simple-array', { nullable: true })
+  tools?: string[];
+
   // Media Relations
   @OneToMany(() => ProjectMedia, (media) => media.project, {
     cascade: true,

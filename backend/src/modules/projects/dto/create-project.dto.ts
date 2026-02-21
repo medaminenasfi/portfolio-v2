@@ -86,11 +86,13 @@ export class CreateProjectDto {
 
   // Links and Tech Stack
   @IsOptional()
-  @IsUrl()
+  @IsUrl({}, { message: 'liveDemoUrl must be a valid URL address' })
+  @IsString()
   liveDemoUrl?: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl({}, { message: 'githubRepoUrl must be a valid URL address' })
+  @IsString()
   githubRepoUrl?: string;
 
   @IsArray()
@@ -123,4 +125,48 @@ export class CreateProjectDto {
   @IsOptional()
   @IsDateString()
   scheduledPublishAt?: string;
+
+  // Media and content
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  bannerImages?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  categoryPhotos?: string[];
+
+  @IsOptional()
+  @IsString()
+  videoUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  videoThumbnail?: string;
+
+  @IsOptional()
+  @IsString()
+  projectDuration?: string;
+
+  @IsOptional()
+  @IsString()
+  clientName?: string;
+
+  @IsOptional()
+  @IsDateString({}, { message: 'startDate must be a valid ISO 8601 date string' })
+  startDate?: string;
+
+  @IsOptional()
+  @IsDateString({}, { message: 'endDate must be a valid ISO 8601 date string' })
+  endDate?: string;
+
+  @IsOptional()
+  @IsString()
+  teamSize?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tools?: string[];
 }

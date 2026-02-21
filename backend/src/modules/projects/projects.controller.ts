@@ -8,6 +8,8 @@ import {
   Delete,
   Query,
   UseGuards,
+  HttpCode,
+  HttpStatus,
   UseInterceptors,
   UploadedFile,
   ParseUUIDPipe,
@@ -35,6 +37,11 @@ export class ProjectsController {
     return this.projectsService.create(createProjectDto);
   }
 
+  @Get()
+  findAll(@Query() query: QueryProjectsDto) {
+    return this.projectsService.findAll(query);
+  }
+
   @Get('statistics')
   getStatistics() {
     return this.projectsService.getStatistics();
@@ -51,8 +58,9 @@ export class ProjectsController {
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.projectsService.remove(id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
+    await this.projectsService.remove(id);
   }
 
   @Post(':id/duplicate')

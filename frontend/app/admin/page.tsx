@@ -2,14 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, LogOut } from 'lucide-react';
 import DashboardStats from '@/components/admin/DashboardStats';
 import RecentProjects from '@/components/admin/RecentProjects';
 import { api } from '@/lib/api';
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const [stats, setStats] = useState({
     totalProjects: 0,
     totalTestimonials: 0,
@@ -62,6 +64,15 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      api.clearToken();
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
   return (
     <div className="space-y-6 md:space-y-8 w-full">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -69,12 +80,22 @@ export default function AdminDashboard() {
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">Dashboard</h1>
           <p className="text-muted-foreground mt-2 text-sm md:text-base">Welcome back to your portfolio admin</p>
         </div>
-        <Link href="/admin/projects/new">
-          <Button className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-slate-900 hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 font-semibold gap-2 w-full sm:w-auto justify-center sm:justify-start">
-            <Plus className="h-4 w-4" />
-            New Project
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Link href="/admin/projects/new" className="flex-1 sm:flex-none">
+            <Button className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-slate-900 hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 font-semibold gap-2 w-full justify-center">
+              <Plus className="h-4 w-4" />
+              New Project
+            </Button>
+          </Link>
+          <Button 
+            onClick={handleLogout}
+            variant="outline"
+            className="flex-1 sm:flex-none"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
           </Button>
-        </Link>
+        </div>
       </div>
 
       <DashboardStats stats={stats} loading={loading} />
