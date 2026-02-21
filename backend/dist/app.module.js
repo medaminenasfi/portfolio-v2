@@ -22,6 +22,10 @@ const auth_module_1 = require("./modules/auth/auth.module");
 const projects_module_1 = require("./modules/projects/projects.module");
 const testimonials_module_1 = require("./modules/testimonials/testimonials.module");
 const resume_module_1 = require("./modules/resume/resume.module");
+const tech_stack_module_1 = require("./modules/tech-stack/tech-stack.module");
+const resume_sections_module_1 = require("./modules/resume-sections/resume-sections.module");
+const contact_module_1 = require("./modules/contact/contact.module");
+const analytics_module_1 = require("./modules/analytics/analytics.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -39,6 +43,10 @@ exports.AppModule = AppModule = __decorate([
             projects_module_1.ProjectsModule,
             testimonials_module_1.TestimonialsModule,
             resume_module_1.ResumeModule,
+            tech_stack_module_1.TechStackModule,
+            resume_sections_module_1.ResumeSectionsModule,
+            contact_module_1.ContactModule,
+            analytics_module_1.AnalyticsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
