@@ -30,31 +30,57 @@ let ProjectsService = class ProjectsService {
             .trim();
     }
     async create(createProjectDto, userId) {
+        console.log('[PROJECTS] Service create called');
+        console.log('[PROJECTS] User ID:', userId);
+        console.log('[PROJECTS] DTO received:', JSON.stringify(createProjectDto, null, 2));
         try {
+            if (!createProjectDto.title || !createProjectDto.description) {
+                throw new Error('Title and description are required');
+            }
+            if (!userId) {
+                throw new Error('User ID is required');
+            }
             const slug = createProjectDto.slug || this.generateSlug(createProjectDto.title);
+            console.log('[PROJECTS] Generated slug:', slug);
             const existingProject = await this.projectRepository.findOne({
                 where: { slug },
             });
             if (existingProject) {
                 const uniqueSlug = `${slug}-${Date.now()}`;
                 createProjectDto.slug = uniqueSlug;
+                console.log('[PROJECTS] Unique slug generated:', uniqueSlug);
             }
             else {
                 createProjectDto.slug = slug;
             }
             const projectData = {
-                ...createProjectDto,
+                title: createProjectDto.title,
+                slug: createProjectDto.slug,
+                description: createProjectDto.description,
+                techStack: createProjectDto.techStack || [],
+                images: createProjectDto.images || [],
+                bannerImage: createProjectDto.bannerImage,
+                cataloguePhoto: createProjectDto.cataloguePhoto,
+                liveDemoUrl: createProjectDto.liveDemoUrl,
+                githubUrl: createProjectDto.githubUrl,
                 category: createProjectDto.category,
                 status: createProjectDto.status,
-                user: { id: userId },
+                isFeatured: createProjectDto.isFeatured || false,
             };
+            console.log('[PROJECTS] Final project data (without user):', JSON.stringify(projectData, null, 2));
             const project = this.projectRepository.create(projectData);
+            console.log('[PROJECTS] Project entity created');
             const savedProject = await this.projectRepository.save(project);
             console.log(`[PROJECTS] Project created: ${savedProject.title} (${savedProject.id})`);
             return savedProject;
         }
         catch (error) {
-            console.error('[PROJECTS] Error creating project:', error.message);
+            console.error('[PROJECTS] Error creating project:', error);
+            console.error('[PROJECTS] Error message:', error.message);
+            console.error('[PROJECTS] Error name:', error.name);
+            if (error.stack) {
+                console.error('[PROJECTS] Error stack:', error.stack);
+            }
             throw error;
         }
     }

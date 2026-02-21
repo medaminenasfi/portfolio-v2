@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const typeorm_1 = require("typeorm");
 const base_entity_1 = require("../../../common/entities/base.entity");
-const project_entity_1 = require("../../projects/entities/project.entity");
 let User = class User extends base_entity_1.BaseEntity {
 };
 exports.User = User;
@@ -24,10 +23,6 @@ __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], User.prototype, "password", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => project_entity_1.Project, (project) => project.user),
-    __metadata("design:type", Array)
-], User.prototype, "projects", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)({ name: 'users' })
 ], User);

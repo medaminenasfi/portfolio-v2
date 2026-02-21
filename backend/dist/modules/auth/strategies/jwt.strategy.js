@@ -13,20 +13,40 @@ exports.JwtStrategy = void 0;
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 const passport_jwt_1 = require("passport-jwt");
+const extractBearerToken = (req) => {
+    const authorization = req?.headers?.authorization || req?.headers?.Authorization;
+    if (!authorization || typeof authorization !== 'string') {
+        console.log('[JWT] Authorization header missing');
+        return null;
+    }
+    const [scheme, token] = authorization.split(' ');
+    if (scheme?.toLowerCase() !== 'bearer' || !token) {
+        console.log('[JWT] Authorization header present but not Bearer scheme');
+        return null;
+    }
+    return token;
+};
 let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
     constructor() {
         super({
-            jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: passport_jwt_1.ExtractJwt.fromExtractors([
+                extractBearerToken,
+                passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
+            ]),
             ignoreExpiration: false,
             secretOrKey: process.env.JWT_SECRET || 'your-secret-key',
         });
+        console.log('[JWT] JWT Strategy initialized with secret:', process.env.JWT_SECRET ? 'Set' : 'Not set');
     }
     async validate(payload) {
-        console.log('🔍 JWT Payload:', payload);
-        return {
-            userId: payload.sub,
+        console.log('[JWT] Full payload received:', JSON.stringify(payload, null, 2));
+        console.log('[JWT] Payload fields:', Object.keys(payload));
+        const user = {
+            userId: payload.sub || payload.userId || payload.id,
             username: payload.username
         };
+        console.log('[JWT] User object created:', JSON.stringify(user, null, 2));
+        return user;
     }
 };
 exports.JwtStrategy = JwtStrategy;

@@ -7,7 +7,6 @@ import configuration from './config/configuration';
 import validationSchema from './config/validation.schema';
 import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './modules/health/health.module';
-import { ProjectsModule } from './modules/projects/projects.module';
 import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
@@ -20,7 +19,6 @@ import { AuthModule } from './modules/auth/auth.module';
     DatabaseModule,
     HealthModule,
     AuthModule,
-    ProjectsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

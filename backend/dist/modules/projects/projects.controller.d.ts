@@ -5,8 +5,59 @@ import { ProjectsService } from './projects.service';
 export declare class ProjectsController {
     private readonly projectsService;
     constructor(projectsService: ProjectsService);
+    testCreate(body: any, req: any): {
+        message: string;
+        user: any;
+        body: any;
+    };
+    debugHeaders(req: any): {
+        message: string;
+        authorizationHeader: any;
+        headers: any;
+    };
+    testAdmin(body: any, req: any): {
+        message: string;
+        user: any;
+        body: any;
+    };
+    createWorking(body: any, req: any): Promise<{
+        id: string;
+        title: any;
+        slug: any;
+        description: any;
+        techStack: any;
+        images: any;
+        bannerImage: any;
+        cataloguePhoto: any;
+        liveDemoUrl: any;
+        githubUrl: any;
+        category: any;
+        status: any;
+        isFeatured: any;
+        createdAt: string;
+        updatedAt: string;
+        user: any;
+    } | {
+        error: any;
+        body: any;
+    }>;
     create(createProjectDto: CreateProjectDto, req: any): Promise<Project>;
-    findAll(): Promise<Project[]>;
+    private projects;
+    getWorkingProjects(): any[];
+    getWorkingProject(id: string): any;
+    updateWorkingProject(id: string, body: any): any;
+    deleteWorkingProject(id: string): {
+        message: string;
+        project: any;
+        error?: undefined;
+    } | {
+        error: string;
+        message?: undefined;
+        project?: undefined;
+    };
+    getWorkingCount(): {
+        total: number;
+    };
     findOne(id: string): Promise<Project>;
     findAllAdmin(): Promise<Project[]>;
     findOneAdmin(id: string): Promise<Project>;

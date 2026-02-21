@@ -1,5 +1,6 @@
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { User } from '../../auth/entities/user.entity';
+import { ProjectMedia } from './project-media.entity';
 export declare enum ProjectCategory {
     WEB = "web",
     MOBILE = "mobile",
@@ -24,4 +25,5 @@ export declare class Project extends BaseEntity {
     status?: ProjectStatus;
     isFeatured?: boolean;
     user: User;
+    media: ProjectMedia[];
 }

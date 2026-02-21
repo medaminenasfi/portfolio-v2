@@ -18,7 +18,6 @@ const configuration_1 = __importDefault(require("./config/configuration"));
 const validation_schema_1 = __importDefault(require("./config/validation.schema"));
 const database_module_1 = require("./database/database.module");
 const health_module_1 = require("./modules/health/health.module");
-const projects_module_1 = require("./modules/projects/projects.module");
 const auth_module_1 = require("./modules/auth/auth.module");
 let AppModule = class AppModule {
 };
@@ -34,7 +33,6 @@ exports.AppModule = AppModule = __decorate([
             database_module_1.DatabaseModule,
             health_module_1.HealthModule,
             auth_module_1.AuthModule,
-            projects_module_1.ProjectsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

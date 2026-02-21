@@ -18,8 +18,6 @@ const jwt_1 = require("@nestjs/jwt");
 const auth_service_1 = require("./auth.service");
 const login_dto_1 = require("./dto/login.dto");
 const register_dto_1 = require("./dto/register.dto");
-const jwt_auth_guard_1 = require("./guards/jwt-auth.guard");
-const admin_guard_1 = require("./guards/admin.guard");
 let AuthController = class AuthController {
     constructor(authService, jwtService) {
         this.authService = authService;
@@ -45,54 +43,15 @@ let AuthController = class AuthController {
             throw new Error('Invalid credentials');
         }
         console.log(`[AUTH] Login successful: ${user.username}`);
+        console.log('[AUTH] User object from validateUser:', JSON.stringify(user, null, 2));
         const payload = { username: user.username, sub: user.id };
+        console.log('[AUTH] JWT payload created:', JSON.stringify(payload, null, 2));
         const token = this.jwtService.sign(payload);
+        console.log('[AUTH] JWT token signed successfully');
         return {
             message: `${user.username} connected successfully!`,
             username: user.username,
             access_token: token,
-        };
-    }
-    getProfile(req) {
-        return req.user;
-    }
-    getAdminOnly() {
-        return {
-            message: 'Admin access granted',
-            system: 'Single admin mode',
-            adminUser: 'amine'
-        };
-    }
-    async getSystemInfo() {
-        const userCount = await this.authService.count();
-        const users = await this.authService.getAllUsers();
-        return {
-            system: 'Single Admin Portfolio System',
-            totalUsers: userCount.total,
-            adminUser: users.users.length > 0 ? users.users[0].username : 'none',
-            registrationAllowed: userCount.total === 0,
-            features: [
-                'Single admin user only',
-                'Public project viewing',
-                'Admin-only project management',
-                'JWT authentication',
-                'File uploads'
-            ]
-        };
-    }
-    async resetUsers() {
-        await this.authService.deleteAllUsers();
-        return { message: 'All users deleted from database' };
-    }
-    async getAllUsers() {
-        return await this.authService.getAllUsers();
-    }
-    async testLogin(body) {
-        console.log('[AUTH] Test endpoint called');
-        return {
-            message: 'Test endpoint working',
-            received: { username: body.username },
-            timestamp: new Date().toISOString()
         };
     }
 };
@@ -111,46 +70,6 @@ __decorate([
     __metadata("design:paramtypes", [login_dto_1.LoginDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
-__decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Get)('profile'),
-    __param(0, (0, common_1.Request)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], AuthController.prototype, "getProfile", null);
-__decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
-    (0, common_1.Get)('admin'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], AuthController.prototype, "getAdminOnly", null);
-__decorate([
-    (0, common_1.Get)('system-info'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "getSystemInfo", null);
-__decorate([
-    (0, common_1.Post)('reset-users'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "resetUsers", null);
-__decorate([
-    (0, common_1.Get)('all-users'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "getAllUsers", null);
-__decorate([
-    (0, common_1.Post)('test-login'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "testLogin", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService,

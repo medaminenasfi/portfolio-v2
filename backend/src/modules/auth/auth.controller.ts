@@ -1,13 +1,9 @@
-import { Controller, Post, Body, UseGuards, Request, Get } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Controller, Post, Body } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Request as ExpressRequest } from 'express';
 
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { AdminGuard } from './guards/admin.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -47,9 +43,12 @@ export class AuthController {
     }
     
     console.log(`[AUTH] Login successful: ${user.username}`);
+    console.log('[AUTH] User object from validateUser:', JSON.stringify(user, null, 2));
     
     const payload = { username: user.username, sub: user.id };
+    console.log('[AUTH] JWT payload created:', JSON.stringify(payload, null, 2));
     const token = this.jwtService.sign(payload);
+    console.log('[AUTH] JWT token signed successfully');
     
     return {
       message: `${user.username} connected successfully!`,
@@ -58,60 +57,4 @@ export class AuthController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@Request() req: ExpressRequest) {
-    return req.user;
-  }
-
-  @UseGuards(JwtAuthGuard, AdminGuard)
-  @Get('admin')
-  getAdminOnly() {
-    return { 
-      message: 'Admin access granted',
-      system: 'Single admin mode',
-      adminUser: 'amine'
-    };
-  }
-
-  @Get('system-info')
-  async getSystemInfo() {
-    const userCount = await this.authService.count();
-    const users = await this.authService.getAllUsers();
-    
-    return {
-      system: 'Single Admin Portfolio System',
-      totalUsers: userCount.total,
-      adminUser: users.users.length > 0 ? users.users[0].username : 'none',
-      registrationAllowed: userCount.total === 0,
-      features: [
-        'Single admin user only',
-        'Public project viewing',
-        'Admin-only project management',
-        'JWT authentication',
-        'File uploads'
-      ]
-    };
-  }
-
-  @Post('reset-users')
-  async resetUsers() {
-    await this.authService.deleteAllUsers();
-    return { message: 'All users deleted from database' };
-  }
-
-  @Get('all-users')
-  async getAllUsers() {
-    return await this.authService.getAllUsers();
-  }
-
-  @Post('test-login')
-  async testLogin(@Body() body: any) {
-    console.log('[AUTH] Test endpoint called');
-    return {
-      message: 'Test endpoint working',
-      received: { username: body.username },
-      timestamp: new Date().toISOString()
-    };
-  }
 }

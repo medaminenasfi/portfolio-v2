@@ -25,13 +25,107 @@ const admin_guard_1 = require("../auth/guards/admin.guard");
 let ProjectsController = class ProjectsController {
     constructor(projectsService) {
         this.projectsService = projectsService;
+        this.projects = [];
+    }
+    testCreate(body, req) {
+        console.log('[PROJECTS] Test create endpoint called');
+        console.log('[PROJECTS] User:', req.user);
+        console.log('[PROJECTS] Body:', body);
+        return {
+            message: 'Test endpoint working',
+            user: req.user,
+            body: body
+        };
+    }
+    debugHeaders(req) {
+        console.log('[PROJECTS] Debug headers endpoint called');
+        console.log('[PROJECTS] Headers:', JSON.stringify(req.headers, null, 2));
+        return {
+            message: 'Headers captured',
+            authorizationHeader: req.headers?.authorization || req.headers?.Authorization,
+            headers: req.headers,
+        };
+    }
+    testAdmin(body, req) {
+        console.log('[PROJECTS] Test admin endpoint called');
+        console.log('[PROJECTS] User:', req.user);
+        console.log('[PROJECTS] Body:', body);
+        return {
+            message: 'Admin endpoint working',
+            user: req.user,
+            body: body
+        };
+    }
+    async createWorking(body, req) {
+        console.log('[PROJECTS] Working create called');
+        console.log('[PROJECTS] User:', req.user);
+        console.log('[PROJECTS] Body:', body);
+        try {
+            const project = {
+                id: `proj-${Date.now()}`,
+                title: body.title || 'Untitled Project',
+                slug: body.title ? body.title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-') : 'untitled',
+                description: body.description || 'No description',
+                techStack: body.techStack || [],
+                images: body.images || [],
+                bannerImage: body.bannerImage,
+                cataloguePhoto: body.cataloguePhoto,
+                liveDemoUrl: body.liveDemoUrl,
+                githubUrl: body.githubUrl,
+                category: body.category,
+                status: body.status,
+                isFeatured: body.isFeatured || false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                user: req.user
+            };
+            this.projects.push(project);
+            console.log('[PROJECTS] Project created successfully:', project.title);
+            return project;
+        }
+        catch (error) {
+            console.error('[PROJECTS] Error:', error.message);
+            return {
+                error: error.message,
+                body: body
+            };
+        }
     }
     create(createProjectDto, req) {
         console.log(`[PROJECTS] Creating project: ${createProjectDto.title} by ${req.user?.username}`);
+        console.log(`[PROJECTS] User ID: ${req.user?.userId}`);
+        console.log(`[PROJECTS] Full user object:`, JSON.stringify(req.user, null, 2));
+        console.log(`[PROJECTS] Project data:`, JSON.stringify(createProjectDto, null, 2));
+        if (!req.user?.userId) {
+            console.error('[PROJECTS] No userId in request - authentication issue');
+            throw new Error('User authentication failed - missing userId');
+        }
         return this.projectsService.create(createProjectDto, req.user.userId);
     }
-    findAll() {
-        return this.projectsService.findAll();
+    getWorkingProjects() {
+        return this.projects;
+    }
+    getWorkingProject(id) {
+        return this.projects.find(p => p.id === id);
+    }
+    updateWorkingProject(id, body) {
+        const index = this.projects.findIndex(p => p.id === id);
+        if (index !== -1) {
+            this.projects[index] = { ...this.projects[index], ...body, updatedAt: new Date().toISOString() };
+            return this.projects[index];
+        }
+        return { error: 'Project not found' };
+    }
+    deleteWorkingProject(id) {
+        const index = this.projects.findIndex(p => p.id === id);
+        if (index !== -1) {
+            const deleted = this.projects.splice(index, 1);
+            return { message: 'Project deleted', project: deleted[0] };
+        }
+        return { error: 'Project not found' };
+    }
+    getWorkingCount() {
+        return { total: this.projects.length };
     }
     findOne(id) {
         return this.projectsService.findOne(id);
@@ -67,6 +161,40 @@ let ProjectsController = class ProjectsController {
 };
 exports.ProjectsController = ProjectsController;
 __decorate([
+    (0, common_1.Post)('test-create'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], ProjectsController.prototype, "testCreate", null);
+__decorate([
+    (0, common_1.Post)('debug-headers'),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ProjectsController.prototype, "debugHeaders", null);
+__decorate([
+    (0, common_1.Post)('test-admin'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], ProjectsController.prototype, "testAdmin", null);
+__decorate([
+    (0, common_1.Post)('create-working'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], ProjectsController.prototype, "createWorking", null);
+__decorate([
     (0, common_1.Post)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
     __param(0, (0, common_1.Body)()),
@@ -76,11 +204,41 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ProjectsController.prototype, "create", null);
 __decorate([
-    (0, common_1.Get)(),
+    (0, common_1.Get)('working'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], ProjectsController.prototype, "findAll", null);
+    __metadata("design:returntype", void 0)
+], ProjectsController.prototype, "getWorkingProjects", null);
+__decorate([
+    (0, common_1.Get)('working/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ProjectsController.prototype, "getWorkingProject", null);
+__decorate([
+    (0, common_1.Patch)('working/:id'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], ProjectsController.prototype, "updateWorkingProject", null);
+__decorate([
+    (0, common_1.Delete)('working/:id'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ProjectsController.prototype, "deleteWorkingProject", null);
+__decorate([
+    (0, common_1.Get)('working/count'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], ProjectsController.prototype, "getWorkingCount", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),

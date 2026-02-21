@@ -9,75 +9,69 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateProjectDto = void 0;
+exports.UpdateProjectMediaDto = void 0;
 const class_validator_1 = require("class-validator");
-class CreateProjectDto {
-    constructor() {
-        this.techStack = [];
-    }
+const project_media_entity_1 = require("../entities/project-media.entity");
+class UpdateProjectMediaDto {
 }
-exports.CreateProjectDto = CreateProjectDto;
-__decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.MaxLength)(150),
-    __metadata("design:type", String)
-], CreateProjectDto.prototype, "title", void 0);
-__decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
-], CreateProjectDto.prototype, "slug", void 0);
-__decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", String)
-], CreateProjectDto.prototype, "description", void 0);
-__decorate([
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.IsString)({ each: true }),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", Array)
-], CreateProjectDto.prototype, "techStack", void 0);
-__decorate([
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.IsString)({ each: true }),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", Array)
-], CreateProjectDto.prototype, "images", void 0);
+exports.UpdateProjectMediaDto = UpdateProjectMediaDto;
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(255),
     __metadata("design:type", String)
-], CreateProjectDto.prototype, "bannerImage", void 0);
+], UpdateProjectMediaDto.prototype, "filename", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(255),
     __metadata("design:type", String)
-], CreateProjectDto.prototype, "cataloguePhoto", void 0);
+], UpdateProjectMediaDto.prototype, "originalName", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(500),
+    __metadata("design:type", String)
+], UpdateProjectMediaDto.prototype, "path", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(project_media_entity_1.MediaType),
+    __metadata("design:type", String)
+], UpdateProjectMediaDto.prototype, "mediaType", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], UpdateProjectMediaDto.prototype, "fileSize", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(10),
+    __metadata("design:type", String)
+], UpdateProjectMediaDto.prototype, "mimeType", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateProjectDto.prototype, "liveDemoUrl", void 0);
+], UpdateProjectMediaDto.prototype, "altText", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateProjectDto.prototype, "githubUrl", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateProjectDto.prototype, "category", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateProjectDto.prototype, "status", void 0);
+], UpdateProjectMediaDto.prototype, "caption", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
-], CreateProjectDto.prototype, "isFeatured", void 0);
-//# sourceMappingURL=create-project.dto.js.map
+], UpdateProjectMediaDto.prototype, "isCover", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], UpdateProjectMediaDto.prototype, "sortOrder", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], UpdateProjectMediaDto.prototype, "isActive", void 0);
+//# sourceMappingURL=update-project-media.dto.js.map
