@@ -5,6 +5,7 @@ import { User } from './src/modules/auth/entities/user.entity';
 import { Project } from './src/modules/projects/entities/project.entity';
 import { ProjectMedia } from './src/modules/projects/entities/project-media.entity';
 import { Testimonial } from './src/modules/testimonials/entities/testimonial.entity';
+import { Resume } from './src/modules/resume/entities/resume.entity';
 
 config();
 const { database } = configuration();
@@ -17,6 +18,6 @@ export default new DataSource({
   password: database.password,
   database: database.name,
   synchronize: false,
-  entities: [User, Project, ProjectMedia, Testimonial],
+  entities: [User, Project, ProjectMedia, Testimonial, Resume],
   migrations: ['dist/migrations/*.js'],
 });

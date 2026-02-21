@@ -21,6 +21,7 @@ const health_module_1 = require("./modules/health/health.module");
 const auth_module_1 = require("./modules/auth/auth.module");
 const projects_module_1 = require("./modules/projects/projects.module");
 const testimonials_module_1 = require("./modules/testimonials/testimonials.module");
+const resume_module_1 = require("./modules/resume/resume.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -37,6 +38,7 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             projects_module_1.ProjectsModule,
             testimonials_module_1.TestimonialsModule,
+            resume_module_1.ResumeModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

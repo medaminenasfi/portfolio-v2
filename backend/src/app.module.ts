@@ -10,6 +10,7 @@ import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
+import { ResumeModule } from './modules/resume/resume.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
     AuthModule,
     ProjectsModule,
     TestimonialsModule,
+    ResumeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
