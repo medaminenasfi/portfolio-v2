@@ -11,47 +11,55 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JwtStrategy = void 0;
 const common_1 = require("@nestjs/common");
+const config_1 = require("@nestjs/config");
 const passport_1 = require("@nestjs/passport");
 const passport_jwt_1 = require("passport-jwt");
+const pickToken = (value) => {
+    if (!value || typeof value !== 'string') {
+        return null;
+    }
+    const normalized = value.trim();
+    if (!normalized) {
+        return null;
+    }
+    if (/^Bearer\s+/i.test(normalized)) {
+        return normalized.replace(/^Bearer\s+/i, '').trim() || null;
+    }
+    return normalized;
+};
 const extractBearerToken = (req) => {
-    const authorization = req?.headers?.authorization || req?.headers?.Authorization;
-    if (!authorization || typeof authorization !== 'string') {
-        console.log('[JWT] Authorization header missing');
-        return null;
+    const headerToken = pickToken(req?.headers?.authorization || req?.headers?.Authorization);
+    if (headerToken) {
+        return headerToken;
     }
-    const [scheme, token] = authorization.split(' ');
-    if (scheme?.toLowerCase() !== 'bearer' || !token) {
-        console.log('[JWT] Authorization header present but not Bearer scheme');
-        return null;
+    const xAccessToken = pickToken(req?.headers?.['x-access-token']);
+    if (xAccessToken) {
+        return xAccessToken;
     }
-    return token;
+    return pickToken(req?.query?.access_token);
 };
 let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
-    constructor() {
+    constructor(configService) {
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromExtractors([
                 extractBearerToken,
                 passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
             ]),
             ignoreExpiration: false,
-            secretOrKey: process.env.JWT_SECRET || 'your-secret-key',
+            secretOrKey: configService.get('JWT_SECRET', 'your-secret-key'),
         });
-        console.log('[JWT] JWT Strategy initialized with secret:', process.env.JWT_SECRET ? 'Set' : 'Not set');
     }
     async validate(payload) {
-        console.log('[JWT] Full payload received:', JSON.stringify(payload, null, 2));
-        console.log('[JWT] Payload fields:', Object.keys(payload));
         const user = {
             userId: payload.sub || payload.userId || payload.id,
             username: payload.username
         };
-        console.log('[JWT] User object created:', JSON.stringify(user, null, 2));
         return user;
     }
 };
 exports.JwtStrategy = JwtStrategy;
 exports.JwtStrategy = JwtStrategy = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [])
+    __metadata("design:paramtypes", [config_1.ConfigService])
 ], JwtStrategy);
 //# sourceMappingURL=jwt.strategy.js.map

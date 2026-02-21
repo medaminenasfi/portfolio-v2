@@ -17,106 +17,257 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const project_entity_1 = require("./entities/project.entity");
+const project_media_entity_1 = require("./entities/project-media.entity");
 let ProjectsService = class ProjectsService {
-    constructor(projectRepository) {
+    constructor(projectRepository, mediaRepository) {
         this.projectRepository = projectRepository;
+        this.mediaRepository = mediaRepository;
     }
-    generateSlug(title) {
-        return title
-            .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .trim();
-    }
-    async create(createProjectDto, userId) {
-        console.log('[PROJECTS] Service create called');
-        console.log('[PROJECTS] User ID:', userId);
-        console.log('[PROJECTS] DTO received:', JSON.stringify(createProjectDto, null, 2));
+    async create(createProjectDto) {
         try {
-            if (!createProjectDto.title || !createProjectDto.description) {
-                throw new Error('Title and description are required');
+            const project = this.projectRepository.create(createProjectDto);
+            if (createProjectDto.scheduledPublishAt) {
+                project.scheduledPublishAt = new Date(createProjectDto.scheduledPublishAt);
             }
-            if (!userId) {
-                throw new Error('User ID is required');
+            if (project.status === project_entity_1.ProjectStatus.PUBLISHED) {
+                project.publishedAt = new Date();
             }
-            const slug = createProjectDto.slug || this.generateSlug(createProjectDto.title);
-            console.log('[PROJECTS] Generated slug:', slug);
-            const existingProject = await this.projectRepository.findOne({
-                where: { slug },
-            });
-            if (existingProject) {
-                const uniqueSlug = `${slug}-${Date.now()}`;
-                createProjectDto.slug = uniqueSlug;
-                console.log('[PROJECTS] Unique slug generated:', uniqueSlug);
-            }
-            else {
-                createProjectDto.slug = slug;
-            }
-            const projectData = {
-                title: createProjectDto.title,
-                slug: createProjectDto.slug,
-                description: createProjectDto.description,
-                techStack: createProjectDto.techStack || [],
-                images: createProjectDto.images || [],
-                bannerImage: createProjectDto.bannerImage,
-                cataloguePhoto: createProjectDto.cataloguePhoto,
-                liveDemoUrl: createProjectDto.liveDemoUrl,
-                githubUrl: createProjectDto.githubUrl,
-                category: createProjectDto.category,
-                status: createProjectDto.status,
-                isFeatured: createProjectDto.isFeatured || false,
-            };
-            console.log('[PROJECTS] Final project data (without user):', JSON.stringify(projectData, null, 2));
-            const project = this.projectRepository.create(projectData);
-            console.log('[PROJECTS] Project entity created');
-            const savedProject = await this.projectRepository.save(project);
-            console.log(`[PROJECTS] Project created: ${savedProject.title} (${savedProject.id})`);
-            return savedProject;
+            return await this.projectRepository.save(project);
         }
         catch (error) {
-            console.error('[PROJECTS] Error creating project:', error);
-            console.error('[PROJECTS] Error message:', error.message);
-            console.error('[PROJECTS] Error name:', error.name);
-            if (error.stack) {
-                console.error('[PROJECTS] Error stack:', error.stack);
-            }
-            throw error;
+            throw new common_1.InternalServerErrorException('Failed to create project');
         }
     }
-    findAll() {
-        return this.projectRepository.find({ order: { createdAt: 'DESC' } });
+    async findAll(query) {
+        const { page = 1, limit = 10, search, category, status, progressStatus, difficulty, featured, tech, sortBy = 'createdAt', sortOrder = 'DESC' } = query;
+        const queryBuilder = this.projectRepository
+            .createQueryBuilder('project')
+            .leftJoinAndSelect('project.media', 'media')
+            .orderBy(`project.${sortBy}`, sortOrder);
+        if (search) {
+            queryBuilder.andWhere('(project.title ILIKE :search OR project.description ILIKE :search OR project.shortSummary ILIKE :search)', { search: `%${search}%` });
+        }
+        if (category) {
+            queryBuilder.andWhere('project.category = :category', { category });
+        }
+        if (status) {
+            queryBuilder.andWhere('project.status = :status', { status });
+        }
+        if (progressStatus) {
+            queryBuilder.andWhere('project.progressStatus = :progressStatus', { progressStatus });
+        }
+        if (difficulty) {
+            queryBuilder.andWhere('project.difficulty = :difficulty', { difficulty });
+        }
+        if (featured !== undefined) {
+            queryBuilder.andWhere('project.isFeatured = :featured', { featured });
+        }
+        if (tech) {
+            queryBuilder.andWhere(':tech = ANY(project.techStack)', { tech });
+        }
+        const now = new Date();
+        queryBuilder.andWhere('(project.scheduledPublishAt IS NULL OR project.scheduledPublishAt <= :now)', { now });
+        const [projects, total] = await queryBuilder
+            .skip((page - 1) * limit)
+            .take(limit)
+            .getManyAndCount();
+        return {
+            projects,
+            total,
+            page,
+            limit,
+        };
     }
     async findOne(id) {
-        const project = await this.projectRepository.findOne({ where: { id } });
+        const project = await this.projectRepository.findOne({
+            where: { id },
+            relations: ['media'],
+        });
         if (!project) {
-            throw new common_1.NotFoundException(`Project with id ${id} not found`);
+            throw new common_1.NotFoundException(`Project with ID ${id} not found`);
         }
         return project;
     }
     async update(id, updateProjectDto) {
         const project = await this.findOne(id);
-        const updateData = {
-            ...updateProjectDto,
-            category: updateProjectDto.category,
-            status: updateProjectDto.status,
-        };
-        const updated = this.projectRepository.merge(project, updateData);
-        return this.projectRepository.save(updated);
+        try {
+            if (updateProjectDto.status) {
+                if (updateProjectDto.status === project_entity_1.ProjectStatus.PUBLISHED && project.status !== project_entity_1.ProjectStatus.PUBLISHED) {
+                    project.publishedAt = new Date();
+                }
+                else if (updateProjectDto.status === project_entity_1.ProjectStatus.ARCHIVED && project.status !== project_entity_1.ProjectStatus.ARCHIVED) {
+                    project.archivedAt = new Date();
+                }
+            }
+            if (updateProjectDto.scheduledPublishAt) {
+                project.scheduledPublishAt = new Date(updateProjectDto.scheduledPublishAt);
+            }
+            Object.assign(project, updateProjectDto);
+            return await this.projectRepository.save(project);
+        }
+        catch (error) {
+            throw new common_1.InternalServerErrorException('Failed to update project');
+        }
     }
     async remove(id) {
         const project = await this.findOne(id);
         await this.projectRepository.remove(project);
     }
-    async count() {
-        const total = await this.projectRepository.count();
-        return { total };
+    async duplicate(id) {
+        const originalProject = await this.findOne(id);
+        const duplicatedProject = this.projectRepository.create({
+            ...originalProject,
+            id: undefined,
+            title: `${originalProject.title} (Copy)`,
+            status: project_entity_1.ProjectStatus.DRAFT,
+            publishedAt: undefined,
+            archivedAt: undefined,
+            createdAt: undefined,
+            updatedAt: undefined,
+        });
+        return await this.projectRepository.save(duplicatedProject);
+    }
+    async bulkPublish(bulkPublishDto) {
+        const { projectIds, status } = bulkPublishDto;
+        const projects = await this.projectRepository.findByIds(projectIds);
+        if (projects.length !== projectIds.length) {
+            throw new common_1.BadRequestException('Some projects not found');
+        }
+        const updateData = { status };
+        if (status === project_entity_1.ProjectStatus.PUBLISHED) {
+            updateData.publishedAt = new Date();
+        }
+        else if (status === project_entity_1.ProjectStatus.ARCHIVED) {
+            updateData.archivedAt = new Date();
+        }
+        await this.projectRepository.update(projectIds, updateData);
+        return await this.projectRepository.findByIds(projectIds);
+    }
+    async bulkDelete(bulkDeleteDto) {
+        const { projectIds } = bulkDeleteDto;
+        const projects = await this.projectRepository.findByIds(projectIds);
+        if (projects.length !== projectIds.length) {
+            throw new common_1.BadRequestException('Some projects not found');
+        }
+        await this.projectRepository.remove(projects);
+    }
+    async bulkFeature(bulkFeatureDto) {
+        const { projectIds, isFeatured = true } = bulkFeatureDto;
+        const projects = await this.projectRepository.findByIds(projectIds);
+        if (projects.length !== projectIds.length) {
+            throw new common_1.BadRequestException('Some projects not found');
+        }
+        await this.projectRepository.update(projectIds, { isFeatured });
+        return await this.projectRepository.findByIds(projectIds);
+    }
+    async getStatistics() {
+        const [total, published, draft, archived, featured, completed, inProgress, byCategory, byDifficulty,] = await Promise.all([
+            this.projectRepository.count(),
+            this.projectRepository.count({ where: { status: project_entity_1.ProjectStatus.PUBLISHED } }),
+            this.projectRepository.count({ where: { status: project_entity_1.ProjectStatus.DRAFT } }),
+            this.projectRepository.count({ where: { status: project_entity_1.ProjectStatus.ARCHIVED } }),
+            this.projectRepository.count({ where: { isFeatured: true } }),
+            this.projectRepository.count({ where: { progressStatus: project_entity_1.ProjectProgressStatus.COMPLETED } }),
+            this.projectRepository.count({ where: { progressStatus: project_entity_1.ProjectProgressStatus.IN_PROGRESS } }),
+            this.getCategoryStats(),
+            this.getDifficultyStats(),
+        ]);
+        return {
+            total,
+            published,
+            draft,
+            archived,
+            featured,
+            completed,
+            inProgress,
+            byCategory,
+            byDifficulty,
+        };
+    }
+    async getCategoryStats() {
+        const result = await this.projectRepository
+            .createQueryBuilder('project')
+            .select('project.category', 'category')
+            .addSelect('COUNT(*)', 'count')
+            .groupBy('project.category')
+            .getRawMany();
+        return result.reduce((acc, item) => {
+            acc[item.category] = parseInt(item.count);
+            return acc;
+        }, {});
+    }
+    async getDifficultyStats() {
+        const result = await this.projectRepository
+            .createQueryBuilder('project')
+            .select('project.difficulty', 'difficulty')
+            .addSelect('COUNT(*)', 'count')
+            .groupBy('project.difficulty')
+            .getRawMany();
+        return result.reduce((acc, item) => {
+            acc[item.difficulty] = parseInt(item.count);
+            return acc;
+        }, {});
+    }
+    async addMedia(projectId, mediaData) {
+        const project = await this.findOne(projectId);
+        const lastMedia = await this.mediaRepository.findOne({
+            where: { projectId },
+            order: { order: 'DESC' },
+        });
+        const media = this.mediaRepository.create({
+            ...mediaData,
+            projectId,
+            order: lastMedia ? lastMedia.order + 1 : 0,
+        });
+        return await this.mediaRepository.save(media);
+    }
+    async updateMediaOrder(projectId, mediaOrders) {
+        await Promise.all(mediaOrders.map(({ id, order }) => this.mediaRepository.update(id, { order })));
+        return await this.mediaRepository.find({
+            where: { projectId },
+            order: { order: 'ASC' },
+        });
+    }
+    async removeMedia(mediaId) {
+        const media = await this.mediaRepository.findOne({ where: { id: mediaId } });
+        if (!media) {
+            throw new common_1.NotFoundException(`Media with ID ${mediaId} not found`);
+        }
+        await this.mediaRepository.remove(media);
+    }
+    async setCoverImage(projectId, mediaId) {
+        const project = await this.findOne(projectId);
+        const media = await this.mediaRepository.findOne({
+            where: { id: mediaId, projectId }
+        });
+        if (!media) {
+            throw new common_1.NotFoundException(`Media with ID ${mediaId} not found in this project`);
+        }
+        project.coverImageId = mediaId;
+        return await this.projectRepository.save(project);
+    }
+    async checkScheduledPublishing() {
+        const now = new Date();
+        const scheduledProjects = await this.projectRepository.find({
+            where: {
+                scheduledPublishAt: (0, typeorm_2.LessThanOrEqual)(now),
+                status: project_entity_1.ProjectStatus.DRAFT,
+            },
+        });
+        if (scheduledProjects.length > 0) {
+            await this.projectRepository.update(scheduledProjects.map(p => p.id), {
+                status: project_entity_1.ProjectStatus.PUBLISHED,
+                publishedAt: now,
+            });
+        }
     }
 };
 exports.ProjectsService = ProjectsService;
 exports.ProjectsService = ProjectsService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(project_entity_1.Project)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(1, (0, typeorm_1.InjectRepository)(project_media_entity_1.ProjectMedia)),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository])
 ], ProjectsService);
 //# sourceMappingURL=projects.service.js.map

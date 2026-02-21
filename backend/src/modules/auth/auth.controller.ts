@@ -1,4 +1,11 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Controller,
+  Post,
+  Body,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { AuthService } from './auth.service';
@@ -18,7 +25,7 @@ export class AuthController {
     const userExists = await this.authService.userExists();
 
     if (userExists) {
-      throw new Error('Registration disabled. Single admin user already exists.');
+      throw new ConflictException('Registration disabled. Single admin user already exists.');
     }
 
     console.log('[AUTH] Creating single admin user:', registerDto.username);
@@ -32,14 +39,14 @@ export class AuthController {
     // Validate input
     if (!loginDto.username || !loginDto.password) {
       console.error('[AUTH] Login failed: Missing credentials');
-      throw new Error('Username and password are required');
+      throw new BadRequestException('Username and password are required');
     }
     
     // Manual login without passport for now
     const user = await this.authService.validateUser(loginDto.username, loginDto.password);
     if (!user) {
       console.log(`[AUTH] Login failed: ${loginDto.username}`);
-      throw new Error('Invalid credentials');
+      throw new UnauthorizedException('Invalid credentials');
     }
     
     console.log(`[AUTH] Login successful: ${user.username}`);

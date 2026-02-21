@@ -12,312 +12,241 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProjectsController = void 0;
+exports.PublicProjectsController = exports.ProjectsController = void 0;
 const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
 const multer_1 = require("multer");
 const path_1 = require("path");
+const uuid_1 = require("uuid");
+const projects_service_1 = require("./projects.service");
 const create_project_dto_1 = require("./dto/create-project.dto");
 const update_project_dto_1 = require("./dto/update-project.dto");
-const projects_service_1 = require("./projects.service");
+const query_projects_dto_1 = require("./dto/query-projects.dto");
+const bulk_operations_dto_1 = require("./dto/bulk-operations.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
-const admin_guard_1 = require("../auth/guards/admin.guard");
+const project_media_entity_1 = require("./entities/project-media.entity");
 let ProjectsController = class ProjectsController {
     constructor(projectsService) {
         this.projectsService = projectsService;
-        this.projects = [];
     }
-    testCreate(body, req) {
-        console.log('[PROJECTS] Test create endpoint called');
-        console.log('[PROJECTS] User:', req.user);
-        console.log('[PROJECTS] Body:', body);
-        return {
-            message: 'Test endpoint working',
-            user: req.user,
-            body: body
-        };
+    create(createProjectDto) {
+        return this.projectsService.create(createProjectDto);
     }
-    debugHeaders(req) {
-        console.log('[PROJECTS] Debug headers endpoint called');
-        console.log('[PROJECTS] Headers:', JSON.stringify(req.headers, null, 2));
-        return {
-            message: 'Headers captured',
-            authorizationHeader: req.headers?.authorization || req.headers?.Authorization,
-            headers: req.headers,
-        };
-    }
-    testAdmin(body, req) {
-        console.log('[PROJECTS] Test admin endpoint called');
-        console.log('[PROJECTS] User:', req.user);
-        console.log('[PROJECTS] Body:', body);
-        return {
-            message: 'Admin endpoint working',
-            user: req.user,
-            body: body
-        };
-    }
-    async createWorking(body, req) {
-        console.log('[PROJECTS] Working create called');
-        console.log('[PROJECTS] User:', req.user);
-        console.log('[PROJECTS] Body:', body);
-        try {
-            const project = {
-                id: `proj-${Date.now()}`,
-                title: body.title || 'Untitled Project',
-                slug: body.title ? body.title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-') : 'untitled',
-                description: body.description || 'No description',
-                techStack: body.techStack || [],
-                images: body.images || [],
-                bannerImage: body.bannerImage,
-                cataloguePhoto: body.cataloguePhoto,
-                liveDemoUrl: body.liveDemoUrl,
-                githubUrl: body.githubUrl,
-                category: body.category,
-                status: body.status,
-                isFeatured: body.isFeatured || false,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                user: req.user
-            };
-            this.projects.push(project);
-            console.log('[PROJECTS] Project created successfully:', project.title);
-            return project;
-        }
-        catch (error) {
-            console.error('[PROJECTS] Error:', error.message);
-            return {
-                error: error.message,
-                body: body
-            };
-        }
-    }
-    create(createProjectDto, req) {
-        console.log(`[PROJECTS] Creating project: ${createProjectDto.title} by ${req.user?.username}`);
-        console.log(`[PROJECTS] User ID: ${req.user?.userId}`);
-        console.log(`[PROJECTS] Full user object:`, JSON.stringify(req.user, null, 2));
-        console.log(`[PROJECTS] Project data:`, JSON.stringify(createProjectDto, null, 2));
-        if (!req.user?.userId) {
-            console.error('[PROJECTS] No userId in request - authentication issue');
-            throw new Error('User authentication failed - missing userId');
-        }
-        return this.projectsService.create(createProjectDto, req.user.userId);
-    }
-    getWorkingProjects() {
-        return this.projects;
-    }
-    getWorkingProject(id) {
-        return this.projects.find(p => p.id === id);
-    }
-    updateWorkingProject(id, body) {
-        const index = this.projects.findIndex(p => p.id === id);
-        if (index !== -1) {
-            this.projects[index] = { ...this.projects[index], ...body, updatedAt: new Date().toISOString() };
-            return this.projects[index];
-        }
-        return { error: 'Project not found' };
-    }
-    deleteWorkingProject(id) {
-        const index = this.projects.findIndex(p => p.id === id);
-        if (index !== -1) {
-            const deleted = this.projects.splice(index, 1);
-            return { message: 'Project deleted', project: deleted[0] };
-        }
-        return { error: 'Project not found' };
-    }
-    getWorkingCount() {
-        return { total: this.projects.length };
+    getStatistics() {
+        return this.projectsService.getStatistics();
     }
     findOne(id) {
-        return this.projectsService.findOne(id);
-    }
-    findAllAdmin() {
-        return this.projectsService.findAll();
-    }
-    findOneAdmin(id) {
         return this.projectsService.findOne(id);
     }
     update(id, updateProjectDto) {
         return this.projectsService.update(id, updateProjectDto);
     }
-    count() {
-        return this.projectsService.count();
-    }
-    uploadImage(file) {
-        if (!file) {
-            console.error('[PROJECTS] No file uploaded');
-            throw new Error('No file uploaded');
-        }
-        console.log(`[PROJECTS] File uploaded: ${file.originalname} (${file.size} bytes)`);
-        return {
-            filename: file.filename,
-            path: `/uploads/projects/${file.filename}`,
-            originalName: file.originalname,
-            size: file.size,
-        };
-    }
     remove(id) {
         return this.projectsService.remove(id);
+    }
+    duplicate(id) {
+        return this.projectsService.duplicate(id);
+    }
+    bulkPublish(bulkPublishDto) {
+        return this.projectsService.bulkPublish(bulkPublishDto);
+    }
+    bulkDelete(bulkDeleteDto) {
+        return this.projectsService.bulkDelete(bulkDeleteDto);
+    }
+    bulkFeature(bulkFeatureDto) {
+        return this.projectsService.bulkFeature(bulkFeatureDto);
+    }
+    async uploadMedia(projectId, file) {
+        if (!file) {
+            throw new common_1.BadRequestException('No file uploaded');
+        }
+        const mediaType = file.mimetype.startsWith('image/') ? project_media_entity_1.MediaType.IMAGE : project_media_entity_1.MediaType.VIDEO;
+        const mediaData = {
+            type: mediaType,
+            filename: file.filename,
+            originalName: file.originalname,
+            mimeType: file.mimetype,
+            size: file.size,
+            url: `/uploads/projects/${file.filename}`,
+        };
+        return this.projectsService.addMedia(projectId, mediaData);
+    }
+    updateMediaOrder(projectId, mediaOrders) {
+        return this.projectsService.updateMediaOrder(projectId, mediaOrders);
+    }
+    removeMedia(mediaId) {
+        return this.projectsService.removeMedia(mediaId);
+    }
+    setCoverImage(projectId, mediaId) {
+        return this.projectsService.setCoverImage(projectId, mediaId);
     }
 };
 exports.ProjectsController = ProjectsController;
 __decorate([
-    (0, common_1.Post)('test-create'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Request)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
-    __metadata("design:returntype", void 0)
-], ProjectsController.prototype, "testCreate", null);
-__decorate([
-    (0, common_1.Post)('debug-headers'),
-    __param(0, (0, common_1.Request)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], ProjectsController.prototype, "debugHeaders", null);
-__decorate([
-    (0, common_1.Post)('test-admin'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
-    __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Request)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
-    __metadata("design:returntype", void 0)
-], ProjectsController.prototype, "testAdmin", null);
-__decorate([
-    (0, common_1.Post)('create-working'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
-    __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Request)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
-    __metadata("design:returntype", Promise)
-], ProjectsController.prototype, "createWorking", null);
-__decorate([
     (0, common_1.Post)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
     __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_project_dto_1.CreateProjectDto, Object]),
-    __metadata("design:returntype", Promise)
+    __metadata("design:paramtypes", [create_project_dto_1.CreateProjectDto]),
+    __metadata("design:returntype", void 0)
 ], ProjectsController.prototype, "create", null);
 __decorate([
-    (0, common_1.Get)('working'),
+    (0, common_1.Get)('statistics'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
-], ProjectsController.prototype, "getWorkingProjects", null);
-__decorate([
-    (0, common_1.Get)('working/:id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], ProjectsController.prototype, "getWorkingProject", null);
-__decorate([
-    (0, common_1.Patch)('working/:id'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
-], ProjectsController.prototype, "updateWorkingProject", null);
-__decorate([
-    (0, common_1.Delete)('working/:id'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], ProjectsController.prototype, "deleteWorkingProject", null);
-__decorate([
-    (0, common_1.Get)('working/count'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], ProjectsController.prototype, "getWorkingCount", null);
+], ProjectsController.prototype, "getStatistics", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
+    __metadata("design:returntype", void 0)
 ], ProjectsController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Get)('admin/all'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], ProjectsController.prototype, "findAllAdmin", null);
-__decorate([
-    (0, common_1.Get)('admin/:id'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], ProjectsController.prototype, "findOneAdmin", null);
-__decorate([
     (0, common_1.Patch)(':id'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_project_dto_1.UpdateProjectDto]),
-    __metadata("design:returntype", Promise)
+    __metadata("design:returntype", void 0)
 ], ProjectsController.prototype, "update", null);
 __decorate([
-    (0, common_1.Get)('count'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], ProjectsController.prototype, "count", null);
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ProjectsController.prototype, "remove", null);
 __decorate([
-    (0, common_1.Post)('upload-image'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
+    (0, common_1.Post)(':id/duplicate'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ProjectsController.prototype, "duplicate", null);
+__decorate([
+    (0, common_1.Patch)('bulk/publish'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [bulk_operations_dto_1.BulkPublishDto]),
+    __metadata("design:returntype", void 0)
+], ProjectsController.prototype, "bulkPublish", null);
+__decorate([
+    (0, common_1.Delete)('bulk/delete'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [bulk_operations_dto_1.BulkDeleteDto]),
+    __metadata("design:returntype", void 0)
+], ProjectsController.prototype, "bulkDelete", null);
+__decorate([
+    (0, common_1.Patch)('bulk/feature'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [bulk_operations_dto_1.BulkFeatureDto]),
+    __metadata("design:returntype", void 0)
+], ProjectsController.prototype, "bulkFeature", null);
+__decorate([
+    (0, common_1.Post)(':id/media'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
         storage: (0, multer_1.diskStorage)({
             destination: (req, file, cb) => {
-                cb(null, './uploads/projects');
+                const uploadPath = (0, path_1.join)(process.cwd(), 'uploads', 'projects');
+                cb(null, uploadPath);
             },
             filename: (req, file, cb) => {
-                const randomName = Array(32)
-                    .fill(null)
-                    .map(() => Math.round(Math.random() * 16).toString(16))
-                    .join('');
-                cb(null, `${randomName}${(0, path_1.extname)(file.originalname)}`);
+                const uniqueSuffix = (0, uuid_1.v4)();
+                const ext = (0, path_1.extname)(file.originalname);
+                cb(null, `${uniqueSuffix}${ext}`);
             },
         }),
         fileFilter: (req, file, cb) => {
-            if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-                return cb(new Error('Only image files are allowed!'), false);
+            const allowedTypes = /jpeg|jpg|png|gif|webp|mp4|avi|mov/;
+            const fileExtname = (0, path_1.extname)(file.originalname).toLowerCase();
+            const mimetype = allowedTypes.test(file.mimetype);
+            if (mimetype && allowedTypes.test(fileExtname)) {
+                return cb(null, true);
             }
-            cb(null, true);
+            else {
+                return cb(new common_1.BadRequestException('Only image and video files are allowed'), false);
+            }
         },
         limits: {
-            fileSize: 5 * 1024 * 1024,
+            fileSize: 50 * 1024 * 1024,
         },
     })),
-    __param(0, (0, common_1.UploadedFile)()),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], ProjectsController.prototype, "uploadImage", null);
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], ProjectsController.prototype, "uploadMedia", null);
 __decorate([
-    (0, common_1.Delete)(':id'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Patch)(':id/media/order'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Array]),
+    __metadata("design:returntype", void 0)
+], ProjectsController.prototype, "updateMediaOrder", null);
+__decorate([
+    (0, common_1.Delete)('media/:mediaId'),
+    __param(0, (0, common_1.Param)('mediaId', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], ProjectsController.prototype, "remove", null);
+    __metadata("design:returntype", void 0)
+], ProjectsController.prototype, "removeMedia", null);
+__decorate([
+    (0, common_1.Patch)(':id/cover-image'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)('mediaId', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], ProjectsController.prototype, "setCoverImage", null);
 exports.ProjectsController = ProjectsController = __decorate([
     (0, common_1.Controller)('projects'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:paramtypes", [projects_service_1.ProjectsService])
 ], ProjectsController);
+let PublicProjectsController = class PublicProjectsController {
+    constructor(projectsService) {
+        this.projectsService = projectsService;
+    }
+    getAllProjects(query) {
+        return this.projectsService.findAll({ ...query, status: 'published' });
+    }
+    getFeaturedProjects(query) {
+        return this.projectsService.findAll({ ...query, featured: true, status: 'published' });
+    }
+    getProjectsByCategory(category, query) {
+        return this.projectsService.findAll({ ...query, category: category, status: 'published' });
+    }
+};
+exports.PublicProjectsController = PublicProjectsController;
+__decorate([
+    (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [query_projects_dto_1.QueryProjectsDto]),
+    __metadata("design:returntype", void 0)
+], PublicProjectsController.prototype, "getAllProjects", null);
+__decorate([
+    (0, common_1.Get)('featured'),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [query_projects_dto_1.QueryProjectsDto]),
+    __metadata("design:returntype", void 0)
+], PublicProjectsController.prototype, "getFeaturedProjects", null);
+__decorate([
+    (0, common_1.Get)('by-category/:category'),
+    __param(0, (0, common_1.Param)('category')),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, query_projects_dto_1.QueryProjectsDto]),
+    __metadata("design:returntype", void 0)
+], PublicProjectsController.prototype, "getProjectsByCategory", null);
+exports.PublicProjectsController = PublicProjectsController = __decorate([
+    (0, common_1.Controller)('public/projects'),
+    __metadata("design:paramtypes", [projects_service_1.ProjectsService])
+], PublicProjectsController);
 //# sourceMappingURL=projects.controller.js.map

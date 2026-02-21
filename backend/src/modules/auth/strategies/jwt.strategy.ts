@@ -1,47 +1,58 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
+const pickToken = (value?: string): string | null => {
+  if (!value || typeof value !== 'string') {
+    return null;
+  }
+
+  const normalized = value.trim();
+  if (!normalized) {
+    return null;
+  }
+
+  if (/^Bearer\s+/i.test(normalized)) {
+    return normalized.replace(/^Bearer\s+/i, '').trim() || null;
+  }
+
+  return normalized;
+};
+
 const extractBearerToken = (req: any) => {
-  const authorization = req?.headers?.authorization || req?.headers?.Authorization;
-  if (!authorization || typeof authorization !== 'string') {
-    console.log('[JWT] Authorization header missing');
-    return null;
+  const headerToken = pickToken(req?.headers?.authorization || req?.headers?.Authorization);
+  if (headerToken) {
+    return headerToken;
   }
 
-  const [scheme, token] = authorization.split(' ');
-  if (scheme?.toLowerCase() !== 'bearer' || !token) {
-    console.log('[JWT] Authorization header present but not Bearer scheme');
-    return null;
+  const xAccessToken = pickToken(req?.headers?.['x-access-token']);
+  if (xAccessToken) {
+    return xAccessToken;
   }
 
-  return token;
+  return pickToken(req?.query?.access_token);
 };
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         extractBearerToken,
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'your-secret-key',
+      secretOrKey: configService.get<string>('JWT_SECRET', 'your-secret-key'),
     });
-    console.log('[JWT] JWT Strategy initialized with secret:', process.env.JWT_SECRET ? 'Set' : 'Not set');
   }
 
   async validate(payload: any) {
-    console.log('[JWT] Full payload received:', JSON.stringify(payload, null, 2));
-    console.log('[JWT] Payload fields:', Object.keys(payload));
-    
-    const user = { 
+    const user = {
       userId: payload.sub || payload.userId || payload.id, 
       username: payload.username
     };
-    
-    console.log('[JWT] User object created:', JSON.stringify(user, null, 2));
+
     return user;
   }
 }

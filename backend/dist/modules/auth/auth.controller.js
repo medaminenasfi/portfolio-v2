@@ -26,7 +26,7 @@ let AuthController = class AuthController {
     async register(registerDto) {
         const userExists = await this.authService.userExists();
         if (userExists) {
-            throw new Error('Registration disabled. Single admin user already exists.');
+            throw new common_1.ConflictException('Registration disabled. Single admin user already exists.');
         }
         console.log('[AUTH] Creating single admin user:', registerDto.username);
         return this.authService.register(registerDto);
@@ -35,12 +35,12 @@ let AuthController = class AuthController {
         console.log(`[AUTH] Login attempt: ${loginDto.username}`);
         if (!loginDto.username || !loginDto.password) {
             console.error('[AUTH] Login failed: Missing credentials');
-            throw new Error('Username and password are required');
+            throw new common_1.BadRequestException('Username and password are required');
         }
         const user = await this.authService.validateUser(loginDto.username, loginDto.password);
         if (!user) {
             console.log(`[AUTH] Login failed: ${loginDto.username}`);
-            throw new Error('Invalid credentials');
+            throw new common_1.UnauthorizedException('Invalid credentials');
         }
         console.log(`[AUTH] Login successful: ${user.username}`);
         console.log('[AUTH] User object from validateUser:', JSON.stringify(user, null, 2));

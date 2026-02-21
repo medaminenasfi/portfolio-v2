@@ -1,6 +1,9 @@
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 import configuration from './src/config/configuration';
+import { User } from './src/modules/auth/entities/user.entity';
+import { Project } from './src/modules/projects/entities/project.entity';
+import { ProjectMedia } from './src/modules/projects/entities/project-media.entity';
 
 config();
 const { database } = configuration();
@@ -13,5 +16,6 @@ export default new DataSource({
   password: database.password,
   database: database.name,
   synchronize: false,
+  entities: [User, Project, ProjectMedia],
   migrations: ['dist/migrations/*.js'],
 });

@@ -1,22 +1,27 @@
-import { BaseEntity } from '../../../common/entities/base.entity';
 import { Project } from './project.entity';
 export declare enum MediaType {
     IMAGE = "image",
-    VIDEO = "video",
-    DOCUMENT = "document"
+    VIDEO = "video"
 }
-export declare class ProjectMedia extends BaseEntity {
+export declare class ProjectMedia {
+    id: string;
+    type: MediaType;
     filename: string;
     originalName: string;
-    path: string;
-    mediaType: MediaType;
-    fileSize: number;
-    mimeType?: string;
-    altText?: string;
-    caption?: string;
-    isCover: boolean;
-    sortOrder: number;
-    isActive: boolean;
+    mimeType: string;
+    size: number;
+    url: string;
+    thumbnailUrl: string;
+    order: number;
+    videoEmbedUrl: string;
+    metadata: {
+        width?: number;
+        height?: number;
+        duration?: number;
+        compressionRatio?: number;
+    };
     project: Project;
     projectId: string;
+    createdAt: Date;
+    updatedAt: Date;
 }

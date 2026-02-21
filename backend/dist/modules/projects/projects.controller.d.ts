@@ -1,75 +1,58 @@
+import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
-import { Project } from './entities/project.entity';
-import { ProjectsService } from './projects.service';
+import { QueryProjectsDto } from './dto/query-projects.dto';
+import { BulkPublishDto, BulkDeleteDto, BulkFeatureDto } from './dto/bulk-operations.dto';
+import { ProjectMedia } from './entities/project-media.entity';
 export declare class ProjectsController {
     private readonly projectsService;
     constructor(projectsService: ProjectsService);
-    testCreate(body: any, req: any): {
-        message: string;
-        user: any;
-        body: any;
-    };
-    debugHeaders(req: any): {
-        message: string;
-        authorizationHeader: any;
-        headers: any;
-    };
-    testAdmin(body: any, req: any): {
-        message: string;
-        user: any;
-        body: any;
-    };
-    createWorking(body: any, req: any): Promise<{
-        id: string;
-        title: any;
-        slug: any;
-        description: any;
-        techStack: any;
-        images: any;
-        bannerImage: any;
-        cataloguePhoto: any;
-        liveDemoUrl: any;
-        githubUrl: any;
-        category: any;
-        status: any;
-        isFeatured: any;
-        createdAt: string;
-        updatedAt: string;
-        user: any;
-    } | {
-        error: any;
-        body: any;
-    }>;
-    create(createProjectDto: CreateProjectDto, req: any): Promise<Project>;
-    private projects;
-    getWorkingProjects(): any[];
-    getWorkingProject(id: string): any;
-    updateWorkingProject(id: string, body: any): any;
-    deleteWorkingProject(id: string): {
-        message: string;
-        project: any;
-        error?: undefined;
-    } | {
-        error: string;
-        message?: undefined;
-        project?: undefined;
-    };
-    getWorkingCount(): {
+    create(createProjectDto: CreateProjectDto): Promise<import("./entities/project.entity").Project>;
+    getStatistics(): Promise<{
         total: number;
-    };
-    findOne(id: string): Promise<Project>;
-    findAllAdmin(): Promise<Project[]>;
-    findOneAdmin(id: string): Promise<Project>;
-    update(id: string, updateProjectDto: UpdateProjectDto): Promise<Project>;
-    count(): Promise<{
-        total: number;
+        published: number;
+        draft: number;
+        archived: number;
+        featured: number;
+        completed: number;
+        inProgress: number;
+        byCategory: Record<string, number>;
+        byDifficulty: Record<string, number>;
     }>;
-    uploadImage(file: Express.Multer.File): {
-        filename: string;
-        path: string;
-        originalName: string;
-        size: number;
-    };
+    findOne(id: string): Promise<import("./entities/project.entity").Project>;
+    update(id: string, updateProjectDto: UpdateProjectDto): Promise<import("./entities/project.entity").Project>;
     remove(id: string): Promise<void>;
+    duplicate(id: string): Promise<import("./entities/project.entity").Project>;
+    bulkPublish(bulkPublishDto: BulkPublishDto): Promise<import("./entities/project.entity").Project[]>;
+    bulkDelete(bulkDeleteDto: BulkDeleteDto): Promise<void>;
+    bulkFeature(bulkFeatureDto: BulkFeatureDto): Promise<import("./entities/project.entity").Project[]>;
+    uploadMedia(projectId: string, file: Express.Multer.File): Promise<ProjectMedia>;
+    updateMediaOrder(projectId: string, mediaOrders: {
+        id: string;
+        order: number;
+    }[]): Promise<ProjectMedia[]>;
+    removeMedia(mediaId: string): Promise<void>;
+    setCoverImage(projectId: string, mediaId: string): Promise<import("./entities/project.entity").Project>;
+}
+export declare class PublicProjectsController {
+    private readonly projectsService;
+    constructor(projectsService: ProjectsService);
+    getAllProjects(query: QueryProjectsDto): Promise<{
+        projects: import("./entities/project.entity").Project[];
+        total: number;
+        page: number;
+        limit: number;
+    }>;
+    getFeaturedProjects(query: QueryProjectsDto): Promise<{
+        projects: import("./entities/project.entity").Project[];
+        total: number;
+        page: number;
+        limit: number;
+    }>;
+    getProjectsByCategory(category: string, query: QueryProjectsDto): Promise<{
+        projects: import("./entities/project.entity").Project[];
+        total: number;
+        page: number;
+        limit: number;
+    }>;
 }
