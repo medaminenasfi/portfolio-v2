@@ -2,21 +2,60 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { LayoutDashboard, Briefcase, FileText, MessageSquare, Settings, LogOut, ChevronRight, Sparkles } from 'lucide-react';
+import { api } from '@/lib/api';
 
 interface AdminSidebarProps {
   open: boolean;
 }
 
+interface MenuItem {
+  icon: any;
+  label: string;
+  href: string;
+  badge?: number;
+}
+
 export default function AdminSidebar({ open }: AdminSidebarProps) {
   const pathname = usePathname();
+  const [pendingTestimonials, setPendingTestimonials] = useState(0);
 
-  const menuItems = [
+  // Fetch pending testimonials count
+  useEffect(() => {
+    const fetchPendingCount = async () => {
+      try {
+        const response = await api.getTestimonials() as any;
+        const testimonials = response.testimonials || response.data || [];
+        const pending = testimonials.filter((t: any) => t.status === 'pending').length;
+        setPendingTestimonials(pending);
+        console.log('AdminSidebar - Pending testimonials:', pending); // Debug log
+        console.log('AdminSidebar - Should show badge:', pending > 0); // Debug log
+      } catch (error) {
+        console.error('Failed to fetch pending testimonials:', error);
+        setPendingTestimonials(0);
+      }
+    };
+
+    fetchPendingCount();
+    
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchPendingCount, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  const menuItems: MenuItem[] = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
     { icon: Briefcase, label: 'Projects', href: '/admin/projects' },
     { icon: FileText, label: 'Experience', href: '/admin/experience' },
     { icon: FileText, label: 'Resume', href: '/admin/resume' },
-    { icon: MessageSquare, label: 'Testimonials', href: '/admin/testimonials' },
+    { 
+      icon: MessageSquare, 
+      label: 'Testimonials', 
+      href: '/admin/testimonials',
+      badge: pendingTestimonials > 0 ? pendingTestimonials : undefined
+    },
     { icon: Settings, label: 'Settings', href: '/admin/settings' },
   ];
 
@@ -51,7 +90,7 @@ export default function AdminSidebar({ open }: AdminSidebarProps) {
           return (
             <Link key={item.href} href={item.href}>
               <div
-                className={`flex items-center gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-all duration-200 group ${
+                className={`flex items-center gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-all duration-200 group relative ${
                   active
                     ? 'bg-gradient-to-r from-cyan-500/30 to-cyan-600/20 text-cyan-300 border border-cyan-500/40'
                     : 'text-muted-foreground hover:text-foreground hover:bg-slate-800/50 border border-transparent hover:border-cyan-500/20'
@@ -65,6 +104,12 @@ export default function AdminSidebar({ open }: AdminSidebarProps) {
                 )}
                 {open && active && (
                   <ChevronRight className="w-3 h-3 md:w-4 md:h-4 ml-auto text-cyan-400" />
+                )}
+                {/* Notification Badge */}
+                {item.badge && (
+                  <div className={`absolute ${open ? 'top-2 right-2' : 'top-1 right-1'} w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse border-2 border-slate-900`}>
+                    {item.badge > 9 ? '9+' : item.badge}
+                  </div>
                 )}
               </div>
             </Link>
