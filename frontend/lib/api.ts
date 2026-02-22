@@ -68,6 +68,9 @@ export class ApiClient {
         const errorData = await response.json().catch(() => ({}));
         const errorMessage = errorData.message || errorData.error || `HTTP ${response.status}: ${response.statusText}`;
         console.error('API Error:', errorMessage);
+        console.error('Full error response:', errorData);
+        console.error('Response status:', response.status);
+        console.error('Response headers:', response.headers);
         throw new Error(errorMessage);
       }
 
@@ -265,11 +268,55 @@ export class ApiClient {
     formData.append('title', metadata.title);
     formData.append('description', metadata.description);
 
-    return this.request('/resume/upload', {
+    const url = `${this.baseURL}/resume/upload`;
+    const headers: Record<string, string> = {};
+
+    // Add authorization header if token exists
+    if (this.token) {
+      headers.Authorization = `Bearer ${this.token}`;
+    }
+
+    console.log('Upload attempt - File:', file.name, 'Size:', file.size, 'Type:', file.type);
+    console.log('Upload URL:', url);
+    console.log('Has token:', !!this.token);
+
+    const response = await fetch(url, {
       method: 'POST',
       body: formData,
-      headers: {}, // Let browser set Content-Type for FormData
+      headers,
+      mode: 'cors',
+      credentials: 'omit',
     });
+
+    console.log(`API Request: POST ${url}`);
+    console.log(`API Response: ${response.status} ${response.statusText}`);
+
+    // Handle 401 Unauthorized
+    if (response.status === 401) {
+      this.clearToken();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      throw new Error('Unauthorized - Please login again');
+    }
+
+    // Handle other HTTP errors
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.message || errorData.error || `HTTP ${response.status}: ${response.statusText}`;
+      console.error('API Error:', errorMessage);
+      console.error('Full error response:', errorData);
+      console.error('Response status:', response.status);
+      throw new Error(errorMessage);
+    }
+
+    // Handle successful response
+    const text = await response.text();
+    if (!text) {
+      return {} as any;
+    }
+
+    return JSON.parse(text);
   }
 
   async updateResume(id: string, metadata: any) {
@@ -446,8 +493,50 @@ export class ApiClient {
     return this.request('/public/testimonials');
   }
 
-  async getPublicResume() {
-    return this.request('/public/resume');
+  async getCurrentResumeInfo() {
+    try {
+      const url = `${this.baseURL}/resume/current`;
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      // Add authorization header if token exists
+      if (this.token) {
+        headers.Authorization = `Bearer ${this.token}`;
+      }
+
+      const response = await fetch(url, {
+        headers,
+        mode: 'cors',
+        credentials: 'omit',
+      });
+      
+      // Handle 404 specifically for no resume found
+      if (response.status === 404) {
+        return null;
+      }
+      
+      // Handle other HTTP errors
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.message || errorData.error || `HTTP ${response.status}: ${response.statusText}`;
+        throw new Error(errorMessage);
+      }
+      
+      // Handle successful response
+      const text = await response.text();
+      if (!text) {
+        return null;
+      }
+      
+      return JSON.parse(text);
+    } catch (error) {
+      // Handle any other errors
+      if (error instanceof Error && error.message.includes('not found')) {
+        return null;
+      }
+      throw error;
+    }
   }
 
   async getPublicTechStack(params?: any) {

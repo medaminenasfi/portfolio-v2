@@ -29,8 +29,14 @@ export class ResumeService {
       throw new BadRequestException('File size must be less than 10MB');
     }
 
-    // Deactivate all existing resumes
-    await this.resumeRepository.update({}, { isActive: false });
+    // Deactivate all existing resumes by finding them first
+    const existingResumes = await this.resumeRepository.find({ where: { isActive: true } });
+    if (existingResumes.length > 0) {
+      await this.resumeRepository.update(
+        existingResumes.map(r => r.id),
+        { isActive: false }
+      );
+    }
 
     // Create new resume record
     const resume = this.resumeRepository.create({

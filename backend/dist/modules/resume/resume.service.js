@@ -33,7 +33,10 @@ let ResumeService = class ResumeService {
         if (file.size > maxSize) {
             throw new common_1.BadRequestException('File size must be less than 10MB');
         }
-        await this.resumeRepository.update({}, { isActive: false });
+        const existingResumes = await this.resumeRepository.find({ where: { isActive: true } });
+        if (existingResumes.length > 0) {
+            await this.resumeRepository.update(existingResumes.map(r => r.id), { isActive: false });
+        }
         const resume = this.resumeRepository.create({
             filename: file.filename,
             originalName: file.originalname,

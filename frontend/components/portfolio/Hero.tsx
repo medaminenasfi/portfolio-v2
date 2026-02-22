@@ -1,4 +1,35 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Download } from 'lucide-react';
+import { api } from '@/lib/api';
+
 export default function Hero() {
+  const [resumeInfo, setResumeInfo] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchResumeInfo = async () => {
+      try {
+        const info = await api.getCurrentResumeInfo();
+        setResumeInfo(info);
+      } catch (error) {
+        // This should not happen now since we handle it in the API client
+        console.log('Error fetching resume info:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResumeInfo();
+  }, []);
+
+  const handleDownloadCV = () => {
+    if (resumeInfo) {
+      window.open('http://localhost:3000/api/resume/download', '_blank');
+    }
+  };
+
   return (
     <section className="min-h-screen flex items-center justify-center px-4 py-20 relative overflow-hidden">
       {/* Background accent */}

@@ -65,19 +65,36 @@ export default function ResumePage() {
       setSaving(true);
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('title', file.name.replace('.pdf', ''));
+      formData.append('description', 'Professional Resume');
 
-      const response = await fetch('/api/resume/upload', {
+      // Get auth token
+      const token = localStorage.getItem('admin_token');
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch('http://localhost:3000/api/resume/upload', {
         method: 'POST',
         body: formData,
+        headers,
+        mode: 'cors',
+        credentials: 'omit',
       });
 
-      if (!response.ok) throw new Error('Upload failed');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.message || errorData.error || 'Upload failed';
+        throw new Error(errorMessage);
+      }
       
       const data = await response.json();
-      setResumeData((prev) => ({ ...prev, resume_url: data.url }));
+      setResumeData((prev) => ({ ...prev, resume_url: data.filePath }));
+      alert('Resume uploaded successfully!');
     } catch (error) {
       console.error('Failed to upload resume:', error);
-      alert('Failed to upload resume');
+      alert(`Failed to upload resume: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setSaving(false);
     }

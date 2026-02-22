@@ -1,6 +1,7 @@
 'use client';
 
 import Hero from '@/components/portfolio/Hero';
+import AboutSection from '@/components/portfolio/AboutSection';
 import ProjectsSection from '@/components/portfolio/ProjectsSection';
 import ExperienceSection from '@/components/portfolio/ExperienceSection';
 import SkillsSection from '@/components/portfolio/SkillsSection';
@@ -14,6 +15,10 @@ export default function Page() {
       <Navigation activeSection="home" />
       
       <Hero />
+      
+      <div id="about" className="scroll-mt-20">
+        <AboutSection />
+      </div>
       
       <div id="projects" className="scroll-mt-20">
         <ProjectsSection />
