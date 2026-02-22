@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Download, User, MapPin, Mail, Phone, Github, Linkedin, Twitter } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Download, User, MapPin, Mail, Phone, Github, Linkedin, Twitter, Eye, ChevronDown, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { api } from '@/lib/api';
@@ -9,27 +9,49 @@ import { api } from '@/lib/api';
 export default function AboutSection() {
   const [resumeInfo, setResumeInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchResumeInfo = async () => {
-      try {
-        const info = await api.getCurrentResumeInfo();
-        setResumeInfo(info);
-      } catch (error) {
-        // This should not happen now since we handle it in the API client
-        console.log('Error fetching resume info:', error);
-      } finally {
-        setLoading(false);
+    fetchResumeInfo();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
       }
     };
 
-    fetchResumeInfo();
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
+
+  const fetchResumeInfo = async () => {
+    try {
+      const info = await api.getCurrentResumeInfo();
+      setResumeInfo(info);
+    } catch (error) {
+      // This should not happen now since we handle it in the API client
+      console.log('Error fetching resume info:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePreviewCV = () => {
+    setShowPreviewModal(true);
+    setShowDropdown(false);
+  };
 
   const handleDownloadCV = () => {
     if (resumeInfo) {
       window.open('http://localhost:3000/api/resume/download', '_blank');
     }
+    setShowDropdown(false);
   };
 
   return (
@@ -151,13 +173,35 @@ export default function AboutSection() {
                     </p>
                   </div>
                   {!loading && resumeInfo && (
-                    <Button
-                      onClick={handleDownloadCV}
-                      className="bg-accent hover:bg-accent/90 text-background flex items-center gap-2"
-                    >
-                      <Download size={16} />
-                      Download CV
-                    </Button>
+                    <div className="relative" ref={dropdownRef}>
+                      <Button
+                        onClick={() => setShowDropdown(!showDropdown)}
+                        className="bg-accent hover:bg-accent/90 text-background flex items-center gap-2"
+                      >
+                        <Download size={16} />
+                        CV Options
+                        <ChevronDown size={14} className={`transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+                      </Button>
+                      
+                      {showDropdown && (
+                        <div className="absolute top-full mt-2 right-0 bg-background border border-border rounded-lg shadow-lg z-50 min-w-[140px]">
+                          <button
+                            onClick={handlePreviewCV}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-accent/10 transition-colors rounded-t-lg"
+                          >
+                            <Eye size={14} />
+                            Preview
+                          </button>
+                          <button
+                            onClick={handleDownloadCV}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-accent/10 transition-colors rounded-b-lg"
+                          >
+                            <Download size={14} />
+                            Download
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   )}
                   {loading && (
                     <div className="w-32 h-10 bg-muted rounded-lg animate-pulse"></div>
@@ -188,6 +232,46 @@ export default function AboutSection() {
           </div>
         </div>
       </div>
+
+      {/* PDF Preview Modal */}
+      {showPreviewModal && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h3 className="text-lg font-semibold text-foreground">Resume Preview</h3>
+              <button
+                onClick={() => setShowPreviewModal(false)}
+                className="p-2 hover:bg-accent/10 rounded-lg transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* PDF Content */}
+            <div className="flex-1 overflow-auto p-4">
+              <iframe
+                src="http://localhost:3000/api/resume/serve"
+                className="w-full h-full min-h-[600px] border-0 rounded"
+                title="Resume Preview"
+              />
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between p-4 border-t border-border">
+              <p className="text-sm text-muted-foreground">
+                Preview of {resumeInfo?.title || 'Resume'}
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => setShowPreviewModal(false)}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
