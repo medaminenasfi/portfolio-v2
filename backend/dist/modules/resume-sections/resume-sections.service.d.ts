@@ -13,6 +13,7 @@ export declare class ResumeSectionsService {
     constructor(workExperienceRepository: Repository<WorkExperience>, educationRepository: Repository<Education>, skillsRepository: Repository<Skill>, certificationsRepository: Repository<Certification>, languagesRepository: Repository<Language>);
     createWorkExperience(createDto: any): Promise<WorkExperience>;
     getAllWorkExperience(): Promise<WorkExperience[]>;
+    getWorkExperienceById(id: string): Promise<WorkExperience>;
     updateWorkExperience(id: string, updateDto: any): Promise<WorkExperience>;
     deleteWorkExperience(id: string): Promise<void>;
     reorderWorkExperience(reorderDto: {

@@ -30,6 +30,12 @@ export class ResumeSectionsController {
     return this.resumeSectionsService.getAllWorkExperience();
   }
 
+  @Get('work-experience/:id')
+  @UseGuards(JwtAuthGuard)
+  getWorkExperienceById(@Param('id', ParseUUIDPipe) id: string) {
+    return this.resumeSectionsService.getWorkExperienceById(id);
+  }
+
   @Post('work-experience')
   @UseGuards(JwtAuthGuard)
   createWorkExperience(@Body() createDto: any) {

@@ -5,14 +5,15 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Plus, Trash2, Edit2 } from 'lucide-react';
+import { api } from '@/lib/api';
 
 interface Experience {
   id: string;
-  job_title: string;
   company: string;
-  location: string;
-  start_date: string;
-  end_date: string | null;
+  position: string;
+  location?: string;
+  startDate: string;
+  endDate: string | null;
   description: string;
 }
 
@@ -26,9 +27,9 @@ export default function ExperiencePage() {
 
   const fetchExperiences = async () => {
     try {
-      const response = await fetch('/api/experience');
-      const data = await response.json();
-      setExperiences(data.data || []);
+      const response = (await api.getWorkExperience()) as any;
+      const experiencesData = Array.isArray(response) ? response : response?.data || [];
+      setExperiences(experiencesData as Experience[]);
     } catch (error) {
       console.error('Failed to fetch experiences:', error);
     } finally {
@@ -36,11 +37,17 @@ export default function ExperiencePage() {
     }
   };
 
+  const formatDate = (value: string | null) => {
+    if (!value) return 'Present';
+    const date = new Date(value);
+    return isNaN(date.getTime()) ? value : date.toLocaleDateString();
+  };
+
   const deleteExperience = async (id: string) => {
     if (!confirm('Are you sure?')) return;
     try {
-      await fetch(`/api/experience/${id}`, { method: 'DELETE' });
-      setExperiences(experiences.filter((e) => e.id !== id));
+      await api.deleteWorkExperience(id);
+      setExperiences((prev) => prev.filter((e) => e.id !== id));
     } catch (error) {
       console.error('Failed to delete experience:', error);
     }
@@ -76,11 +83,11 @@ export default function ExperiencePage() {
             <Card key={exp.id} className="p-6 bg-card border border-border hover:border-accent/50 transition">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-foreground">{exp.job_title}</h3>
+                  <h3 className="text-lg font-semibold text-foreground">{exp.position}</h3>
                   <p className="text-accent text-sm font-medium">{exp.company}</p>
                   <p className="text-muted-foreground text-sm">
-                    {exp.location} • {new Date(exp.start_date).toLocaleDateString()}{' '}
-                    {exp.end_date ? `- ${new Date(exp.end_date).toLocaleDateString()}` : '- Present'}
+                    {exp.location || 'Remote'} • {exp.startDate ? new Date(exp.startDate).toLocaleDateString() : 'N/A'}{' '}
+                    {exp.endDate ? `- ${new Date(exp.endDate).toLocaleDateString()}` : '- Present'}
                   </p>
                   <p className="text-muted-foreground text-sm mt-2">{exp.description}</p>
                 </div>

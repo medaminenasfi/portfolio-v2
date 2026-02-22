@@ -27,6 +27,10 @@ __decorate([
     __metadata("design:type", String)
 ], WorkExperience.prototype, "position", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], WorkExperience.prototype, "location", void 0);
+__decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], WorkExperience.prototype, "startDate", void 0);

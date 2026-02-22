@@ -11,6 +11,9 @@ export class WorkExperience {
   @Column()
   position!: string;
 
+  @Column({ nullable: true })
+  location!: string;
+
   @Column()
   startDate!: string; // Format: "Jan 2020"
 

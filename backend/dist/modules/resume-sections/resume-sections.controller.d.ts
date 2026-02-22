@@ -3,6 +3,7 @@ export declare class ResumeSectionsController {
     private readonly resumeSectionsService;
     constructor(resumeSectionsService: ResumeSectionsService);
     getWorkExperience(): Promise<import("./entities/work-experience.entity").WorkExperience[]>;
+    getWorkExperienceById(id: string): Promise<import("./entities/work-experience.entity").WorkExperience>;
     createWorkExperience(createDto: any): Promise<import("./entities/work-experience.entity").WorkExperience>;
     updateWorkExperience(id: string, updateDto: any): Promise<import("./entities/work-experience.entity").WorkExperience>;
     deleteWorkExperience(id: string): Promise<void>;

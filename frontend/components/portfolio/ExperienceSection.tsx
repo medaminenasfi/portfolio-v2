@@ -4,18 +4,20 @@ import { useState, useEffect } from 'react';
 
 interface Experience {
   id: string;
-  company_name: string;
+  company: string;
   position: string;
-  employment_type: string;
-  location: string;
-  description: string;
-  start_date: string;
-  end_date: string | null;
+  location?: string;
+  description?: string;
+  startDate: string;
+  endDate: string | null;
+  orderIndex?: number;
 }
 
 export default function ExperienceSection() {
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
   useEffect(() => {
     fetchExperience();
@@ -23,22 +25,33 @@ export default function ExperienceSection() {
 
   const fetchExperience = async () => {
     try {
-      const response = await fetch('/api/experience');
+      setError(null);
+      const response = await fetch(`${apiBaseUrl}/resume-sections/work-experience`, {
+        cache: 'no-store',
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch experience (${response.status})`);
+      }
       const data = await response.json();
-      setExperiences(data.data || []);
+      const experiencesData = Array.isArray(data) ? data : data?.data || [];
+      setExperiences(experiencesData);
     } catch (error) {
       console.error('Failed to fetch experience:', error);
+      setError('Unable to load experience right now. Please try again later.');
     } finally {
       setLoading(false);
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Present';
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-    }).format(date);
+    return isNaN(date.getTime())
+      ? dateString
+      : new Intl.DateTimeFormat('en-US', {
+          year: 'numeric',
+          month: 'short',
+        }).format(date);
   };
 
   return (
@@ -54,6 +67,10 @@ export default function ExperienceSection() {
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="text-muted-foreground">Loading experience...</div>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">{error}</p>
           </div>
         ) : experiences.length === 0 ? (
           <div className="text-center py-12">
@@ -82,21 +99,19 @@ export default function ExperienceSection() {
                       <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-2">
                         <div>
                           <h3 className="text-2xl font-bold text-foreground">{exp.position}</h3>
-                          <p className="text-primary font-semibold">{exp.company_name}</p>
+                          <p className="text-primary font-semibold">{exp.company}</p>
                         </div>
                         <div className="text-sm text-muted-foreground mt-2 md:mt-0">
-                          {formatDate(exp.start_date)} -{' '}
-                          {exp.end_date ? formatDate(exp.end_date) : 'Present'}
+                          {formatDate(exp.startDate)} - {formatDate(exp.endDate)}
                         </div>
                       </div>
 
                       <div className="flex flex-wrap gap-3 mb-3">
-                        <span className="px-3 py-1 bg-secondary text-accent rounded-full text-xs font-medium">
-                          {exp.employment_type}
-                        </span>
-                        <span className="px-3 py-1 bg-secondary text-accent rounded-full text-xs font-medium">
-                          {exp.location}
-                        </span>
+                        {exp.location && (
+                          <span className="px-3 py-1 bg-secondary text-accent rounded-full text-xs font-medium">
+                            {exp.location}
+                          </span>
+                        )}
                       </div>
 
                       {exp.description && (

@@ -27,6 +27,9 @@ let ResumeSectionsController = class ResumeSectionsController {
     getWorkExperience() {
         return this.resumeSectionsService.getAllWorkExperience();
     }
+    getWorkExperienceById(id) {
+        return this.resumeSectionsService.getWorkExperienceById(id);
+    }
     createWorkExperience(createDto) {
         return this.resumeSectionsService.createWorkExperience(createDto);
     }
@@ -120,6 +123,14 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], ResumeSectionsController.prototype, "getWorkExperience", null);
+__decorate([
+    (0, common_1.Get)('work-experience/:id'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ResumeSectionsController.prototype, "getWorkExperienceById", null);
 __decorate([
     (0, common_1.Post)('work-experience'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

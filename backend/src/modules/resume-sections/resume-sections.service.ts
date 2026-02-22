@@ -44,6 +44,14 @@ export class ResumeSectionsService {
     });
   }
 
+  async getWorkExperienceById(id: string): Promise<WorkExperience> {
+    const experience = await this.workExperienceRepository.findOne({ where: { id } });
+    if (!experience) {
+      throw new NotFoundException('Work experience not found');
+    }
+    return experience;
+  }
+
   async updateWorkExperience(id: string, updateDto: any): Promise<WorkExperience> {
     await this.workExperienceRepository.update(id, updateDto);
     const updated = await this.workExperienceRepository.findOne({ where: { id } });

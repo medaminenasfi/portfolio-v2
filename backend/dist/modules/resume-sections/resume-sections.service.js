@@ -46,6 +46,13 @@ let ResumeSectionsService = class ResumeSectionsService {
             order: { orderIndex: 'ASC' },
         });
     }
+    async getWorkExperienceById(id) {
+        const experience = await this.workExperienceRepository.findOne({ where: { id } });
+        if (!experience) {
+            throw new common_1.NotFoundException('Work experience not found');
+        }
+        return experience;
+    }
     async updateWorkExperience(id, updateDto) {
         await this.workExperienceRepository.update(id, updateDto);
         const updated = await this.workExperienceRepository.findOne({ where: { id } });

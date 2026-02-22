@@ -10,33 +10,41 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { api } from '@/lib/api';
+
+interface ExperiencePayload {
+  company: string;
+  position: string;
+  location?: string;
+  startDate: string;
+  endDate: string | null;
+  description: string;
+}
 
 interface ExperienceFormProps {
   experienceId?: string;
-  initialData?: {
-    job_title: string;
-    company: string;
-    location: string;
-    start_date: string;
-    end_date: string | null;
-    description: string;
-    currently_working: boolean;
-  };
+  initialData?: ExperiencePayload;
 }
 
 export default function ExperienceForm({ experienceId, initialData }: ExperienceFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [currentlyWorking, setCurrentlyWorking] = useState(initialData?.currently_working || false);
-  const [formData, setFormData] = useState(
-    initialData || {
-      job_title: '',
+  const normalizedInitial = initialData
+    ? {
+        ...initialData,
+        startDate: initialData.startDate?.split('T')[0] || initialData.startDate || '',
+        endDate: initialData.endDate ? initialData.endDate.split('T')[0] : '',
+      }
+    : undefined;
+  const [currentlyWorking, setCurrentlyWorking] = useState(!normalizedInitial?.endDate);
+  const [formData, setFormData] = useState<ExperiencePayload>(
+    normalizedInitial || {
       company: '',
+      position: '',
       location: '',
-      start_date: '',
-      end_date: '',
+      startDate: '',
+      endDate: '',
       description: '',
-      currently_working: false,
     }
   );
 
@@ -45,13 +53,11 @@ export default function ExperienceForm({ experienceId, initialData }: Experience
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleCurrentlyWorking = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const checked = e.target.checked;
+  const handleCurrentlyWorking = (checked: boolean) => {
     setCurrentlyWorking(checked);
-    setFormData((prev) => ({ 
-      ...prev, 
-      currently_working: checked,
-      end_date: checked ? null : prev.end_date,
+    setFormData((prev) => ({
+      ...prev,
+      endDate: checked ? null : prev.endDate,
     }));
   };
 
@@ -60,16 +66,16 @@ export default function ExperienceForm({ experienceId, initialData }: Experience
     setLoading(true);
 
     try {
-      const method = experienceId ? 'PUT' : 'POST';
-      const url = experienceId ? `/api/experience/${experienceId}` : '/api/experience';
+      const payload: ExperiencePayload = {
+        ...formData,
+        endDate: currentlyWorking ? null : formData.endDate,
+      };
 
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) throw new Error('Failed to save experience');
+      if (experienceId) {
+        await api.updateWorkExperience(experienceId, payload);
+      } else {
+        await api.createWorkExperience(payload);
+      }
 
       router.push('/admin/experience');
     } catch (error) {
@@ -97,11 +103,11 @@ export default function ExperienceForm({ experienceId, initialData }: Experience
         <h2 className="text-xl font-semibold text-foreground">Job Details</h2>
 
         <div>
-          <Label htmlFor="job_title">Job Title *</Label>
+          <Label htmlFor="position">Job Title *</Label>
           <Input
-            id="job_title"
-            name="job_title"
-            value={formData.job_title}
+            id="position"
+            name="position"
+            value={formData.position}
             onChange={handleChange}
             placeholder="E.g., Senior Full Stack Developer"
             className="mt-2 bg-secondary/30 border-border"
@@ -124,27 +130,26 @@ export default function ExperienceForm({ experienceId, initialData }: Experience
           </div>
 
           <div>
-            <Label htmlFor="location">Location *</Label>
+            <Label htmlFor="location">Location</Label>
             <Input
               id="location"
               name="location"
-              value={formData.location}
+              value={formData.location || ''}
               onChange={handleChange}
               placeholder="E.g., San Francisco, CA"
               className="mt-2 bg-secondary/30 border-border"
-              required
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="start_date">Start Date *</Label>
+            <Label htmlFor="startDate">Start Date *</Label>
             <Input
-              id="start_date"
-              name="start_date"
+              id="startDate"
+              name="startDate"
               type="date"
-              value={formData.start_date}
+              value={formData.startDate}
               onChange={handleChange}
               className="mt-2 bg-secondary/30 border-border"
               required
@@ -152,12 +157,12 @@ export default function ExperienceForm({ experienceId, initialData }: Experience
           </div>
 
           <div>
-            <Label htmlFor="end_date">End Date</Label>
+            <Label htmlFor="endDate">End Date</Label>
             <Input
-              id="end_date"
-              name="end_date"
+              id="endDate"
+              name="endDate"
               type="date"
-              value={formData.end_date || ''}
+              value={formData.endDate || ''}
               onChange={handleChange}
               disabled={currentlyWorking}
               className="mt-2 bg-secondary/30 border-border disabled:opacity-50"
@@ -166,7 +171,7 @@ export default function ExperienceForm({ experienceId, initialData }: Experience
         </div>
 
         <label className="flex items-center gap-3 cursor-pointer">
-          <Checkbox checked={currentlyWorking} onChange={handleCurrentlyWorking} />
+          <Checkbox checked={currentlyWorking} onCheckedChange={(value) => handleCurrentlyWorking(Boolean(value))} />
           <span className="text-foreground">Currently working here</span>
         </label>
 

@@ -337,6 +337,10 @@ export class ApiClient {
     return this.request('/resume-sections/work-experience');
   }
 
+  async getWorkExperienceById(id: string) {
+    return this.request(`/resume-sections/work-experience/${id}`);
+  }
+
   async getEducation() {
     return this.request('/resume-sections/education');
   }
