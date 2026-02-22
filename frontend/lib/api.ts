@@ -341,10 +341,6 @@ export class ApiClient {
     return this.request('/resume-sections/education');
   }
 
-  async getSkills() {
-    return this.request('/resume-sections/skills');
-  }
-
   async getCertifications() {
     return this.request('/resume-sections/certifications');
   }
@@ -546,6 +542,67 @@ export class ApiClient {
 
   async getPublicResumeSections() {
     return this.request('/public/resume-sections');
+  }
+
+  // Skills endpoints
+  async getSkills(params?: any) {
+    const query = params ? `?${new URLSearchParams(params)}` : '';
+    return this.request(`/resume-sections/skills${query}`);
+  }
+
+  async createSkill(skillData: any) {
+    return this.request('/resume-sections/skills', {
+      method: 'POST',
+      body: JSON.stringify(skillData),
+    });
+  }
+
+  async updateSkill(id: string, skillData: any) {
+    return this.request(`/resume-sections/skills/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(skillData),
+    });
+  }
+
+  async deleteSkill(id: string) {
+    return this.request(`/resume-sections/skills/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async reorderSkills(reorderData: { ids: string[]; orderIndexes: number[] }) {
+    return this.request('/resume-sections/skills/reorder', {
+      method: 'PATCH',
+      body: JSON.stringify(reorderData),
+    });
+  }
+
+  async uploadSkillPhoto(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const url = `${this.baseURL}/resume-sections/skills/upload-photo`;
+    const headers: Record<string, string> = {};
+
+    if (this.token) {
+      headers.Authorization = `Bearer ${this.token}`;
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      body: formData,
+      headers,
+      mode: 'cors',
+      credentials: 'omit',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.message || errorData.error || `HTTP ${response.status}: ${response.statusText}`;
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
   }
 
   async submitContactForm(data: any) {

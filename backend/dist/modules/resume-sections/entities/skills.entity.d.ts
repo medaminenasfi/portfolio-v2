@@ -13,6 +13,7 @@ export declare enum SkillProficiency {
 export declare class Skill {
     id: string;
     name: string;
+    photo: string;
     category: SkillCategory;
     proficiency: SkillProficiency;
     keywords: string[];

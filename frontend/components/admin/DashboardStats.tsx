@@ -1,13 +1,14 @@
 'use client';
 
 import { Card } from '@/components/ui/card';
-import { Briefcase, MessageSquare, Download, Users, Eye, FileText, TrendingUp } from 'lucide-react';
+import { Briefcase, MessageSquare, Download, Users, Eye, FileText, TrendingUp, Code } from 'lucide-react';
 
 interface DashboardStatsProps {
   stats: {
     totalProjects: number;
     totalTestimonials: number;
     pendingTestimonials: number;
+    totalSkills: number;
     totalContacts: number;
     totalDownloads: number;
     currentVisitors: number;
@@ -46,6 +47,15 @@ export default function DashboardStats({ stats, loading = false }: DashboardStat
       alert: stats.pendingTestimonials > 0,
     },
     {
+      icon: Code,
+      label: 'Skills',
+      value: stats.totalSkills,
+      color: 'text-green-400',
+      bgColor: 'bg-gradient-to-br from-green-500/10 to-green-600/5',
+      borderColor: 'border-green-500/30',
+      trend: '+3%',
+    },
+    {
       icon: Eye,
       label: 'Live Visitors',
       value: stats.currentVisitors,
@@ -59,8 +69,8 @@ export default function DashboardStats({ stats, loading = false }: DashboardStat
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 w-full">
-        {[...Array(4)].map((_, index) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 w-full">
+        {[...Array(5)].map((_, index) => (
           <Card key={index} className="p-6 md:p-8 animate-pulse">
             <div className="h-4 bg-muted rounded w-1/2 mb-4"></div>
             <div className="h-8 bg-muted rounded w-3/4"></div>
@@ -71,7 +81,7 @@ export default function DashboardStats({ stats, loading = false }: DashboardStat
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 w-full">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 w-full">
       {statCards.map((stat, index) => {
         const Icon = stat.icon;
         return (

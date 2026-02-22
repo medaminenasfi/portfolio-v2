@@ -9,11 +9,18 @@ import {
   UseGuards,
   ParseUUIDPipe,
   Query,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import { ResumeSectionsService } from './resume-sections.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 
-@Controller('resume')
+@Controller('resume-sections')
 export class ResumeSectionsController {
   constructor(private readonly resumeSectionsService: ResumeSectionsService) {}
 
@@ -78,6 +85,46 @@ export class ResumeSectionsController {
   }
 
   // Skills endpoints
+  @Post('skills/upload-photo')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const uploadPath = join(process.cwd(), 'uploads', 'skills');
+          if (!existsSync(uploadPath)) {
+            mkdirSync(uploadPath, { recursive: true });
+          }
+          cb(null, uploadPath);
+        },
+        filename: (req, file, cb) => {
+          const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+        if (!allowed.includes(file.mimetype)) {
+          return cb(new BadRequestException('Only PNG, JPG, or WEBP images are allowed'), false);
+        }
+        cb(null, true);
+      },
+      limits: { fileSize: 2 * 1024 * 1024 },
+    }),
+  )
+  uploadSkillPhoto(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    // Return relative path that frontend can use (served via /uploads)
+    const relativePath = `/uploads/skills/${file.filename}`;
+    return {
+      url: relativePath,
+      filename: file.filename,
+    };
+  }
+
   @Get('skills')
   getSkills(@Query('category') category?: string) {
     return this.resumeSectionsService.getAllSkills(category);

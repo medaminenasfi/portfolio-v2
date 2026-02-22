@@ -14,6 +14,7 @@ interface DashboardStats {
   totalProjects: number;
   totalTestimonials: number;
   pendingTestimonials: number;
+  totalSkills: number;
   totalContacts: number;
   totalDownloads: number;
   currentVisitors: number;
@@ -25,6 +26,7 @@ export default function AdminDashboard() {
     totalProjects: 0,
     totalTestimonials: 0,
     pendingTestimonials: 0,
+    totalSkills: 0,
     totalContacts: 0,
     totalDownloads: 0,
     currentVisitors: 0,
@@ -40,36 +42,40 @@ export default function AdminDashboard() {
       setLoading(true);
       
       // Fetch data from backend API
-      const [projectsRes, testimonialsRes] = await Promise.all([
+      const [projectsRes, testimonialsRes, skillsRes] = await Promise.all([
         api.getPublicProjects({ limit: 1 }), // Use public endpoint
         api.getTestimonials(), // Use admin endpoint to get all testimonials
+        api.getSkills(), // Get skills data - using correct endpoint
         // Skip contact and analytics stats for now as they're causing UUID errors
       ]);
+
+      const projectsData = projectsRes as any;
+      const testimonialsData = testimonialsRes as any;
+      const skillsData = skillsRes as any;
 
       console.log('=== DASHBOARD DEBUG ==='); // Debug log
       console.log('Projects response:', projectsRes); // Debug log
       console.log('Testimonials response:', testimonialsRes); // Debug log
       console.log('Testimonials raw:', JSON.stringify(testimonialsRes, null, 2)); // Debug log
 
-      const projectsData = projectsRes as any;
-      const testimonialsData = testimonialsRes as any;
-
-      // Check different possible response structures
-      const testimonialsArray = testimonialsData.testimonials || testimonialsData.data || testimonialsData || [];
-      console.log('Testimonials array:', testimonialsArray); // Debug log
-      console.log('Testimonials array length:', testimonialsArray.length); // Debug log
-
       // Count pending testimonials
+      const testimonialsArray = testimonialsData.testimonials || testimonialsData.data || testimonialsData || [];
       const pendingTestimonials = testimonialsArray.filter(
         (t: any) => t.status === 'pending'
       );
+      console.log('Testimonials array:', testimonialsArray); // Debug log
+      console.log('Testimonials array length:', testimonialsArray.length); // Debug log
       console.log('Pending testimonials:', pendingTestimonials); // Debug log
       console.log('Pending count:', pendingTestimonials.length); // Debug log
 
+      // Count skills
+      const skillsArray = skillsData.skills || skillsData.data || skillsData || [];
+      
       setStats({
         totalProjects: projectsData.total || projectsData.projects?.length || 0,
         totalTestimonials: testimonialsArray.length,
-        pendingTestimonials: pendingTestimonials.length, // New stat for pending testimonials
+        pendingTestimonials: pendingTestimonials.length,
+        totalSkills: skillsArray.length,
         totalContacts: 0, // Temporarily disabled
         totalDownloads: 0, // Temporarily disabled
         currentVisitors: 0, // Temporarily disabled
@@ -81,6 +87,7 @@ export default function AdminDashboard() {
         totalProjects: 0,
         totalTestimonials: 0,
         pendingTestimonials: 0,
+        totalSkills: 0,
         totalContacts: 0,
         totalDownloads: 0,
         currentVisitors: 0,

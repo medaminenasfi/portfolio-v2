@@ -16,6 +16,10 @@ exports.ResumeSectionsController = void 0;
 const common_1 = require("@nestjs/common");
 const resume_sections_service_1 = require("./resume-sections.service");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const platform_express_1 = require("@nestjs/platform-express");
+const multer_1 = require("multer");
+const path_1 = require("path");
+const fs_1 = require("fs");
 let ResumeSectionsController = class ResumeSectionsController {
     constructor(resumeSectionsService) {
         this.resumeSectionsService = resumeSectionsService;
@@ -49,6 +53,16 @@ let ResumeSectionsController = class ResumeSectionsController {
     }
     reorderEducation(reorderDto) {
         return this.resumeSectionsService.reorderEducation(reorderDto);
+    }
+    uploadSkillPhoto(file) {
+        if (!file) {
+            throw new common_1.BadRequestException('No file uploaded');
+        }
+        const relativePath = `/uploads/skills/${file.filename}`;
+        return {
+            url: relativePath,
+            filename: file.filename,
+        };
     }
     getSkills(category) {
         return this.resumeSectionsService.getAllSkills(category);
@@ -179,6 +193,37 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ResumeSectionsController.prototype, "reorderEducation", null);
 __decorate([
+    (0, common_1.Post)('skills/upload-photo'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.diskStorage)({
+            destination: (req, file, cb) => {
+                const uploadPath = (0, path_1.join)(process.cwd(), 'uploads', 'skills');
+                if (!(0, fs_1.existsSync)(uploadPath)) {
+                    (0, fs_1.mkdirSync)(uploadPath, { recursive: true });
+                }
+                cb(null, uploadPath);
+            },
+            filename: (req, file, cb) => {
+                const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+                cb(null, `${uniqueSuffix}${(0, path_1.extname)(file.originalname)}`);
+            },
+        }),
+        fileFilter: (req, file, cb) => {
+            const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+            if (!allowed.includes(file.mimetype)) {
+                return cb(new common_1.BadRequestException('Only PNG, JPG, or WEBP images are allowed'), false);
+            }
+            cb(null, true);
+        },
+        limits: { fileSize: 2 * 1024 * 1024 },
+    })),
+    __param(0, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ResumeSectionsController.prototype, "uploadSkillPhoto", null);
+__decorate([
     (0, common_1.Get)('skills'),
     __param(0, (0, common_1.Query)('category')),
     __metadata("design:type", Function),
@@ -303,7 +348,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ResumeSectionsController.prototype, "getCompleteResume", null);
 exports.ResumeSectionsController = ResumeSectionsController = __decorate([
-    (0, common_1.Controller)('resume'),
+    (0, common_1.Controller)('resume-sections'),
     __metadata("design:paramtypes", [resume_sections_service_1.ResumeSectionsService])
 ], ResumeSectionsController);
 //# sourceMappingURL=resume-sections.controller.js.map

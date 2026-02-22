@@ -18,6 +18,10 @@ export declare class ResumeSectionsController {
         ids: string[];
         orderIndexes: number[];
     }): Promise<import("./entities/education.entity").Education[]>;
+    uploadSkillPhoto(file: Express.Multer.File): {
+        url: string;
+        filename: string;
+    };
     getSkills(category?: string): Promise<import("./entities/skills.entity").Skill[]>;
     createSkill(createDto: any): Promise<import("./entities/skills.entity").Skill>;
     updateSkill(id: string, updateDto: any): Promise<import("./entities/skills.entity").Skill>;

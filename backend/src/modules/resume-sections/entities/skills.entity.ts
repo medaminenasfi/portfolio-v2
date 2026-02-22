@@ -22,6 +22,9 @@ export class Skill {
   @Column()
   name!: string;
 
+  @Column({ nullable: true })
+  photo!: string; // URL or path to skill photo/icon
+
   @Column({
     type: 'enum',
     enum: SkillCategory,
