@@ -61,4 +61,5 @@ export declare class PublicProjectsController {
         page: number;
         limit: number;
     }>;
+    getProjectById(id: string): Promise<import("./entities/project.entity").Project>;
 }

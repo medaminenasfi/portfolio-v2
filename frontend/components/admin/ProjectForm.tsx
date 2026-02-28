@@ -446,6 +446,16 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
             ))}
           </select>
         </div>
+
+        <div className="pt-2">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <Checkbox
+              checked={formData.isFeatured}
+              onCheckedChange={handleCheckbox}
+            />
+            <span className="text-foreground font-medium">Featured Project</span>
+          </label>
+        </div>
       </CollapsibleSection>
 
       {/* Links */}
@@ -910,76 +920,6 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
         <Button type="button" variant="outline" onClick={addHighlight}>
           Add Highlight
         </Button>
-      </CollapsibleSection>
-
-      {/* SEO */}
-      <CollapsibleSection title="SEO Settings" defaultOpen={false}>
-        
-        <div>
-          <Label htmlFor="metaTitle">Meta Title</Label>
-          <Input
-            id="metaTitle"
-            name="metaTitle"
-            value={formData.seoData?.metaTitle || ''}
-            onChange={(e) => setFormData(prev => ({
-              ...prev,
-              seoData: { ...prev.seoData, metaTitle: e.target.value }
-            }))}
-            placeholder="SEO title for search engines"
-            className="mt-2 bg-secondary/30 border-border"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="metaDescription">Meta Description</Label>
-          <Textarea
-            id="metaDescription"
-            name="metaDescription"
-            value={formData.seoData?.metaDescription || ''}
-            onChange={(e) => setFormData(prev => ({
-              ...prev,
-              seoData: { ...prev.seoData, metaDescription: e.target.value }
-            }))}
-            placeholder="SEO description for search engines"
-            className="mt-2 bg-secondary/30 border-border min-h-20"
-          />
-        </div>
-
-        <div>
-          <Label>Keywords</Label>
-          {formData.seoData?.keywords?.map((keyword, index) => (
-            <div key={index} className="flex gap-2">
-              <Input
-                value={keyword}
-                onChange={(e) => handleKeywordsChange(index, e.target.value)}
-                placeholder="SEO keyword"
-                className="bg-secondary/30 border-border"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => removeKeyword(index)}
-              >
-                Remove
-              </Button>
-            </div>
-          )) || []}
-          <Button type="button" variant="outline" onClick={addKeyword}>
-            Add Keyword
-          </Button>
-        </div>
-      </CollapsibleSection>
-
-      {/* Settings */}
-      <CollapsibleSection title="Settings" defaultOpen={false}>
-        <label className="flex items-center gap-3 cursor-pointer">
-          <Checkbox 
-            checked={formData.isFeatured} 
-            onCheckedChange={handleCheckbox}
-          />
-          <span className="text-foreground">Featured Project</span>
-        </label>
       </CollapsibleSection>
 
       {/* Submit */}

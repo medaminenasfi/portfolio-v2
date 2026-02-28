@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { randomUUID } from 'crypto';
 import { Project, ProjectStatus, ProjectProgressStatus } from './entities/project.entity';
 import { ProjectMedia, MediaType } from './entities/project-media.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -305,52 +306,54 @@ export class ProjectsService {
         order: { order: 'DESC' },
       });
 
-      // Create media entity with explicit field assignment to avoid null/undefined issues
-      const media = this.mediaRepository.create({
-        type: mediaData.type,
-        filename: mediaData.filename,
-        originalName: mediaData.originalName,
-        mimeType: mediaData.mimeType,
-        size: mediaData.size,
-        url: mediaData.url,
-        thumbnailUrl: mediaData.thumbnailUrl,
-        videoEmbedUrl: mediaData.videoEmbedUrl,
-        metadata: mediaData.metadata,
-        project: project, // Set the project relation explicitly
-        projectId: projectId, // Set the foreign key explicitly
-        order: lastMedia ? lastMedia.order + 1 : 0,
-      });
+      // Use raw SQL INSERT to 100% bypass TypeORM relation/FK conflict
+      const newId = randomUUID();
+      const newOrder = lastMedia ? lastMedia.order + 1 : 0;
 
-      console.log('Creating media entity:', media);
-      const savedMedia = await this.mediaRepository.save(media);
-      console.log('Saved media:', savedMedia);
+      await this.mediaRepository.manager.query(
+        `INSERT INTO "project_media" 
+          ("id", "type", "filename", "originalName", "mimeType", "size", "url", "projectId", "order", "createdAt", "updatedAt")
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())`,
+        [
+          newId,
+          mediaData.type,
+          mediaData.filename,
+          mediaData.originalName,
+          mediaData.mimeType,
+          mediaData.size || 0,
+          mediaData.url,
+          projectId,
+          newOrder,
+        ]
+      );
 
-      // Prepare project updates based on category
-      let shouldUpdateProject = false;
+      console.log('Inserted media via raw SQL, id:', newId, 'projectId:', projectId);
+      const savedMedia = await this.mediaRepository.findOne({ where: { id: newId } });
+      if (!savedMedia) throw new Error('Failed to retrieve saved media after insert');
+
+      // Prepare project updates based on category - use update() NOT save() to avoid cascade issues
+      const updateData: Partial<Project> = {};
       if (mediaData.url) {
         if (category === 'banner' || (!category && mediaData.type === MediaType.IMAGE)) {
           const currentBanners = Array.isArray(project.bannerImages) ? project.bannerImages : [];
-          project.bannerImages = [...currentBanners, mediaData.url];
-          shouldUpdateProject = true;
+          updateData.bannerImages = [...currentBanners, mediaData.url];
         } else if (category === 'category') {
           const currentPhotos = Array.isArray(project.categoryPhotos) ? project.categoryPhotos : [];
-          project.categoryPhotos = [...currentPhotos, mediaData.url];
-          shouldUpdateProject = true;
+          updateData.categoryPhotos = [...currentPhotos, mediaData.url];
         } else if (category === 'video') {
-          project.videoUrl = mediaData.url;
-          shouldUpdateProject = true;
+          updateData.videoUrl = mediaData.url;
         } else if (category === 'thumbnail') {
-          project.videoThumbnail = mediaData.url;
-          shouldUpdateProject = true;
+          updateData.videoThumbnail = mediaData.url;
         }
       }
 
-      // Update project only if needed
-      if (shouldUpdateProject) {
-        await this.projectRepository.save(project);
+      // Use update() instead of save() to avoid TypeORM cascade saving media entities
+      if (Object.keys(updateData).length > 0) {
+        await this.projectRepository.update(projectId, updateData);
+        console.log('Updated project fields:', Object.keys(updateData));
       }
 
-      return savedMedia;
+      return savedMedia!;
     } catch (error) {
       console.error('Error in addMedia:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';

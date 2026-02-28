@@ -239,13 +239,16 @@ let PublicProjectsController = class PublicProjectsController {
         this.projectsService = projectsService;
     }
     getAllProjects(query) {
-        return this.projectsService.findAll({ ...query, status: 'published' });
+        return this.projectsService.findAll(query);
     }
     getFeaturedProjects(query) {
         return this.projectsService.findAll({ ...query, featured: true, status: 'published' });
     }
     getProjectsByCategory(category, query) {
         return this.projectsService.findAll({ ...query, category: category, status: 'published' });
+    }
+    getProjectById(id) {
+        return this.projectsService.findOne(id);
     }
 };
 exports.PublicProjectsController = PublicProjectsController;
@@ -271,6 +274,13 @@ __decorate([
     __metadata("design:paramtypes", [String, query_projects_dto_1.QueryProjectsDto]),
     __metadata("design:returntype", void 0)
 ], PublicProjectsController.prototype, "getProjectsByCategory", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], PublicProjectsController.prototype, "getProjectById", null);
 exports.PublicProjectsController = PublicProjectsController = __decorate([
     (0, common_1.Controller)('public/projects'),
     __metadata("design:paramtypes", [projects_service_1.ProjectsService])

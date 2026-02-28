@@ -23,6 +23,7 @@ export class PublicProjectsController {
 
   @Get()
   async findAll(@Query() query: QueryProjectsDto) {
+    // Return all projects regardless of status (for admin use)
     return this.projectsService.findAll(query);
   }
 

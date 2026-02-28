@@ -16,6 +16,7 @@ exports.ProjectsService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const crypto_1 = require("crypto");
 const project_entity_1 = require("./entities/project.entity");
 const project_media_entity_1 = require("./entities/project-media.entity");
 let ProjectsService = class ProjectsService {
@@ -217,46 +218,45 @@ let ProjectsService = class ProjectsService {
                 where: { projectId },
                 order: { order: 'DESC' },
             });
-            const media = this.mediaRepository.create({
-                type: mediaData.type,
-                filename: mediaData.filename,
-                originalName: mediaData.originalName,
-                mimeType: mediaData.mimeType,
-                size: mediaData.size,
-                url: mediaData.url,
-                thumbnailUrl: mediaData.thumbnailUrl,
-                videoEmbedUrl: mediaData.videoEmbedUrl,
-                metadata: mediaData.metadata,
-                project: project,
-                projectId: projectId,
-                order: lastMedia ? lastMedia.order + 1 : 0,
-            });
-            console.log('Creating media entity:', media);
-            const savedMedia = await this.mediaRepository.save(media);
-            console.log('Saved media:', savedMedia);
-            let shouldUpdateProject = false;
+            const newId = (0, crypto_1.randomUUID)();
+            const newOrder = lastMedia ? lastMedia.order + 1 : 0;
+            await this.mediaRepository.manager.query(`INSERT INTO "project_media" 
+          ("id", "type", "filename", "originalName", "mimeType", "size", "url", "projectId", "order", "createdAt", "updatedAt")
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())`, [
+                newId,
+                mediaData.type,
+                mediaData.filename,
+                mediaData.originalName,
+                mediaData.mimeType,
+                mediaData.size || 0,
+                mediaData.url,
+                projectId,
+                newOrder,
+            ]);
+            console.log('Inserted media via raw SQL, id:', newId, 'projectId:', projectId);
+            const savedMedia = await this.mediaRepository.findOne({ where: { id: newId } });
+            if (!savedMedia)
+                throw new Error('Failed to retrieve saved media after insert');
+            const updateData = {};
             if (mediaData.url) {
                 if (category === 'banner' || (!category && mediaData.type === project_media_entity_1.MediaType.IMAGE)) {
                     const currentBanners = Array.isArray(project.bannerImages) ? project.bannerImages : [];
-                    project.bannerImages = [...currentBanners, mediaData.url];
-                    shouldUpdateProject = true;
+                    updateData.bannerImages = [...currentBanners, mediaData.url];
                 }
                 else if (category === 'category') {
                     const currentPhotos = Array.isArray(project.categoryPhotos) ? project.categoryPhotos : [];
-                    project.categoryPhotos = [...currentPhotos, mediaData.url];
-                    shouldUpdateProject = true;
+                    updateData.categoryPhotos = [...currentPhotos, mediaData.url];
                 }
                 else if (category === 'video') {
-                    project.videoUrl = mediaData.url;
-                    shouldUpdateProject = true;
+                    updateData.videoUrl = mediaData.url;
                 }
                 else if (category === 'thumbnail') {
-                    project.videoThumbnail = mediaData.url;
-                    shouldUpdateProject = true;
+                    updateData.videoThumbnail = mediaData.url;
                 }
             }
-            if (shouldUpdateProject) {
-                await this.projectRepository.save(project);
+            if (Object.keys(updateData).length > 0) {
+                await this.projectRepository.update(projectId, updateData);
+                console.log('Updated project fields:', Object.keys(updateData));
             }
             return savedMedia;
         }

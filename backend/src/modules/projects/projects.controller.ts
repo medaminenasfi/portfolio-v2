@@ -184,7 +184,8 @@ export class PublicProjectsController {
 
   @Get()
   getAllProjects(@Query() query: QueryProjectsDto) {
-    return this.projectsService.findAll({ ...query, status: 'published' as any });
+    // Return all projects regardless of status (for frontend to show all projects)
+    return this.projectsService.findAll(query);
   }
 
   @Get('featured')
@@ -198,5 +199,11 @@ export class PublicProjectsController {
     @Query() query: QueryProjectsDto,
   ) {
     return this.projectsService.findAll({ ...query, category: category as any, status: 'published' as any });
+  }
+
+  @Get(':id')
+  getProjectById(@Param('id', ParseUUIDPipe) id: string) {
+    // Return any project by ID regardless of status
+    return this.projectsService.findOne(id);
   }
 }

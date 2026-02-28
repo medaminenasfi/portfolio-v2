@@ -2,9 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Search } from 'lucide-react';
+import { ArrowRight, Search, ExternalLink, Github } from 'lucide-react';
 import Navigation from '@/components/portfolio/Navigation';
 import Footer from '@/components/portfolio/Footer';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:3000';
+
+function getImageUrl(path: string | undefined): string {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  return `${API_BASE}${path}`;
+}
 
 interface Project {
   id: string;
@@ -17,6 +25,8 @@ interface Project {
   liveDemoUrl?: string;
   githubRepoUrl?: string;
   status?: string;
+  bannerImages?: string[];
+  categoryPhotos?: string[];
   created_at: string;
 }
 
@@ -32,14 +42,9 @@ export default function AllProjectsPage() {
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/public/projects');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+      const response = await fetch(`${apiUrl}/public/projects?limit=100`);
       const data = await response.json();
-      console.log('Projects page - Raw data:', data); // Debug log
-      console.log('Projects page - Projects:', data.projects); // Debug log
-      console.log('Projects page - Count:', data.projects?.length); // Debug log
-      console.log('Project 0:', data.projects?.[0]); // Debug log
-      
-      // Show all projects on public site (remove published filter)
       setProjects(data.projects || []);
     } catch (error) {
       console.error('Failed to fetch projects:', error);
@@ -47,6 +52,13 @@ export default function AllProjectsPage() {
       setLoading(false);
     }
   };
+
+  function getProjectImage(project: Project): string {
+    const photos = project.categoryPhotos?.filter(Boolean) || [];
+    const banners = project.bannerImages?.filter(Boolean) || [];
+    const first = photos[0] || banners[0];
+    return first ? getImageUrl(first) : '';
+  }
 
   const categories = ['All', ...new Set(projects.map(p => p.category))];
   
@@ -118,48 +130,92 @@ export default function AllProjectsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredProjects.map((project) => (
+              {filteredProjects.map((project) => {
+                const imageUrl = getProjectImage(project);
+                return (
                 <Link key={project.id} href={`/projects/${project.id}`}>
-                  <div className="group h-full p-6 bg-gradient-to-br from-slate-900/50 to-slate-800/50 border border-cyan-500/20 rounded-xl hover:border-cyan-500/60 hover:from-slate-900/70 hover:to-slate-800/70 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10 cursor-pointer">
-                    <div className="flex items-start justify-between mb-4">
-                      <span className="px-3 py-1 bg-cyan-500/20 text-cyan-300 rounded-full text-xs font-semibold border border-cyan-500/30">
-                        {project.category}
-                      </span>
-                      {project.isFeatured && (
-                        <span className="px-3 py-1 bg-violet-500/20 text-violet-300 rounded-full text-xs font-semibold border border-violet-500/30">
-                          Featured
-                        </span>
+                  <div className="group h-full bg-gradient-to-br from-slate-900/50 to-slate-800/50 border border-cyan-500/20 rounded-xl hover:border-cyan-500/60 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10 cursor-pointer overflow-hidden flex flex-col">
+                    
+                    {/* Project Image */}
+                    <div className="relative h-48 bg-secondary/30 overflow-hidden flex-shrink-0">
+                      {imageUrl ? (
+                        <>
+                          <img
+                            src={imageUrl}
+                            alt={project.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).parentElement!.classList.add('hidden');
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </>
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-violet-500/10 flex items-center justify-center">
+                          <span className="text-4xl font-bold text-cyan-500/20">{project.category}</span>
+                        </div>
                       )}
+                      {/* Badges overlay on image */}
+                      <div className="absolute top-3 left-3 flex gap-2">
+                        <span className="px-2 py-1 bg-black/60 backdrop-blur text-cyan-300 rounded-full text-xs font-semibold border border-cyan-500/30">
+                          {project.category}
+                        </span>
+                        {project.isFeatured && (
+                          <span className="px-2 py-1 bg-black/60 backdrop-blur text-violet-300 rounded-full text-xs font-semibold border border-violet-500/30">
+                            Featured
+                          </span>
+                        )}
+                      </div>
                     </div>
 
-                    <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-cyan-400 transition-colors line-clamp-2">
-                      {project.title}
-                    </h3>
+                    {/* Project Content */}
+                    <div className="p-6 flex flex-col flex-1">
+                      <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-cyan-400 transition-colors line-clamp-2">
+                        {project.title}
+                      </h3>
 
-                    <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
-                      {project.shortSummary}
-                    </p>
+                      <p className="text-muted-foreground text-sm mb-4 line-clamp-2 flex-1">
+                        {project.shortSummary}
+                      </p>
 
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {(project.techStack || []).slice(0, 3).map((tech: string, idx: number) => (
-                        <span key={idx} className="text-xs bg-cyan-500/10 text-cyan-300 px-2 py-1 rounded border border-cyan-500/30">
-                          {tech}
-                        </span>
-                      ))}
-                      {(project.techStack || []).length > 3 && (
-                        <span className="text-xs bg-cyan-500/10 text-cyan-300 px-2 py-1 rounded border border-cyan-500/30">
-                          +{(project.techStack || []).length - 3}
-                        </span>
-                      )}
-                    </div>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {(project.techStack || []).slice(0, 3).map((tech: string, idx: number) => (
+                          <span key={idx} className="text-xs bg-cyan-500/10 text-cyan-300 px-2 py-1 rounded border border-cyan-500/30">
+                            {tech}
+                          </span>
+                        ))}
+                        {(project.techStack || []).length > 3 && (
+                          <span className="text-xs bg-cyan-500/10 text-cyan-300 px-2 py-1 rounded border border-cyan-500/30">
+                            +{(project.techStack || []).length - 3}
+                          </span>
+                        )}
+                      </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-cyan-500/20">
-                      <span className="text-sm text-muted-foreground">View details</span>
-                      <ArrowRight className="w-4 h-4 text-cyan-400 group-hover:translate-x-1 transition-transform" />
+                      <div className="flex items-center justify-between pt-4 border-t border-cyan-500/20">
+                        <div className="flex items-center gap-3">
+                          {project.liveDemoUrl && (
+                            <span onClick={(e) => { e.preventDefault(); window.open(project.liveDemoUrl, '_blank'); }}
+                              className="flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300">
+                              <ExternalLink className="w-3 h-3" /> Demo
+                            </span>
+                          )}
+                          {project.githubRepoUrl && (
+                            <span onClick={(e) => { e.preventDefault(); window.open(project.githubRepoUrl, '_blank'); }}
+                              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+                              <Github className="w-3 h-3" /> Code
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground group-hover:text-cyan-400">
+                          <span>Details</span>
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </Link>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
