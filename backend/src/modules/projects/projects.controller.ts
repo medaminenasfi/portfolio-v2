@@ -118,6 +118,7 @@ export class ProjectsController {
   async uploadMedia(
     @Param('id', ParseUUIDPipe) projectId: string,
     @UploadedFile() file: Express.Multer.File,
+    @Body('category') category?: string,
   ) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
@@ -134,7 +135,8 @@ export class ProjectsController {
       url: `/uploads/projects/${file.filename}`,
     };
 
-    return this.projectsService.addMedia(projectId, mediaData);
+    const categoryType = category === 'category' ? 'category' : 'banner';
+    return this.projectsService.addMedia(projectId, mediaData, categoryType);
   }
 
   @Patch(':id/media/order')

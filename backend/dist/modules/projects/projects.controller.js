@@ -59,7 +59,7 @@ let ProjectsController = class ProjectsController {
     bulkFeature(bulkFeatureDto) {
         return this.projectsService.bulkFeature(bulkFeatureDto);
     }
-    async uploadMedia(projectId, file) {
+    async uploadMedia(projectId, file, category) {
         if (!file) {
             throw new common_1.BadRequestException('No file uploaded');
         }
@@ -72,7 +72,8 @@ let ProjectsController = class ProjectsController {
             size: file.size,
             url: `/uploads/projects/${file.filename}`,
         };
-        return this.projectsService.addMedia(projectId, mediaData);
+        const categoryType = category === 'category' ? 'category' : 'banner';
+        return this.projectsService.addMedia(projectId, mediaData, categoryType);
     }
     updateMediaOrder(projectId, mediaOrders) {
         return this.projectsService.updateMediaOrder(projectId, mediaOrders);
@@ -187,8 +188,9 @@ __decorate([
     })),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.UploadedFile)()),
+    __param(2, (0, common_1.Body)('category')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, Object, String]),
     __metadata("design:returntype", Promise)
 ], ProjectsController.prototype, "uploadMedia", null);
 __decorate([

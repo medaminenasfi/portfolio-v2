@@ -34,11 +34,15 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
-    console.log(`[AUTH] Login attempt: ${loginDto.username}`);
+    console.log('[AUTH] Login attempt received');
+    console.log('[AUTH] Request body:', JSON.stringify(loginDto, null, 2));
+    console.log(`[AUTH] Login attempt username: ${loginDto.username}`);
     
     // Validate input
     if (!loginDto.username || !loginDto.password) {
       console.error('[AUTH] Login failed: Missing credentials');
+      console.error('[AUTH] username:', loginDto.username);
+      console.error('[AUTH] password:', loginDto.password ? '***present***' : '***missing***');
       throw new BadRequestException('Username and password are required');
     }
     

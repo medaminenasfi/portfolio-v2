@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Star, Quote } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { api } from '@/lib/api';
 import TestimonialForm from './TestimonialForm';
 
 interface Testimonial {
@@ -28,23 +29,9 @@ export default function TestimonialsSection() {
 
   const fetchTestimonials = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/public/testimonials');
-      const data = await response.json();
-      console.log('=== PUBLIC TESTIMONIALS DEBUG ==='); // Debug log
-      console.log('Raw response:', data); // Debug log
-      console.log('Response JSON:', JSON.stringify(data, null, 2)); // Debug log
-      
-      // The public endpoint should already return only approved testimonials
-      // But let's ensure we're handling the data correctly
-      const testimonials = data.testimonials || data.data || data || [];
-      console.log('Testimonials array:', testimonials); // Debug log
-      console.log('Testimonials count:', testimonials.length); // Debug log
-      
-      if (testimonials.length > 0) {
-        console.log('Sample testimonial:', JSON.stringify(testimonials[0], null, 2)); // Debug log
-      }
-      
-      setTestimonials(testimonials);
+      const data: any = await api.getPublicTestimonials();
+      const testimonialsData = data.testimonials || data.data || [];
+      setTestimonials(testimonialsData);
     } catch (error) {
       console.error('Failed to fetch testimonials:', error);
     } finally {

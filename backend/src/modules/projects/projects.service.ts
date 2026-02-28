@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { Project, ProjectStatus, ProjectProgressStatus } from './entities/project.entity';
-import { ProjectMedia } from './entities/project-media.entity';
+import { ProjectMedia, MediaType } from './entities/project-media.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { QueryProjectsDto } from './dto/query-projects.dto';
@@ -292,7 +292,7 @@ export class ProjectsService {
   }
 
   // Media management
-  async addMedia(projectId: string, mediaData: Partial<ProjectMedia>): Promise<ProjectMedia> {
+  async addMedia(projectId: string, mediaData: Partial<ProjectMedia>, category?: 'banner' | 'category'): Promise<ProjectMedia> {
     const project = await this.findOne(projectId);
     
     // Get the highest order number for this project
@@ -307,7 +307,20 @@ export class ProjectsService {
       order: lastMedia ? lastMedia.order + 1 : 0,
     });
 
-    return await this.mediaRepository.save(media);
+    const savedMedia = await this.mediaRepository.save(media);
+
+    // Also add to bannerImages or categoryPhotos array based on category
+    if (mediaData.url) {
+      if (category === 'banner' || (!category && mediaData.type === MediaType.IMAGE)) {
+        project.bannerImages = [...(project.bannerImages || []), mediaData.url];
+        await this.projectRepository.save(project);
+      } else if (category === 'category') {
+        project.categoryPhotos = [...(project.categoryPhotos || []), mediaData.url];
+        await this.projectRepository.save(project);
+      }
+    }
+
+    return savedMedia;
   }
 
   async updateMediaOrder(projectId: string, mediaOrders: { id: string; order: number }[]): Promise<ProjectMedia[]> {

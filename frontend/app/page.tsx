@@ -4,6 +4,9 @@ import Hero from '@/components/portfolio/Hero';
 import AboutSection from '@/components/portfolio/AboutSection';
 import ProjectsSection from '@/components/portfolio/ProjectsSection';
 import ExperienceSection from '@/components/portfolio/ExperienceSection';
+import EducationSection from '@/components/portfolio/EducationSection';
+import CertificationsSection from '@/components/portfolio/CertificationsSection';
+import LanguagesSection from '@/components/portfolio/LanguagesSection';
 import SkillsSection from '@/components/portfolio/SkillsSection';
 import TestimonialsSection from '@/components/portfolio/TestimonialsSection';
 import Navigation from '@/components/portfolio/Navigation';
@@ -31,6 +34,12 @@ export default function Page() {
       <div id="experience" className="scroll-mt-20">
         <ExperienceSection />
       </div>
+      
+      <EducationSection />
+      
+      <CertificationsSection />
+      
+      <LanguagesSection />
       
       <div id="skills" className="scroll-mt-20">
         <SkillsSection />

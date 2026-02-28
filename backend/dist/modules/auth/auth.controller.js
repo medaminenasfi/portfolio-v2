@@ -32,9 +32,13 @@ let AuthController = class AuthController {
         return this.authService.register(registerDto);
     }
     async login(loginDto) {
-        console.log(`[AUTH] Login attempt: ${loginDto.username}`);
+        console.log('[AUTH] Login attempt received');
+        console.log('[AUTH] Request body:', JSON.stringify(loginDto, null, 2));
+        console.log(`[AUTH] Login attempt username: ${loginDto.username}`);
         if (!loginDto.username || !loginDto.password) {
             console.error('[AUTH] Login failed: Missing credentials');
+            console.error('[AUTH] username:', loginDto.username);
+            console.error('[AUTH] password:', loginDto.password ? '***present***' : '***missing***');
             throw new common_1.BadRequestException('Username and password are required');
         }
         const user = await this.authService.validateUser(loginDto.username, loginDto.password);

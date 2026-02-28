@@ -36,7 +36,7 @@ export declare class ProjectsService {
     }>;
     private getCategoryStats;
     private getDifficultyStats;
-    addMedia(projectId: string, mediaData: Partial<ProjectMedia>): Promise<ProjectMedia>;
+    addMedia(projectId: string, mediaData: Partial<ProjectMedia>, category?: 'banner' | 'category'): Promise<ProjectMedia>;
     updateMediaOrder(projectId: string, mediaOrders: {
         id: string;
         order: number;

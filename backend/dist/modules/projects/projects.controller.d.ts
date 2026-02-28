@@ -32,7 +32,7 @@ export declare class ProjectsController {
     bulkPublish(bulkPublishDto: BulkPublishDto): Promise<import("./entities/project.entity").Project[]>;
     bulkDelete(bulkDeleteDto: BulkDeleteDto): Promise<void>;
     bulkFeature(bulkFeatureDto: BulkFeatureDto): Promise<import("./entities/project.entity").Project[]>;
-    uploadMedia(projectId: string, file: Express.Multer.File): Promise<ProjectMedia>;
+    uploadMedia(projectId: string, file: Express.Multer.File, category?: string): Promise<ProjectMedia>;
     updateMediaOrder(projectId: string, mediaOrders: {
         id: string;
         order: number;

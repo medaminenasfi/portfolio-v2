@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { api } from '@/lib/api';
 
 interface Project {
   id: string;
@@ -28,33 +29,19 @@ export default function ProjectsSection() {
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/public/projects');
-      const data = await response.json();
-      console.log('ProjectsSection - Raw data:', data); // Debug log
-      console.log('ProjectsSection - Projects:', data.projects); // Debug log
-      console.log('ProjectsSection - Count:', data.projects?.length); // Debug log
-      console.log('Sample project:', data.projects?.[0]); // Debug log
+      const data: any = await api.getPublicProjects();
+      console.log('ProjectsSection - Raw data:', data);
       
-      // Check if projects have bannerImages or categoryPhotos
-      if (data.projects && data.projects.length > 0) {
-        const sampleProject = data.projects[0];
-        console.log('Sample project fields:', Object.keys(sampleProject));
-        console.log('Has bannerImages:', !!sampleProject.bannerImages, 'Length:', sampleProject.bannerImages?.length || 0);
-        console.log('Has categoryPhotos:', !!sampleProject.categoryPhotos, 'Length:', sampleProject.categoryPhotos?.length || 0);
-      }
+      const projectsData = data.projects || [];
       
       // Sort projects to show ones with images first
-      const sortedProjects = (data.projects || []).sort((a: any, b: any) => {
+      const sortedProjects = projectsData.sort((a: any, b: any) => {
         const aHasImages = (a.bannerImages && a.bannerImages.length > 0) || (a.categoryPhotos && a.categoryPhotos.length > 0);
         const bHasImages = (b.bannerImages && b.bannerImages.length > 0) || (b.categoryPhotos && b.categoryPhotos.length > 0);
         if (aHasImages && !bHasImages) return -1;
         if (!aHasImages && bHasImages) return 1;
         return 0;
       });
-      
-      console.log('Projects data:', data.projects); // Debug log
-      console.log('Sorted projects:', sortedProjects); // Debug log
-      console.log('Project 0:', sortedProjects[0]); // Debug log
       
       setProjects(sortedProjects);
     } catch (error) {

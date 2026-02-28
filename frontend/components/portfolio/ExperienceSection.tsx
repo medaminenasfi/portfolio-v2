@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
 
 interface Experience {
   id: string;
@@ -17,7 +18,6 @@ export default function ExperienceSection() {
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
   useEffect(() => {
     fetchExperience();
@@ -26,13 +26,7 @@ export default function ExperienceSection() {
   const fetchExperience = async () => {
     try {
       setError(null);
-      const response = await fetch(`${apiBaseUrl}/resume-sections/work-experience`, {
-        cache: 'no-store',
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to fetch experience (${response.status})`);
-      }
-      const data = await response.json();
+      const data: any = await api.getWorkExperience();
       const experiencesData = Array.isArray(data) ? data : data?.data || [];
       setExperiences(experiencesData);
     } catch (error) {

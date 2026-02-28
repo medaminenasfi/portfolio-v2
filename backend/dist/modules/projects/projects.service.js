@@ -208,7 +208,7 @@ let ProjectsService = class ProjectsService {
             return acc;
         }, {});
     }
-    async addMedia(projectId, mediaData) {
+    async addMedia(projectId, mediaData, category) {
         const project = await this.findOne(projectId);
         const lastMedia = await this.mediaRepository.findOne({
             where: { projectId },
@@ -219,7 +219,18 @@ let ProjectsService = class ProjectsService {
             projectId,
             order: lastMedia ? lastMedia.order + 1 : 0,
         });
-        return await this.mediaRepository.save(media);
+        const savedMedia = await this.mediaRepository.save(media);
+        if (mediaData.url) {
+            if (category === 'banner' || (!category && mediaData.type === project_media_entity_1.MediaType.IMAGE)) {
+                project.bannerImages = [...(project.bannerImages || []), mediaData.url];
+                await this.projectRepository.save(project);
+            }
+            else if (category === 'category') {
+                project.categoryPhotos = [...(project.categoryPhotos || []), mediaData.url];
+                await this.projectRepository.save(project);
+            }
+        }
+        return savedMedia;
     }
     async updateMediaOrder(projectId, mediaOrders) {
         await Promise.all(mediaOrders.map(({ id, order }) => this.mediaRepository.update(id, { order })));

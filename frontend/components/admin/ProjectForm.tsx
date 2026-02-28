@@ -296,11 +296,11 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
           ...formData.seoData,
           keywords: formData.seoData?.keywords?.filter(k => k.trim()) || [],
         },
-        // Don't include file arrays in initial submission
-        bannerImages: [],
-        categoryPhotos: [],
-        videoUrl: '',
-        videoThumbnail: '',
+        // Preserve existing photos - only reset if they are blob URLs (new uploads)
+        bannerImages: formData.bannerImages?.filter((url: string) => !url.startsWith('blob:')) || [],
+        categoryPhotos: formData.categoryPhotos?.filter((url: string) => !url.startsWith('blob:')) || [],
+        videoUrl: formData.videoUrl && !formData.videoUrl.startsWith('blob:') ? formData.videoUrl : '',
+        videoThumbnail: formData.videoThumbnail && !formData.videoThumbnail.startsWith('blob:') ? formData.videoThumbnail : '',
       };
 
       let createdProject;
@@ -347,23 +347,10 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
 
   // Helper function to upload files
   const uploadFile = async (projectId: string, file: File, type: string) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', type);
-
     try {
-      const response = await fetch(`http://localhost:3000/api/public/projects/${projectId}/media`, {
-        method: 'POST',
-        body: formData,
-        // Note: Don't set Content-Type header when using FormData
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Upload failed: ${response.statusText}`);
-      }
-
-      const result = await response.json();
+      // Determine category based on type
+      const category = type === 'category' ? 'category' : 'banner';
+      const result = await api.uploadProjectMedia(projectId, file, category);
       console.log(`Uploaded ${type} file:`, result);
       return result;
     } catch (error) {
@@ -505,10 +492,41 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
             }}
             className="mt-2 bg-secondary/30 border-border"
           />
+          {/* Show existing banner images */}
+          {formData.bannerImages && formData.bannerImages.length > 0 && (
+            <div className="mt-4">
+              <div className="text-sm text-muted-foreground mb-2">
+                Existing Banner Images ({formData.bannerImages.length}):
+              </div>
+              <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                {formData.bannerImages.map((url, idx) => (
+                  <div key={idx} className="relative group">
+                    <img
+                      src={url.startsWith('http') ? url : `http://localhost:3000${url}`}
+                      alt={`Banner ${idx + 1}`}
+                      className="w-full h-20 object-cover rounded border border-border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newImages = formData.bannerImages?.filter((_, i) => i !== idx);
+                        setFormData(prev => ({ ...prev, bannerImages: newImages }));
+                      }}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Show new banner file previews */}
           {bannerFiles.length > 0 && (
-            <div className="mt-2">
+            <div className="mt-4">
               <div className="text-sm text-foreground mb-2">
-                {bannerFiles.length} file(s) selected: {bannerFiles.map(f => f.name).join(', ')}
+                New Banner Images to Upload ({bannerFiles.length}):
               </div>
               <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
                 {bannerFiles.map((file, idx) => (
@@ -523,8 +541,6 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
                       onClick={() => {
                         const newFiles = bannerFiles.filter((_, i) => i !== idx);
                         setBannerFiles(newFiles);
-                        const fileNames = newFiles.map(f => URL.createObjectURL(f));
-                        setFormData(prev => ({ ...prev, bannerImages: fileNames }));
                       }}
                       className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition"
                     >
@@ -553,10 +569,41 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
             }}
             className="mt-2 bg-secondary/30 border-border"
           />
+          {/* Show existing category photos */}
+          {formData.categoryPhotos && formData.categoryPhotos.length > 0 && (
+            <div className="mt-4">
+              <div className="text-sm text-muted-foreground mb-2">
+                Existing Category Photos ({formData.categoryPhotos.length}):
+              </div>
+              <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                {formData.categoryPhotos.map((url, idx) => (
+                  <div key={idx} className="relative group">
+                    <img
+                      src={url.startsWith('http') ? url : `http://localhost:3000${url}`}
+                      alt={`Category photo ${idx + 1}`}
+                      className="w-full h-20 object-cover rounded border border-border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newImages = formData.categoryPhotos?.filter((_, i) => i !== idx);
+                        setFormData(prev => ({ ...prev, categoryPhotos: newImages }));
+                      }}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Show new category photo previews */}
           {categoryPhotos.length > 0 && (
-            <div className="mt-2">
+            <div className="mt-4">
               <div className="text-sm text-foreground mb-2">
-                {categoryPhotos.length} photo(s) selected: {categoryPhotos.map(f => f.name).join(', ')}
+                New Category Photos to Upload ({categoryPhotos.length}):
               </div>
               <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
                 {categoryPhotos.map((file, idx) => (
@@ -571,8 +618,6 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
                       onClick={() => {
                         const newFiles = categoryPhotos.filter((_, i) => i !== idx);
                         setCategoryPhotos(newFiles);
-                        const fileNames = newFiles.map(f => URL.createObjectURL(f));
-                        setFormData(prev => ({ ...prev, categoryPhotos: fileNames }));
                       }}
                       className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition"
                     >

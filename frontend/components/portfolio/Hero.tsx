@@ -4,30 +4,40 @@ import { useState, useEffect } from 'react';
 import { Download } from 'lucide-react';
 import { api } from '@/lib/api';
 
+interface TechStack {
+  id: string;
+  name: string;
+  category: string;
+}
+
 export default function Hero() {
   const [resumeInfo, setResumeInfo] = useState<any>(null);
+  const [techStack, setTechStack] = useState<TechStack[]>([]);
   const [loading, setLoading] = useState(true);
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
   useEffect(() => {
-    const fetchResumeInfo = async () => {
+    const fetchData = async () => {
       try {
-        const info = await api.getCurrentResumeInfo();
-        setResumeInfo(info);
+        const [resumeInfo, techData] = await Promise.all([
+          api.getCurrentResumeInfo(),
+          fetch(`${apiBaseUrl}/tech-stack?showOnHomepage=true`).then(r => r.ok ? r.json() : []),
+        ]);
+        setResumeInfo(resumeInfo);
+        const techStackData = Array.isArray(techData) ? techData : techData?.data || [];
+        setTechStack(techStackData.slice(0, 8)); // Limit to 8 items
       } catch (error) {
-        // This should not happen now since we handle it in the API client
-        console.log('Error fetching resume info:', error);
+        console.log('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchResumeInfo();
+    fetchData();
   }, []);
 
   const handleDownloadCV = () => {
-    if (resumeInfo) {
-      window.open('http://localhost:3000/api/resume/download', '_blank');
-    }
+    window.open('http://localhost:3000/api/resume/download', '_blank');
   };
 
   return (
@@ -71,23 +81,28 @@ export default function Hero() {
         <div className="mt-16 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground mb-4">TECHNOLOGIES I WORK WITH</p>
           <div className="flex flex-wrap justify-center gap-3">
-            {[
-              'React',
-              'Node.js',
-              'TypeScript',
-              'MongoDB',
-              'PostgreSQL',
-              'Express',
-              'Next.js',
-              'AWS',
-            ].map((tech) => (
-              <span
-                key={tech}
-                className="px-4 py-2 bg-secondary text-accent rounded-full text-sm font-medium"
-              >
-                {tech}
-              </span>
-            ))}
+            {techStack.length > 0 ? (
+              techStack.map((tech) => (
+                <span
+                  key={tech.id}
+                  className="px-4 py-2 bg-secondary text-accent rounded-full text-sm font-medium"
+                >
+                  {tech.name}
+                </span>
+              ))
+            ) : (
+              // Fallback static data if API returns empty
+              <>
+                {['React', 'Node.js', 'TypeScript', 'MongoDB', 'PostgreSQL', 'Express', 'Next.js', 'AWS'].map((tech) => (
+                  <span
+                    key={tech}
+                    className="px-4 py-2 bg-secondary text-accent rounded-full text-sm font-medium"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </>
+            )}
           </div>
         </div>
       </div>

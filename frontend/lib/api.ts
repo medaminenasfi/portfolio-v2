@@ -29,17 +29,23 @@ export class ApiClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    isFormData: boolean = false
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      'Content-Type': isFormData ? 'multipart/form-data' : 'application/json',
       ...(options.headers as Record<string, string>),
     };
 
     // Add authorization header if token exists
     if (this.token) {
       headers.Authorization = `Bearer ${this.token}`;
+    }
+
+    // Don't set Content-Type header for FormData - let browser set it with boundary
+    if (isFormData) {
+      delete headers['Content-Type'];
     }
 
     const config: RequestInit = {
@@ -187,15 +193,18 @@ export class ApiClient {
     });
   }
 
-  async uploadProjectMedia(projectId: string, file: File) {
+  async uploadProjectMedia(projectId: string, file: File, category?: string) {
     const formData = new FormData();
     formData.append('file', file);
+    if (category) {
+      formData.append('category', category);
+    }
     
     return this.request(`/projects/${projectId}/media`, {
       method: 'POST',
       body: formData,
       headers: {}, // Let browser set Content-Type for FormData
-    });
+    }, true); // isFormData = true
   }
 
   async updateProjectMediaOrder(projectId: string, mediaOrders: { id: string; order: number }[]) {
@@ -268,55 +277,11 @@ export class ApiClient {
     formData.append('title', metadata.title);
     formData.append('description', metadata.description);
 
-    const url = `${this.baseURL}/resume/upload`;
-    const headers: Record<string, string> = {};
-
-    // Add authorization header if token exists
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
-    }
-
-    console.log('Upload attempt - File:', file.name, 'Size:', file.size, 'Type:', file.type);
-    console.log('Upload URL:', url);
-    console.log('Has token:', !!this.token);
-
-    const response = await fetch(url, {
+    return this.request('/resume/upload', {
       method: 'POST',
       body: formData,
-      headers,
-      mode: 'cors',
-      credentials: 'omit',
-    });
-
-    console.log(`API Request: POST ${url}`);
-    console.log(`API Response: ${response.status} ${response.statusText}`);
-
-    // Handle 401 Unauthorized
-    if (response.status === 401) {
-      this.clearToken();
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-      throw new Error('Unauthorized - Please login again');
-    }
-
-    // Handle other HTTP errors
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.message || errorData.error || `HTTP ${response.status}: ${response.statusText}`;
-      console.error('API Error:', errorMessage);
-      console.error('Full error response:', errorData);
-      console.error('Response status:', response.status);
-      throw new Error(errorMessage);
-    }
-
-    // Handle successful response
-    const text = await response.text();
-    if (!text) {
-      return {} as any;
-    }
-
-    return JSON.parse(text);
+      headers: {}, // Let browser set Content-Type for FormData
+    }, true); // isFormData = true
   }
 
   async updateResume(id: string, metadata: any) {
@@ -407,7 +372,7 @@ export class ApiClient {
       method: 'POST',
       body: formData,
       headers: {}, // Let browser set Content-Type for FormData
-    });
+    }, true); // isFormData = true
   }
 
   // Contact endpoints
