@@ -3,7 +3,17 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { api } from '@/lib/api';
+import { api, API_BASE_URL } from '@/lib/api';
+
+// Helper to get full image URL
+const getImageUrl = (path: string | undefined): string => {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  const backendUrl = API_BASE_URL.replace('/api', '');
+  return `${backendUrl}${path}`;
+};
 
 interface Project {
   id: string;
@@ -80,7 +90,7 @@ export default function ProjectsSection() {
                       <>
                         {project.categoryPhotos && project.categoryPhotos.length > 0 ? (
                           <img
-                            src={project.categoryPhotos[0].startsWith('http') ? project.categoryPhotos[0] : `http://localhost:3000${project.categoryPhotos[0]}`}
+                            src={getImageUrl(project.categoryPhotos[0])}
                             alt={project.title}
                             className="w-full h-full object-cover"
                             onError={(e) => {
@@ -89,7 +99,7 @@ export default function ProjectsSection() {
                           />
                         ) : (
                           <img
-                            src={project.bannerImages![0].startsWith('http') ? project.bannerImages![0] : `http://localhost:3000${project.bannerImages![0]}`}
+                            src={getImageUrl(project.bannerImages![0])}
                             alt={project.title}
                             className="w-full h-full object-cover"
                             onError={(e) => {

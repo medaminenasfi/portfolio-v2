@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, LogOut } from 'lucide-react';
+import { Plus, LogOut, TrendingUp, BarChart3, Clock, Code } from 'lucide-react';
 import DashboardStats from '@/components/admin/DashboardStats';
 import RecentProjects from '@/components/admin/RecentProjects';
+import DashboardSkills from '@/components/admin/DashboardSkills';
 import { api } from '@/lib/api';
 
 interface DashboardStats {
@@ -33,9 +34,19 @@ export default function AdminDashboard() {
   });
   const [loading, setLoading] = useState(true);
 
+  const [currentTime, setCurrentTime] = useState<string>('');
+
   useEffect(() => {
     fetchDashboardStats();
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
   }, []);
+
+  const updateTime = () => {
+    const now = new Date();
+    setCurrentTime(now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+  };
 
   const fetchDashboardStats = async () => {
     try {
@@ -107,32 +118,88 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-6 md:space-y-8 w-full">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="space-y-8 w-full">
+      {/* Header Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground mt-2 text-sm md:text-base">Welcome back to your portfolio admin</p>
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-2">Dashboard</h1>
+          <p className="text-muted-foreground text-lg">Manage your portfolio content and analytics</p>
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row gap-3 justify-start md:justify-end">
           <Link href="/admin/projects/new" className="flex-1 sm:flex-none">
             <Button className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-slate-900 hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 font-semibold gap-2 w-full justify-center">
-              <Plus className="h-4 w-4" />
+              <Plus className="h-5 w-5" />
               New Project
             </Button>
           </Link>
           <Button 
             onClick={handleLogout}
             variant="outline"
-            className="flex-1 sm:flex-none"
+            className="flex-1 sm:flex-none border-muted-foreground/20 hover:border-red-500/40 hover:text-red-400 transition-all"
           >
-            <LogOut className="h-4 w-4 mr-2" />
+            <LogOut className="h-5 w-5 mr-2" />
             Logout
           </Button>
         </div>
       </div>
 
-      <DashboardStats stats={stats} loading={loading} />
-      <RecentProjects />
+      {/* Stats Section */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <BarChart3 className="text-cyan-400 w-5 h-5" />
+          <h2 className="text-xl font-semibold text-foreground">Overview</h2>
+        </div>
+        <DashboardStats stats={stats} loading={loading} />
+      </div>
+
+      {/* Quick Stats Info */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="p-6 bg-gradient-to-br from-slate-800/40 to-slate-900/40 border border-cyan-500/20 hover:border-cyan-500/40 transition-all">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-muted-foreground text-sm font-medium">Last Updated</p>
+              <p className="text-2xl font-bold text-foreground mt-2">{currentTime}</p>
+            </div>
+            <Clock className="text-cyan-400 w-10 h-10 opacity-30" />
+          </div>
+        </Card>
+        <Card className="p-6 bg-gradient-to-br from-slate-800/40 to-slate-900/40 border border-cyan-500/20 hover:border-cyan-500/40 transition-all">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-muted-foreground text-sm font-medium">Portfolio Status</p>
+              <p className="text-2xl font-bold text-green-400 mt-2">Published</p>
+            </div>
+            <TrendingUp className="text-green-400 w-10 h-10 opacity-30" />
+          </div>
+        </Card>
+        <Card className="p-6 bg-gradient-to-br from-slate-800/40 to-slate-900/40 border border-cyan-500/20 hover:border-cyan-500/40 transition-all">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-muted-foreground text-sm font-medium">Content Items</p>
+              <p className="text-2xl font-bold text-cyan-400 mt-2">{stats.totalProjects + stats.totalSkills}</p>
+            </div>
+            <BarChart3 className="text-cyan-400 w-10 h-10 opacity-30" />
+          </div>
+        </Card>
+      </div>
+
+      {/* Skills Section */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <Code className="text-cyan-400 w-5 h-5" />
+          <h2 className="text-xl font-semibold text-foreground">Skills & Technologies</h2>
+        </div>
+        <DashboardSkills />
+      </div>
+
+      {/* Recent Projects Section */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <TrendingUp className="text-cyan-400 w-5 h-5" />
+          <h2 className="text-xl font-semibold text-foreground">Content Management</h2>
+        </div>
+        <RecentProjects />
+      </div>
     </div>
   );
 }

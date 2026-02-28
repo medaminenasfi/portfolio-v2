@@ -1,15 +1,52 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { api } from '@/lib/api';
+import { api, API_BASE_URL } from '@/lib/api';
+import { Code, Wrench, Star } from 'lucide-react';
+
+// Helper to get full image URL
+const getImageUrl = (path: string | undefined | null): string => {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  // Prepend backend URL for relative paths
+  const backendUrl = API_BASE_URL.replace('/api', '');
+  return `${backendUrl}${path}`;
+};
 
 interface Skill {
   id: string;
   name: string;
-  category: string;
-  proficiency?: number;
-  iconUrl?: string;
+  photo?: string;
+  category: 'frontend' | 'backend' | 'tools' | 'soft_skills';
+  proficiency: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  keywords?: string[];
+  description?: string;
+  orderIndex: number;
+  isActive: boolean;
 }
+
+const proficiencyColors: Record<string, { bg: string; text: string; border: string }> = {
+  beginner: { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30' },
+  intermediate: { bg: 'bg-cyan-500/20', text: 'text-cyan-400', border: 'border-cyan-500/30' },
+  advanced: { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/30' },
+  expert: { bg: 'bg-violet-500/20', text: 'text-violet-400', border: 'border-violet-500/30' },
+};
+
+const categoryIcons: Record<string, any> = {
+  frontend: Code,
+  backend: Code,
+  tools: Wrench,
+  soft_skills: Star,
+};
+
+const categoryLabels: Record<string, string> = {
+  frontend: 'Frontend',
+  backend: 'Backend',
+  tools: 'Tools & DevOps',
+  soft_skills: 'Soft Skills',
+};
 
 export default function SkillsSection() {
   const [skills, setSkills] = useState<Skill[]>([]);
@@ -23,12 +60,15 @@ export default function SkillsSection() {
   const fetchSkills = async () => {
     try {
       const data: any = await api.getSkills();
-      const skillsData = Array.isArray(data) ? data : data?.data || [];
-      setSkills(skillsData);
+      const skillsData = Array.isArray(data) ? data : data?.skills || data?.data || [];
+      
+      // Filter only active skills
+      const activeSkills = skillsData.filter((s: Skill) => s.isActive !== false);
+      setSkills(activeSkills);
       
       // Group skills by category
-      const grouped = skillsData.reduce((acc: Record<string, Skill[]>, skill: Skill) => {
-        const category = skill.category || 'Other';
+      const grouped = activeSkills.reduce((acc: Record<string, Skill[]>, skill: Skill) => {
+        const category = skill.category || 'tools';
         if (!acc[category]) {
           acc[category] = [];
         }
@@ -54,7 +94,7 @@ export default function SkillsSection() {
             </p>
           </div>
           <div className="flex justify-center py-12">
-            <div className="text-muted-foreground">Loading skills...</div>
+            <div className="text-muted-foreground animate-pulse">Loading skills...</div>
           </div>
         </div>
       </section>
@@ -76,38 +116,81 @@ export default function SkillsSection() {
             <p className="text-muted-foreground">No skills found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {Object.entries(groupedSkills).map(([category, categorySkills]) => (
-              <div
-                key={category}
-                className="bg-card border border-border rounded-lg p-8 hover:border-accent hover:shadow-lg transition-all duration-300"
-              >
-                <h3 className="text-2xl font-bold text-primary mb-6">{category}</h3>
+          <div className="space-y-12">
+            {Object.entries(groupedSkills).map(([category, categorySkills]) => {
+              const CategoryIcon = categoryIcons[category] || Code;
+              const categoryLabel = categoryLabels[category] || category;
 
-                <div className="flex flex-wrap gap-3">
-                  {categorySkills.map((skill) => (
-                    <span
-                      key={skill.id}
-                      className="px-4 py-2 bg-secondary text-foreground rounded-lg text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
-                    >
-                      {skill.name}
-                    </span>
-                  ))}
+              return (
+                <div key={category} className="space-y-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 rounded-lg border border-cyan-500/30">
+                      <CategoryIcon className="w-6 h-6 text-cyan-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl md:text-3xl font-bold text-foreground">{categoryLabel}</h3>
+                      <p className="text-sm text-muted-foreground">{categorySkills.length} skills</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {categorySkills.map((skill) => {
+                      const profColor = proficiencyColors[skill.proficiency];
+                      return (
+                        <div key={skill.id} className="group/skill relative">
+                          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-violet-500/10 rounded-lg blur opacity-0 group-hover/skill:opacity-100 transition-opacity duration-300"></div>
+                          <div className={`relative p-4 rounded-lg border ${profColor.border} bg-gradient-to-br from-slate-800/50 to-slate-900/30 hover:from-slate-800/70 hover:to-slate-900/50 transition-all duration-300 h-full flex flex-col items-center text-center gap-3 group-hover/skill:shadow-lg group-hover/skill:shadow-cyan-500/10`}>
+                            {/* Skill Image */}
+                            {skill.photo ? (
+                              <div className="relative w-14 h-14 flex-shrink-0">
+                                <img
+                                  src={getImageUrl(skill.photo)}
+                                  alt={skill.name}
+                                  className="w-full h-full object-contain rounded-lg"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 flex items-center justify-center border border-cyan-500/30">
+                                <Code className="w-7 h-7 text-cyan-400" />
+                              </div>
+                            )}
+
+                            {/* Skill Name */}
+                            <div>
+                              <h4 className="font-bold text-foreground text-sm leading-tight">{skill.name}</h4>
+                            </div>
+
+                            {/* Proficiency Badge */}
+                            <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${profColor.bg} ${profColor.text} ${profColor.border} capitalize`}>
+                              {skill.proficiency}
+                            </span>
+
+                            {/* Description Tooltip */}
+                            {skill.description && (
+                              <p className="text-xs text-muted-foreground line-clamp-2 hidden group-hover/skill:block mt-2 pt-2 border-t border-cyan-500/20">
+                                {skill.description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
         {/* Highlights */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             { number: '2+', label: 'Years Experience' },
             { number: '5+', label: 'Projects Completed' },
             { number: '100%', label: 'Client Satisfaction' },
           ].map((stat) => (
-            <div key={stat.label} className="text-center">
-              <div className="text-4xl font-bold text-primary mb-2">{stat.number}</div>
+            <div key={stat.label} className="text-center p-6 rounded-lg bg-gradient-to-br from-slate-800/30 to-slate-900/20 border border-cyan-500/20 hover:border-cyan-500/40 transition-all">
+              <div className="text-4xl md:text-5xl font-bold text-cyan-400 mb-2">{stat.number}</div>
               <p className="text-muted-foreground">{stat.label}</p>
             </div>
           ))}
