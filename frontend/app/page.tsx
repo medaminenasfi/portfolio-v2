@@ -11,6 +11,7 @@ import SkillsSection from '@/components/portfolio/SkillsSection';
 import TestimonialsSection from '@/components/portfolio/TestimonialsSection';
 import Navigation from '@/components/portfolio/Navigation';
 import Footer from '@/components/portfolio/Footer';
+import ScrollToTop from '@/components/portfolio/ScrollToTop';
 
 export default function Page() {
   return (
@@ -46,6 +47,7 @@ export default function Page() {
       </div>
       
       <Footer />
+      <ScrollToTop />
     </main>
   );
 }
