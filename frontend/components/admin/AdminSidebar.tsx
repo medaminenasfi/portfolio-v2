@@ -50,7 +50,6 @@ export default function AdminSidebar({ open }: AdminSidebarProps) {
     { icon: Briefcase, label: 'Projects', href: '/admin/projects' },
     { icon: Code, label: 'Skills', href: '/admin/skills' },
     { icon: FileText, label: 'Experience', href: '/admin/experience' },
-    { icon: FileText, label: 'Resume', href: '/admin/resume' },
     { 
       icon: MessageSquare, 
       label: 'Testimonials', 

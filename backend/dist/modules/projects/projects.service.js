@@ -209,28 +209,62 @@ let ProjectsService = class ProjectsService {
         }, {});
     }
     async addMedia(projectId, mediaData, category) {
-        const project = await this.findOne(projectId);
-        const lastMedia = await this.mediaRepository.findOne({
-            where: { projectId },
-            order: { order: 'DESC' },
-        });
-        const media = this.mediaRepository.create({
-            ...mediaData,
-            projectId,
-            order: lastMedia ? lastMedia.order + 1 : 0,
-        });
-        const savedMedia = await this.mediaRepository.save(media);
-        if (mediaData.url) {
-            if (category === 'banner' || (!category && mediaData.type === project_media_entity_1.MediaType.IMAGE)) {
-                project.bannerImages = [...(project.bannerImages || []), mediaData.url];
+        try {
+            console.log('addMedia called with projectId:', projectId);
+            console.log('mediaData:', mediaData);
+            const project = await this.findOne(projectId);
+            const lastMedia = await this.mediaRepository.findOne({
+                where: { projectId },
+                order: { order: 'DESC' },
+            });
+            const media = this.mediaRepository.create({
+                type: mediaData.type,
+                filename: mediaData.filename,
+                originalName: mediaData.originalName,
+                mimeType: mediaData.mimeType,
+                size: mediaData.size,
+                url: mediaData.url,
+                thumbnailUrl: mediaData.thumbnailUrl,
+                videoEmbedUrl: mediaData.videoEmbedUrl,
+                metadata: mediaData.metadata,
+                project: project,
+                projectId: projectId,
+                order: lastMedia ? lastMedia.order + 1 : 0,
+            });
+            console.log('Creating media entity:', media);
+            const savedMedia = await this.mediaRepository.save(media);
+            console.log('Saved media:', savedMedia);
+            let shouldUpdateProject = false;
+            if (mediaData.url) {
+                if (category === 'banner' || (!category && mediaData.type === project_media_entity_1.MediaType.IMAGE)) {
+                    const currentBanners = Array.isArray(project.bannerImages) ? project.bannerImages : [];
+                    project.bannerImages = [...currentBanners, mediaData.url];
+                    shouldUpdateProject = true;
+                }
+                else if (category === 'category') {
+                    const currentPhotos = Array.isArray(project.categoryPhotos) ? project.categoryPhotos : [];
+                    project.categoryPhotos = [...currentPhotos, mediaData.url];
+                    shouldUpdateProject = true;
+                }
+                else if (category === 'video') {
+                    project.videoUrl = mediaData.url;
+                    shouldUpdateProject = true;
+                }
+                else if (category === 'thumbnail') {
+                    project.videoThumbnail = mediaData.url;
+                    shouldUpdateProject = true;
+                }
+            }
+            if (shouldUpdateProject) {
                 await this.projectRepository.save(project);
             }
-            else if (category === 'category') {
-                project.categoryPhotos = [...(project.categoryPhotos || []), mediaData.url];
-                await this.projectRepository.save(project);
-            }
+            return savedMedia;
         }
-        return savedMedia;
+        catch (error) {
+            console.error('Error in addMedia:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            throw new common_1.InternalServerErrorException('Failed to add media: ' + errorMessage);
+        }
     }
     async updateMediaOrder(projectId, mediaOrders) {
         await Promise.all(mediaOrders.map(({ id, order }) => this.mediaRepository.update(id, { order })));

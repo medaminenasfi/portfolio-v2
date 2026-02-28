@@ -124,6 +124,17 @@ export class ProjectsController {
       throw new BadRequestException('No file uploaded');
     }
 
+    console.log('Uploading media for project:', projectId);
+    console.log('ProjectId type:', typeof projectId);
+    console.log('File details:', {
+      filename: file.filename,
+      originalName: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+      path: file.path,
+    });
+    console.log('Category:', category);
+
     const mediaType = file.mimetype.startsWith('image/') ? MediaType.IMAGE : MediaType.VIDEO;
     
     const mediaData: Partial<ProjectMedia> = {
@@ -135,8 +146,13 @@ export class ProjectsController {
       url: `/uploads/projects/${file.filename}`,
     };
 
-    const categoryType = category === 'category' ? 'category' : 'banner';
-    return this.projectsService.addMedia(projectId, mediaData, categoryType);
+    // Validate category
+    const validCategories = ['banner', 'category', 'video', 'thumbnail'];
+    const categoryType = category && validCategories.includes(category) ? category : 'banner';
+    
+    console.log('Saving media with category:', categoryType);
+    console.log('Calling addMedia with projectId:', projectId, 'and mediaData:', mediaData);
+    return this.projectsService.addMedia(projectId, mediaData, categoryType as 'banner' | 'category' | 'video' | 'thumbnail');
   }
 
   @Patch(':id/media/order')

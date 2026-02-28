@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 
 import './globals.css'
@@ -10,12 +10,13 @@ export const metadata: Metadata = {
   title: 'Full Stack Developer Portfolio',
   description: 'Professional portfolio showcasing full stack development projects, experience, and technical expertise',
   generator: 'v0.app',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    userScalable: true,
-  },
 }
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  userScalable: true,
+};
 
 export default function RootLayout({
   children,

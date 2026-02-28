@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
+import { CollapsibleSection } from '@/components/ui/collapsible-section';
 
 interface ProjectFormProps {
   projectId?: string;
@@ -299,8 +300,8 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
         // Preserve existing photos - only reset if they are blob URLs (new uploads)
         bannerImages: formData.bannerImages?.filter((url: string) => !url.startsWith('blob:')) || [],
         categoryPhotos: formData.categoryPhotos?.filter((url: string) => !url.startsWith('blob:')) || [],
-        videoUrl: formData.videoUrl && !formData.videoUrl.startsWith('blob:') ? formData.videoUrl : '',
-        videoThumbnail: formData.videoThumbnail && !formData.videoThumbnail.startsWith('blob:') ? formData.videoThumbnail : '',
+        videoUrl: typeof formData.videoUrl === 'string' && !formData.videoUrl.startsWith('blob:') ? formData.videoUrl : '',
+        videoThumbnail: typeof formData.videoThumbnail === 'string' && !formData.videoThumbnail.startsWith('blob:') ? formData.videoThumbnail : '',
       };
 
       let createdProject;
@@ -349,7 +350,16 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
   const uploadFile = async (projectId: string, file: File, type: string) => {
     try {
       // Determine category based on type
-      const category = type === 'category' ? 'category' : 'banner';
+      let category: string | undefined;
+      if (type === 'category') {
+        category = 'category';
+      } else if (type === 'banner') {
+        category = 'banner';
+      } else if (type === 'video') {
+        category = 'video';
+      } else if (type === 'thumbnail') {
+        category = 'thumbnail';
+      }
       const result = await api.uploadProjectMedia(projectId, file, category);
       console.log(`Uploaded ${type} file:`, result);
       return result;
@@ -381,9 +391,7 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
       </div>
 
       {/* Basic Information */}
-      <Card className="p-6 bg-card border border-border space-y-4">
-        <h2 className="text-xl font-semibold text-foreground">Basic Information</h2>
-
+      <CollapsibleSection title="Basic Information" defaultOpen={true}>
         <div>
           <Label htmlFor="title">Project Title *</Label>
           <Input
@@ -438,12 +446,10 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
             ))}
           </select>
         </div>
-      </Card>
+      </CollapsibleSection>
 
       {/* Links */}
-      <Card className="p-6 bg-card border border-border space-y-4">
-        <h2 className="text-xl font-semibold text-foreground">Links</h2>
-
+      <CollapsibleSection title="Links" defaultOpen={false}>
         <div>
           <Label htmlFor="liveDemoUrl">Live Demo URL</Label>
           <Input
@@ -469,12 +475,10 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
             className="mt-2 bg-secondary/30 border-border"
           />
         </div>
-
-      </Card>
+      </CollapsibleSection>
 
       {/* Media & Content */}
-      <Card className="p-6 bg-card border border-border space-y-4">
-        <h2 className="text-xl font-semibold text-foreground">Media & Content</h2>
+      <CollapsibleSection title="Media & Content" defaultOpen={false}>
 
         <div>
           <Label htmlFor="bannerImages">Banner Images</Label>
@@ -685,11 +689,10 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
             className="mt-2 bg-secondary/30 border-border"
           />
         </div>
-      </Card>
+      </CollapsibleSection>
 
       {/* Project Details */}
-      <Card className="p-6 bg-card border border-border space-y-4">
-        <h2 className="text-xl font-semibold text-foreground">Project Details</h2>
+      <CollapsibleSection title="Project Details" defaultOpen={false}>
 
         <div>
           <Label htmlFor="role">Your Role</Label>
@@ -788,11 +791,10 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
             className="mt-2 bg-secondary/30 border-border"
           />
         </div>
-      </Card>
+      </CollapsibleSection>
 
       {/* Technologies */}
-      <Card className="p-6 bg-card border border-border space-y-4">
-        <h2 className="text-xl font-semibold text-foreground">Technologies</h2>
+      <CollapsibleSection title="Technologies" defaultOpen={false}>
         
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {TECH_OPTIONS.map((tech) => (
@@ -836,11 +838,10 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
             </span>
           ))}
         </div>
-      </Card>
+      </CollapsibleSection>
 
       {/* Tools */}
-      <Card className="p-6 bg-card border border-border space-y-4">
-        <h2 className="text-xl font-semibold text-foreground">Tools & Software</h2>
+      <CollapsibleSection title="Tools & Software" defaultOpen={false}>
         
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {['VS Code', 'Figma', 'Postman', 'Docker', 'Git', 'Webpack', 'Vite', 'Jest', 'ESLint', 'Prettier', 'Slack', 'Jira'].map((tool) => (
@@ -884,11 +885,10 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
             </span>
           )) || []}
         </div>
-      </Card>
+      </CollapsibleSection>
 
       {/* Highlights */}
-      <Card className="p-6 bg-card border border-border space-y-4">
-        <h2 className="text-xl font-semibold text-foreground">Key Highlights</h2>
+      <CollapsibleSection title="Key Highlights" defaultOpen={false}>
         {formData.highlights?.map((highlight, index) => (
           <div key={index} className="flex gap-2">
             <Input
@@ -910,11 +910,10 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
         <Button type="button" variant="outline" onClick={addHighlight}>
           Add Highlight
         </Button>
-      </Card>
+      </CollapsibleSection>
 
       {/* SEO */}
-      <Card className="p-6 bg-card border border-border space-y-4">
-        <h2 className="text-xl font-semibold text-foreground">SEO Settings</h2>
+      <CollapsibleSection title="SEO Settings" defaultOpen={false}>
         
         <div>
           <Label htmlFor="metaTitle">Meta Title</Label>
@@ -970,11 +969,10 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
             Add Keyword
           </Button>
         </div>
-      </Card>
+      </CollapsibleSection>
 
       {/* Settings */}
-      <Card className="p-6 bg-card border border-border space-y-4">
-        <h2 className="text-xl font-semibold text-foreground">Settings</h2>
+      <CollapsibleSection title="Settings" defaultOpen={false}>
         <label className="flex items-center gap-3 cursor-pointer">
           <Checkbox 
             checked={formData.isFeatured} 
@@ -982,7 +980,7 @@ export default function ProjectForm({ projectId, initialData }: ProjectFormProps
           />
           <span className="text-foreground">Featured Project</span>
         </label>
-      </Card>
+      </CollapsibleSection>
 
       {/* Submit */}
       <div className="flex gap-3">

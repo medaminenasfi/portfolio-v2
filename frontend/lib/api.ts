@@ -33,27 +33,30 @@ export class ApiClient {
     isFormData: boolean = false
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    const headers: Record<string, string> = {
-      'Content-Type': isFormData ? 'multipart/form-data' : 'application/json',
-      ...(options.headers as Record<string, string>),
-    };
-
-    // Add authorization header if token exists
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
-    }
-
-    // Don't set Content-Type header for FormData - let browser set it with boundary
-    if (isFormData) {
-      delete headers['Content-Type'];
-    }
-
+    
+    // For FormData requests, don't set Content-Type - let browser handle it
     const config: RequestInit = {
       ...options,
-      headers,
       mode: 'cors', // Explicitly set CORS mode
       credentials: 'omit', // Don't send credentials for cross-origin
     };
+    
+    // Add authorization header if token exists
+    if (this.token) {
+      config.headers = {
+        Authorization: `Bearer ${this.token}`,
+        ...(config.headers as Record<string, string> || {}),
+      };
+    } else {
+      config.headers = {
+        ...(config.headers as Record<string, string> || {}),
+      };
+    }
+    
+    // Don't set Content-Type header for FormData - let browser set it with boundary
+    if (!isFormData) {
+      (config.headers as Record<string, string>)['Content-Type'] = 'application/json';
+    }
 
     try {
       console.log(`API Request: ${options.method || 'GET'} ${url}`);
@@ -550,28 +553,11 @@ export class ApiClient {
     const formData = new FormData();
     formData.append('file', file);
 
-    const url = `${this.baseURL}/resume-sections/skills/upload-photo`;
-    const headers: Record<string, string> = {};
-
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
-    }
-
-    const response = await fetch(url, {
+    return this.request('/resume-sections/skills/upload-photo', {
       method: 'POST',
       body: formData,
-      headers,
-      mode: 'cors',
-      credentials: 'omit',
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.message || errorData.error || `HTTP ${response.status}: ${response.statusText}`;
-      throw new Error(errorMessage);
-    }
-
-    return response.json();
+      headers: {}, // Let browser set Content-Type for FormData
+    }, true); // isFormData = true
   }
 
   async submitContactForm(data: any) {

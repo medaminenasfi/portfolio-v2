@@ -199,6 +199,35 @@ async function ProjectDetailContent({ projectId }: { projectId: string }) {
               </div>
             </div>
 
+            {/* Video Content */}
+            {(project.videoUrl || project.videoThumbnail) && (
+              <div className="bg-card/50 border border-border rounded-xl p-6">
+                <h2 className="text-2xl font-bold text-foreground mb-4">Video Content</h2>
+                <div className="aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center">
+                  {project.videoUrl ? (
+                    <video
+                      controls
+                      poster={project.videoThumbnail ? (project.videoThumbnail.startsWith('http') ? project.videoThumbnail : `http://localhost:3000${project.videoThumbnail}`) : undefined}
+                      className="w-full h-full object-contain"
+                      onError={(e) => console.error('Video error:', e)}
+                    >
+                      <source
+                        src={project.videoUrl.startsWith('http') ? project.videoUrl : `http://localhost:3000${project.videoUrl}`}
+                        type="video/mp4"
+                      />
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : project.videoThumbnail ? (
+                    <img
+                      src={project.videoThumbnail.startsWith('http') ? project.videoThumbnail : `http://localhost:3000${project.videoThumbnail}`}
+                      alt="Video thumbnail"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : null}
+                </div>
+              </div>
+            )}
+
             {/* Project Metadata */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {project.role && (

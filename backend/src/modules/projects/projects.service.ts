@@ -292,35 +292,70 @@ export class ProjectsService {
   }
 
   // Media management
-  async addMedia(projectId: string, mediaData: Partial<ProjectMedia>, category?: 'banner' | 'category'): Promise<ProjectMedia> {
-    const project = await this.findOne(projectId);
-    
-    // Get the highest order number for this project
-    const lastMedia = await this.mediaRepository.findOne({
-      where: { projectId },
-      order: { order: 'DESC' },
-    });
+  async addMedia(projectId: string, mediaData: Partial<ProjectMedia>, category?: 'banner' | 'category' | 'video' | 'thumbnail'): Promise<ProjectMedia> {
+    try {
+      console.log('addMedia called with projectId:', projectId);
+      console.log('mediaData:', mediaData);
+      
+      const project = await this.findOne(projectId);
+      
+      // Get the highest order number for this project
+      const lastMedia = await this.mediaRepository.findOne({
+        where: { projectId },
+        order: { order: 'DESC' },
+      });
 
-    const media = this.mediaRepository.create({
-      ...mediaData,
-      projectId,
-      order: lastMedia ? lastMedia.order + 1 : 0,
-    });
+      // Create media entity with explicit field assignment to avoid null/undefined issues
+      const media = this.mediaRepository.create({
+        type: mediaData.type,
+        filename: mediaData.filename,
+        originalName: mediaData.originalName,
+        mimeType: mediaData.mimeType,
+        size: mediaData.size,
+        url: mediaData.url,
+        thumbnailUrl: mediaData.thumbnailUrl,
+        videoEmbedUrl: mediaData.videoEmbedUrl,
+        metadata: mediaData.metadata,
+        project: project, // Set the project relation explicitly
+        projectId: projectId, // Set the foreign key explicitly
+        order: lastMedia ? lastMedia.order + 1 : 0,
+      });
 
-    const savedMedia = await this.mediaRepository.save(media);
+      console.log('Creating media entity:', media);
+      const savedMedia = await this.mediaRepository.save(media);
+      console.log('Saved media:', savedMedia);
 
-    // Also add to bannerImages or categoryPhotos array based on category
-    if (mediaData.url) {
-      if (category === 'banner' || (!category && mediaData.type === MediaType.IMAGE)) {
-        project.bannerImages = [...(project.bannerImages || []), mediaData.url];
-        await this.projectRepository.save(project);
-      } else if (category === 'category') {
-        project.categoryPhotos = [...(project.categoryPhotos || []), mediaData.url];
+      // Prepare project updates based on category
+      let shouldUpdateProject = false;
+      if (mediaData.url) {
+        if (category === 'banner' || (!category && mediaData.type === MediaType.IMAGE)) {
+          const currentBanners = Array.isArray(project.bannerImages) ? project.bannerImages : [];
+          project.bannerImages = [...currentBanners, mediaData.url];
+          shouldUpdateProject = true;
+        } else if (category === 'category') {
+          const currentPhotos = Array.isArray(project.categoryPhotos) ? project.categoryPhotos : [];
+          project.categoryPhotos = [...currentPhotos, mediaData.url];
+          shouldUpdateProject = true;
+        } else if (category === 'video') {
+          project.videoUrl = mediaData.url;
+          shouldUpdateProject = true;
+        } else if (category === 'thumbnail') {
+          project.videoThumbnail = mediaData.url;
+          shouldUpdateProject = true;
+        }
+      }
+
+      // Update project only if needed
+      if (shouldUpdateProject) {
         await this.projectRepository.save(project);
       }
-    }
 
-    return savedMedia;
+      return savedMedia;
+    } catch (error) {
+      console.error('Error in addMedia:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new InternalServerErrorException('Failed to add media: ' + errorMessage);
+    }
   }
 
   async updateMediaOrder(projectId: string, mediaOrders: { id: string; order: number }[]): Promise<ProjectMedia[]> {
