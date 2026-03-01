@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { api, API_BASE_URL } from '@/lib/api';
 import { Code, Wrench, Star } from 'lucide-react';
+import StatsDisplay from './StatsDisplay';
 
 // Helper to get full image URL
 const getImageUrl = (path: string | undefined | null): string => {
@@ -50,11 +51,17 @@ const categoryLabels: Record<string, string> = {
 
 export default function SkillsSection() {
   const [skills, setSkills] = useState<Skill[]>([]);
+  const [stats, setStats] = useState<any[]>([
+    { id: 'years-experience', number: '2+', label: 'Years Experience', orderIndex: 0 },
+    { id: 'projects-completed', number: '5+', label: 'Projects Completed', orderIndex: 1 },
+    { id: 'client-satisfaction', number: '100%', label: 'Client Satisfaction', orderIndex: 2 },
+  ]);
   const [loading, setLoading] = useState(true);
   const [groupedSkills, setGroupedSkills] = useState<Record<string, Skill[]>>({});
 
   useEffect(() => {
     fetchSkills();
+    fetchStats();
   }, []);
 
   const fetchSkills = async () => {
@@ -80,6 +87,47 @@ export default function SkillsSection() {
       console.error('Failed to fetch skills:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const data: any = await api.getPortfolioStats();
+      const statsData = Array.isArray(data) ? data : data?.portfolioStats || data?.data || [];
+      
+      if (statsData.length > 0) {
+        const mappedStats = [
+          {
+            id: 'years-experience',
+            number: statsData.find((s: any) => s.id === 'years-experience')?.number || '2+',
+            label: 'Years Experience',
+            description: statsData.find((s: any) => s.id === 'years-experience')?.description || null,
+            orderIndex: statsData.find((s: any) => s.id === 'years-experience')?.orderIndex || 0
+          },
+          {
+            id: 'projects-completed',
+            number: statsData.find((s: any) => s.id === 'projects-completed')?.number || '5+',
+            label: 'Projects Completed',
+            description: statsData.find((s: any) => s.id === 'projects-completed')?.description || null,
+            orderIndex: statsData.find((s: any) => s.id === 'projects-completed')?.orderIndex || 1
+          },
+          {
+            id: 'client-satisfaction',
+            number: statsData.find((s: any) => s.id === 'client-satisfaction')?.number || '100%',
+            label: 'Client Satisfaction',
+            description: statsData.find((s: any) => s.id === 'client-satisfaction')?.description || null,
+            orderIndex: statsData.find((s: any) => s.id === 'client-satisfaction')?.orderIndex || 2
+          }
+        ];
+        setStats(mappedStats);
+      }
+    } catch (error) {
+      // Silently handle API errors - use default stats
+      setStats([
+        { id: 'years-experience', number: '2+', label: 'Years Experience', orderIndex: 0 },
+        { id: 'projects-completed', number: '5+', label: 'Projects Completed', orderIndex: 1 },
+        { id: 'client-satisfaction', number: '100%', label: 'Client Satisfaction', orderIndex: 2 },
+      ]);
     }
   };
 
@@ -183,18 +231,7 @@ export default function SkillsSection() {
         )}
 
         {/* Highlights */}
-        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { number: '2+', label: 'Years Experience' },
-            { number: '5+', label: 'Projects Completed' },
-            { number: '100%', label: 'Client Satisfaction' },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center p-6 rounded-lg bg-gradient-to-br from-slate-800/30 to-slate-900/20 border border-cyan-500/20 hover:border-cyan-500/40 transition-all">
-              <div className="text-4xl md:text-5xl font-bold text-cyan-400 mb-2">{stat.number}</div>
-              <p className="text-muted-foreground">{stat.label}</p>
-            </div>
-          ))}
-        </div>
+        <StatsDisplay />
       </div>
     </section>
   );

@@ -573,6 +573,42 @@ export class ApiClient {
       body: JSON.stringify(data),
     });
   }
+
+  // Portfolio Stats endpoints
+  async getPortfolioStats() {
+    return this.request('/resume-sections/portfolio-stats');
+  }
+
+  async getPortfolioStatById(id: string) {
+    return this.request(`/resume-sections/portfolio-stats/${id}`);
+  }
+
+  async createPortfolioStat(data: any) {
+    return this.request('/resume-sections/portfolio-stats', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updatePortfolioStat(id: string, data: any) {
+    return this.request(`/resume-sections/portfolio-stats/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deletePortfolioStat(id: string) {
+    return this.request(`/resume-sections/portfolio-stats/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async reorderPortfolioStats(reorderData: { ids: string[]; orderIndexes: number[] }) {
+    return this.request('/resume-sections/portfolio-stats/reorder', {
+      method: 'PATCH',
+      body: JSON.stringify(reorderData),
+    });
+  }
 }
 
 // Create and export API client instance

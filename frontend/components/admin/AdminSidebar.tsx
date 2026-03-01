@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Briefcase, FileText, MessageSquare, Settings, LogOut, ChevronRight, Sparkles, Code } from 'lucide-react';
+import { LayoutDashboard, Briefcase, FileText, MessageSquare, Settings, LogOut, ChevronRight, Sparkles, Code, BarChart3 } from 'lucide-react';
 import { api } from '@/lib/api';
 
 interface AdminSidebarProps {
@@ -49,6 +49,7 @@ export default function AdminSidebar({ open }: AdminSidebarProps) {
     { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
     { icon: Briefcase, label: 'Projects', href: '/admin/projects' },
     { icon: Code, label: 'Skills', href: '/admin/skills' },
+    { icon: BarChart3, label: 'Stats', href: '/admin/stats' },
     { icon: FileText, label: 'Experience', href: '/admin/experience' },
     { 
       icon: MessageSquare, 

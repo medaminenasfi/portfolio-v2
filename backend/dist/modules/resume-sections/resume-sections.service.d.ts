@@ -4,13 +4,15 @@ import { Education } from './entities/education.entity';
 import { Skill } from './entities/skills.entity';
 import { Certification } from './entities/certifications.entity';
 import { Language } from './entities/languages.entity';
+import { PortfolioStat } from './entities/portfolio-stats.entity';
 export declare class ResumeSectionsService {
     private readonly workExperienceRepository;
     private readonly educationRepository;
     private readonly skillsRepository;
     private readonly certificationsRepository;
     private readonly languagesRepository;
-    constructor(workExperienceRepository: Repository<WorkExperience>, educationRepository: Repository<Education>, skillsRepository: Repository<Skill>, certificationsRepository: Repository<Certification>, languagesRepository: Repository<Language>);
+    private readonly portfolioStatsRepository;
+    constructor(workExperienceRepository: Repository<WorkExperience>, educationRepository: Repository<Education>, skillsRepository: Repository<Skill>, certificationsRepository: Repository<Certification>, languagesRepository: Repository<Language>, portfolioStatsRepository: Repository<PortfolioStat>);
     createWorkExperience(createDto: any): Promise<WorkExperience>;
     getAllWorkExperience(): Promise<WorkExperience[]>;
     getWorkExperienceById(id: string): Promise<WorkExperience>;
@@ -52,11 +54,21 @@ export declare class ResumeSectionsService {
         ids: string[];
         orderIndexes: number[];
     }): Promise<Language[]>;
+    createPortfolioStat(createDto: any): Promise<PortfolioStat>;
+    getAllPortfolioStats(): Promise<PortfolioStat[]>;
+    getPortfolioStatById(id: string): Promise<PortfolioStat>;
+    updatePortfolioStat(id: string, updateDto: any): Promise<PortfolioStat>;
+    deletePortfolioStat(id: string): Promise<void>;
+    reorderPortfolioStats(reorderDto: {
+        ids: string[];
+        orderIndexes: number[];
+    }): Promise<PortfolioStat[]>;
     getCompleteResume(): Promise<{
         workExperience: WorkExperience[];
         education: Education[];
         skills: Skill[];
         certifications: Certification[];
         languages: Language[];
+        portfolioStats: PortfolioStat[];
     }>;
 }

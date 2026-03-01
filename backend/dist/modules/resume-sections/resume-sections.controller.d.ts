@@ -47,11 +47,21 @@ export declare class ResumeSectionsController {
         ids: string[];
         orderIndexes: number[];
     }): Promise<import("./entities/languages.entity").Language[]>;
+    getPortfolioStats(): Promise<import("./entities/portfolio-stats.entity").PortfolioStat[]>;
+    getPortfolioStatById(id: string): Promise<import("./entities/portfolio-stats.entity").PortfolioStat>;
+    createPortfolioStat(createDto: any): Promise<import("./entities/portfolio-stats.entity").PortfolioStat>;
+    updatePortfolioStat(id: string, updateDto: any): Promise<import("./entities/portfolio-stats.entity").PortfolioStat>;
+    deletePortfolioStat(id: string): Promise<void>;
+    reorderPortfolioStats(reorderDto: {
+        ids: string[];
+        orderIndexes: number[];
+    }): Promise<import("./entities/portfolio-stats.entity").PortfolioStat[]>;
     getCompleteResume(): Promise<{
         workExperience: import("./entities/work-experience.entity").WorkExperience[];
         education: import("./entities/education.entity").Education[];
         skills: import("./entities/skills.entity").Skill[];
         certifications: import("./entities/certifications.entity").Certification[];
         languages: import("./entities/languages.entity").Language[];
+        portfolioStats: import("./entities/portfolio-stats.entity").PortfolioStat[];
     }>;
 }

@@ -6,6 +6,7 @@ import { Education } from './entities/education.entity';
 import { Skill } from './entities/skills.entity';
 import { Certification } from './entities/certifications.entity';
 import { Language } from './entities/languages.entity';
+import { PortfolioStat } from './entities/portfolio-stats.entity';
 
 @Injectable()
 export class ResumeSectionsService {
@@ -20,6 +21,8 @@ export class ResumeSectionsService {
     private readonly certificationsRepository: Repository<Certification>,
     @InjectRepository(Language)
     private readonly languagesRepository: Repository<Language>,
+    @InjectRepository(PortfolioStat)
+    private readonly portfolioStatsRepository: Repository<PortfolioStat>,
   ) {}
 
   // Work Experience CRUD
@@ -306,6 +309,68 @@ export class ResumeSectionsService {
     });
   }
 
+  // Portfolio Stats CRUD
+  async createPortfolioStat(createDto: any): Promise<PortfolioStat> {
+    const maxOrder = await this.portfolioStatsRepository
+      .createQueryBuilder('stat')
+      .orderBy('stat.orderIndex', 'DESC')
+      .getOne();
+
+    const portfolioStat = this.portfolioStatsRepository.create({
+      ...createDto,
+      orderIndex: createDto.orderIndex ?? (maxOrder?.orderIndex ?? 0) + 1,
+    });
+
+    return (await this.portfolioStatsRepository.save(portfolioStat) as unknown) as PortfolioStat;
+  }
+
+  async getAllPortfolioStats(): Promise<PortfolioStat[]> {
+    return this.portfolioStatsRepository.find({
+      where: { isActive: true },
+      order: { orderIndex: 'ASC' },
+    });
+  }
+
+  async getPortfolioStatById(id: string): Promise<PortfolioStat> {
+    const stat = await this.portfolioStatsRepository.findOne({ where: { id } });
+    if (!stat) {
+      throw new NotFoundException('Portfolio stat not found');
+    }
+    return stat;
+  }
+
+  async updatePortfolioStat(id: string, updateDto: any): Promise<PortfolioStat> {
+    await this.portfolioStatsRepository.update(id, updateDto);
+    const updated = await this.portfolioStatsRepository.findOne({ where: { id } });
+    if (!updated) {
+      throw new NotFoundException('Portfolio stat not found');
+    }
+    return updated;
+  }
+
+  async deletePortfolioStat(id: string): Promise<void> {
+    const stat = await this.portfolioStatsRepository.findOne({ where: { id } });
+    if (!stat) {
+      throw new NotFoundException('Portfolio stat not found');
+    }
+    await this.portfolioStatsRepository.delete(id);
+  }
+
+  async reorderPortfolioStats(reorderDto: { ids: string[]; orderIndexes: number[] }): Promise<PortfolioStat[]> {
+    const { ids, orderIndexes } = reorderDto;
+
+    for (let i = 0; i < ids.length; i++) {
+      await this.portfolioStatsRepository.update(ids[i], {
+        orderIndex: orderIndexes[i],
+      });
+    }
+
+    return this.portfolioStatsRepository.find({
+      where: { id: In(ids) },
+      order: { orderIndex: 'ASC' },
+    });
+  }
+
   // Get all resume sections
   async getCompleteResume() {
     return {
@@ -314,6 +379,7 @@ export class ResumeSectionsService {
       skills: await this.getAllSkills(),
       certifications: await this.getAllCertifications(),
       languages: await this.getAllLanguages(),
+      portfolioStats: await this.getAllPortfolioStats(),
     };
   }
 }
