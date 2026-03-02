@@ -269,6 +269,18 @@ export class ApiClient {
     });
   }
 
+  async getTestimonialById(id: string) {
+    return this.request(`/testimonials/${id}`);
+  }
+
+  async updateTestimonialStatus(id: string, status: 'approved' | 'rejected', adminNotes?: string) {
+    const endpoint = status === 'approved' ? `/testimonials/${id}/approve` : `/testimonials/${id}/reject`;
+    return this.request(endpoint, {
+      method: 'PATCH',
+      body: JSON.stringify({ adminNotes }),
+    });
+  }
+
   // Resume endpoints
   async getResumes() {
     return this.request('/resume');

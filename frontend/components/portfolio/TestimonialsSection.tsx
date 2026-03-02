@@ -30,8 +30,10 @@ export default function TestimonialsSection() {
   const fetchTestimonials = async () => {
     try {
       const data: any = await api.getPublicTestimonials();
-      const testimonialsData = data.testimonials || data.data || [];
-      setTestimonials(testimonialsData);
+      console.log('Public testimonials response:', data); // Debug log
+      // Handle different response formats
+      const testimonialsData = data.value || data.testimonials || data.data || data || [];
+      setTestimonials(Array.isArray(testimonialsData) ? testimonialsData : []);
     } catch (error) {
       console.error('Failed to fetch testimonials:', error);
     } finally {

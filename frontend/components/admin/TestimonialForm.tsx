@@ -4,24 +4,34 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Star } from 'lucide-react';
+import { Star, Check, X, MessageSquare } from 'lucide-react';
+import { api } from '@/lib/api';
+import { toast } from '@/hooks/use-toast';
 
 interface TestimonialFormProps {
   id?: string;
+}
+
+interface Testimonial {
+  id: string;
+  clientName: string;
+  company: string;
+  position: string;
+  email: string;
+  rating: number;
+  comment: string;
+  status: 'pending' | 'approved' | 'rejected';
+  adminNotes?: string;
+  createdAt: string;
 }
 
 export default function TestimonialForm({ id }: TestimonialFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [formData, setFormData] = useState({
-    name: '',
-    company: '',
-    role: '',
-    content: '',
-    rating: 5,
-    image: '',
-  });
+  const [testimonial, setTestimonial] = useState<Testimonial | null>(null);
+  const [adminNotes, setAdminNotes] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
 
   useEffect(() => {
     if (id) {
@@ -31,177 +41,204 @@ export default function TestimonialForm({ id }: TestimonialFormProps) {
 
   const fetchTestimonial = async () => {
     try {
-      const response = await fetch(`/api/testimonials/${id}`);
-      if (!response.ok) throw new Error('Failed to fetch');
-      const data = await response.json();
-      setFormData(data.testimonial);
+      const data = await api.getTestimonialById(id as string);
+      setTestimonial(data);
+      setSelectedStatus(data.status);
+      setAdminNotes(data.adminNotes || '');
     } catch (err) {
       setError('Failed to load testimonial');
       console.error(err);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleStatusChange = async (newStatus: 'approved' | 'rejected') => {
+    if (!id) return;
+    
     setLoading(true);
     setError('');
 
     try {
-      const url = id ? `/api/testimonials/${id}` : '/api/testimonials';
-      const method = id ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+      await api.updateTestimonialStatus(id, newStatus, adminNotes);
+      
+      toast({
+        title: `Testimonial ${newStatus}`,
+        description: `The testimonial has been ${newStatus} successfully.`,
       });
-
-      if (!response.ok) throw new Error('Failed to save');
-
-      router.push('/admin/testimonials');
+      
+      // Update local state
+      if (testimonial) {
+        setTestimonial({
+          ...testimonial,
+          status: newStatus,
+          adminNotes: adminNotes
+        });
+        setSelectedStatus(newStatus);
+      }
     } catch (err) {
-      setError('Failed to save testimonial');
+      setError(`Failed to ${newStatus} testimonial`);
       console.error(err);
+      toast({
+        title: 'Error',
+        description: `Failed to ${newStatus} testimonial.`,
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'rating' ? parseInt(value) : value,
-    }));
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-5 h-5 ${
+              star <= rating
+                ? 'fill-yellow-400 text-yellow-400'
+                : 'text-muted-foreground'
+            }`}
+          />
+        ))}
+      </div>
+    );
   };
 
+  if (!testimonial) {
+    return (
+      <div className="flex items-center justify-center min-h-64">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading testimonial...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <Card className="p-8 max-w-2xl">
-      <h2 className="text-2xl font-bold text-foreground mb-6">
-        {id ? 'Edit Testimonial' : 'Add New Testimonial'}
-      </h2>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Review Testimonial</h1>
+          <p className="text-muted-foreground">Approve or reject this testimonial</p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => router.back()}
+        >
+          Back
+        </Button>
+      </div>
 
       {error && (
-        <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded-lg mb-6">
+        <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded-lg">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Name *
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-              placeholder="John Doe"
-            />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Testimonial Preview */}
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+            <MessageSquare size={20} />
+            Testimonial Preview
+          </h2>
+          
+          <div className="space-y-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-xl font-semibold text-foreground">{testimonial.clientName}</h3>
+                <p className="text-muted-foreground">{testimonial.position}</p>
+                <p className="text-muted-foreground">{testimonial.company}</p>
+                <p className="text-sm text-muted-foreground">{testimonial.email}</p>
+              </div>
+              {renderStars(testimonial.rating)}
+            </div>
+            
+            <div className="border-t pt-4">
+              <p className="text-foreground leading-relaxed">"{testimonial.comment}"</p>
+            </div>
+            
+            <div className="text-sm text-muted-foreground border-t pt-4">
+              <p>Submitted: {new Date(testimonial.createdAt).toLocaleDateString()}</p>
+              <p>Status: <span className={`font-medium ${
+                testimonial.status === 'approved' ? 'text-green-600' :
+                testimonial.status === 'rejected' ? 'text-red-600' :
+                'text-yellow-600'
+              }`}>{testimonial.status.toUpperCase()}</span></p>
+            </div>
           </div>
+        </Card>
 
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Company *
-            </label>
-            <input
-              type="text"
-              name="company"
-              value={formData.company}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-              placeholder="Tech Company Inc"
-            />
+        {/* Status Controls */}
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold text-foreground mb-4">Status Management</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Current Status
+              </label>
+              <div className={`px-3 py-2 rounded-lg text-center font-medium ${
+                testimonial.status === 'approved' ? 'bg-green-100 text-green-800' :
+                testimonial.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                'bg-yellow-100 text-yellow-800'
+              }`}>
+                {testimonial.status.toUpperCase()}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Admin Notes (optional)
+              </label>
+              <textarea
+                value={adminNotes}
+                onChange={(e) => setAdminNotes(e.target.value)}
+                placeholder="Add any notes about this decision..."
+                className="w-full p-3 border rounded-lg resize-none h-24 bg-background border-border text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+
+            <div className="space-y-3 pt-4">
+              {testimonial.status !== 'approved' && (
+                <Button
+                  onClick={() => handleStatusChange('approved')}
+                  disabled={loading}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+                >
+                  <Check size={16} />
+                  {loading ? 'Approving...' : 'Approve Testimonial'}
+                </Button>
+              )}
+              
+              {testimonial.status !== 'rejected' && (
+                <Button
+                  onClick={() => handleStatusChange('rejected')}
+                  disabled={loading}
+                  variant="outline"
+                  className="w-full border-red-600 text-red-600 hover:bg-red-50 flex items-center gap-2"
+                >
+                  <X size={16} />
+                  {loading ? 'Rejecting...' : 'Reject Testimonial'}
+                </Button>
+              )}
+            </div>
+
+            {testimonial.status === 'approved' && (
+              <div className="text-center text-sm text-green-600 bg-green-50 p-3 rounded-lg">
+                ✓ This testimonial is approved and visible on the public site
+              </div>
+            )}
+            
+            {testimonial.status === 'rejected' && (
+              <div className="text-center text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+                ✗ This testimonial is rejected and not visible on the public site
+              </div>
+            )}
           </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-2">
-            Role *
-          </label>
-          <input
-            type="text"
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-            placeholder="CEO / Project Manager"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-2">
-            Testimonial *
-          </label>
-          <textarea
-            name="content"
-            value={formData.content}
-            onChange={handleChange}
-            required
-            rows={6}
-            className="w-full px-4 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent resize-none"
-            placeholder="Share your feedback and experience..."
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-3">
-            Rating *
-          </label>
-          <div className="flex gap-2">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                onClick={() => setFormData(prev => ({ ...prev, rating: star }))}
-                className="transition-transform hover:scale-110"
-              >
-                <Star
-                  size={28}
-                  className={star <= formData.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}
-                />
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-2">
-            Image URL (Optional)
-          </label>
-          <input
-            type="url"
-            name="image"
-            value={formData.image}
-            onChange={handleChange}
-            className="w-full px-4 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-            placeholder="https://example.com/image.jpg"
-          />
-        </div>
-
-        <div className="flex gap-3 pt-6">
-          <Button
-            type="submit"
-            disabled={loading}
-            className="flex-1"
-          >
-            {loading ? 'Saving...' : id ? 'Update Testimonial' : 'Add Testimonial'}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
-    </Card>
+        </Card>
+      </div>
+    </div>
   );
 }

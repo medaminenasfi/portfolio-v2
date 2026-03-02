@@ -1,15 +1,17 @@
 import TestimonialForm from '@/components/admin/TestimonialForm';
 
 interface EditTestimonialPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function EditTestimonialPage({ params }: EditTestimonialPageProps) {
+export default async function EditTestimonialPage({ params }: EditTestimonialPageProps) {
+  const { id } = await params;
+  
   return (
     <div>
-      <TestimonialForm id={params.id} />
+      <TestimonialForm id={id} />
     </div>
   );
 }
