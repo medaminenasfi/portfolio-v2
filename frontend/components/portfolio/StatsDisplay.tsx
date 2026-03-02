@@ -17,19 +17,21 @@ export default function StatsDisplay() {
 
   const fetchStats = async () => {
     try {
-      const data: any = await api.getPortfolioStats();
-      const statsData = Array.isArray(data) ? data : data?.portfolioStats || data?.data || [];
+      const response: any = await api.getPortfolioStats();
+      const statsData = Array.isArray(response) ? response : response?.portfolioStats || response?.data || [];
       
       if (statsData.length > 0) {
+        // Update stats with backend data by matching labels (not IDs)
         const updatedStats = stats.map(stat => {
-          const backendStat = statsData.find((s: any) => s.id === stat.id);
-          return backendStat ? { ...stat, number: backendStat.number } : stat;
+          const backendStat = statsData.find((s: any) => s.label === stat.label);
+          return backendStat ? { ...stat, number: backendStat.number || stat.number } : stat;
         });
         setStats(updatedStats);
         // Save to localStorage as backup
         localStorage.setItem('portfolio-stats', JSON.stringify(updatedStats));
       }
     } catch (error) {
+      console.log('Failed to fetch stats from backend, using fallback:', error);
       // Silently handle API errors - fallback to localStorage or defaults
       const savedStats = localStorage.getItem('portfolio-stats');
       if (savedStats) {

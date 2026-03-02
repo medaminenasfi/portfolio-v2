@@ -26,6 +26,7 @@ const tech_stack_module_1 = require("./modules/tech-stack/tech-stack.module");
 const resume_sections_module_1 = require("./modules/resume-sections/resume-sections.module");
 const contact_module_1 = require("./modules/contact/contact.module");
 const analytics_module_1 = require("./modules/analytics/analytics.module");
+const settings_module_1 = require("./modules/settings/settings.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -47,6 +48,7 @@ exports.AppModule = AppModule = __decorate([
             resume_sections_module_1.ResumeSectionsModule,
             contact_module_1.ContactModule,
             analytics_module_1.AnalyticsModule,
+            settings_module_1.SettingsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

@@ -15,6 +15,7 @@ import { TechStackModule } from './modules/tech-stack/tech-stack.module';
 import { ResumeSectionsModule } from './modules/resume-sections/resume-sections.module';
 import { ContactModule } from './modules/contact/contact.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { SettingsModule } from './modules/settings/settings.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
     ResumeSectionsModule,
     ContactModule,
     AnalyticsModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

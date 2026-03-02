@@ -10,12 +10,9 @@ import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
 interface PortfolioStat {
-  id: string;
+  id: number;
   label: string;
   number: string;
-  description: string | null;
-  orderIndex: number;
-  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -29,6 +26,7 @@ const STATS_CONFIG = [
 export default function StatsPage() {
   const [stats, setStats] = useState<any[]>(STATS_CONFIG.map(stat => ({
     ...stat,
+    backendId: null, // Will store the numeric ID from backend
     number: stat.default,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -45,12 +43,18 @@ export default function StatsPage() {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const data: any = await api.getPortfolioStats();
-      if (Array.isArray(data) && data.length > 0) {
-        // Update stats with backend data
+      const response: any = await api.getPortfolioStats();
+      const backendStats = response.data || response; // Handle both response formats
+      
+      if (Array.isArray(backendStats) && backendStats.length > 0) {
+        // Update stats with backend data by matching labels
         const updatedStats = stats.map(stat => {
-          const backendStat = data.find((s: any) => s.id === stat.id);
-          return backendStat ? { ...stat, number: backendStat.number } : stat;
+          const backendStat = backendStats.find((s: any) => s.label === stat.label);
+          return backendStat ? { 
+            ...stat, 
+            backendId: backendStat.id, 
+            number: backendStat.number || stat.default 
+          } : stat;
         });
         setStats(updatedStats);
         // Save to localStorage as backup
@@ -104,6 +108,9 @@ export default function StatsPage() {
     try {
       setSaving(true);
       
+      const statToUpdate = stats.find(s => s.id === statId);
+      if (!statToUpdate) return;
+      
       // Update local state
       const updatedStats = stats.map(stat => 
         stat.id === statId ? { ...stat, number: editValue, updatedAt: new Date().toISOString() } : stat
@@ -115,7 +122,26 @@ export default function StatsPage() {
       
       // Try to save to backend
       try {
-        await api.updatePortfolioStat(statId, { number: editValue });
+        if (statToUpdate.backendId) {
+          // Update existing stat
+          await api.updatePortfolioStat(statToUpdate.backendId.toString(), { 
+            number: editValue,
+            label: statToUpdate.label 
+          });
+        } else {
+          // Create new stat
+          const newStat = await api.createPortfolioStat({ 
+            number: editValue,
+            label: statToUpdate.label 
+          });
+          // Update the stat with the new backend ID
+          const newStatData = (newStat as any).data || newStat;
+          const finalStats = updatedStats.map(stat => 
+            stat.id === statId ? { ...stat, backendId: newStatData?.id } : stat
+          );
+          setStats(finalStats);
+          localStorage.setItem('portfolio-stats', JSON.stringify(finalStats));
+        }
         toast({
           title: 'Success',
           description: 'Stat updated and saved to backend',

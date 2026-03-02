@@ -6,13 +6,13 @@ export class CreateStatDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(20)
-  number: string;
+  number!: string;
 
   @ApiProperty({ example: 'Years Experience', description: 'The stat label' })
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
-  label: string;
+  label!: string;
 }
 
 export class UpdateStatDto {

@@ -8,17 +8,17 @@ export declare class SettingsController {
     getAllStats(): Promise<{
         statusCode: HttpStatus;
         message: string;
-        data: any;
+        data: import("./entities/portfolio-stat.entity").PortfolioStat[];
     }>;
     createStat(createStatDto: CreateStatDto): Promise<{
         statusCode: HttpStatus;
         message: string;
-        data: any;
+        data: import("./entities/portfolio-stat.entity").PortfolioStat;
     }>;
     updateStat(id: number, updateStatDto: UpdateStatDto): Promise<{
         statusCode: HttpStatus;
         message: string;
-        data: any;
+        data: import("./entities/portfolio-stat.entity").PortfolioStat;
     }>;
     deleteStat(id: number): Promise<{
         statusCode: HttpStatus;
@@ -27,17 +27,17 @@ export declare class SettingsController {
     getAllSocialLinks(): Promise<{
         statusCode: HttpStatus;
         message: string;
-        data: any;
+        data: import("./entities/social-link.entity").SocialLink[];
     }>;
     createSocialLink(createSocialLinkDto: CreateSocialLinkDto): Promise<{
         statusCode: HttpStatus;
         message: string;
-        data: any;
+        data: import("./entities/social-link.entity").SocialLink;
     }>;
     updateSocialLink(id: number, updateSocialLinkDto: UpdateSocialLinkDto): Promise<{
         statusCode: HttpStatus;
         message: string;
-        data: any;
+        data: import("./entities/social-link.entity").SocialLink;
     }>;
     deleteSocialLink(id: number): Promise<{
         statusCode: HttpStatus;

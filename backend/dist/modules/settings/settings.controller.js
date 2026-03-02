@@ -11,10 +11,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SettingsController = void 0;
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
 const settings_service_1 = require("./settings.service");
 const settings_dto_1 = require("./dto/settings.dto");
 const social_link_dto_1 = require("./dto/social-link.dto");
@@ -86,8 +86,7 @@ let SettingsController = class SettingsController {
         };
     }
     async initializeDefaultData() {
-        await this.settingsService.initializeDefaultStats();
-        await this.settingsService.initializeDefaultSocialLinks();
+        await this.settingsService.initializeDefaults();
         return {
             statusCode: common_1.HttpStatus.OK,
             message: 'Default settings data initialized successfully',
@@ -97,8 +96,8 @@ let SettingsController = class SettingsController {
 exports.SettingsController = SettingsController;
 __decorate([
     (0, common_1.Get)('stats'),
-    ApiOperation({ summary: 'Get all portfolio stats' }),
-    ApiResponse({ status: 200, description: 'Return all portfolio stats' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all portfolio stats' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Return all portfolio stats' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
@@ -106,9 +105,9 @@ __decorate([
 __decorate([
     (0, common_1.Post)('stats'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    ApiBearerAuth(),
-    ApiOperation({ summary: 'Create a new portfolio stat' }),
-    ApiResponse({ status: 201, description: 'Stat created successfully' }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a new portfolio stat' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Stat created successfully' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [settings_dto_1.CreateStatDto]),
@@ -117,10 +116,10 @@ __decorate([
 __decorate([
     (0, common_1.Patch)('stats/:id'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    ApiBearerAuth(),
-    ApiOperation({ summary: 'Update a portfolio stat' }),
-    ApiParam({ name: 'id', description: 'Stat ID' }),
-    ApiResponse({ status: 200, description: 'Stat updated successfully' }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Update a portfolio stat' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'Stat ID' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Stat updated successfully' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -130,10 +129,10 @@ __decorate([
 __decorate([
     (0, common_1.Delete)('stats/:id'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    ApiBearerAuth(),
-    ApiOperation({ summary: 'Delete a portfolio stat' }),
-    ApiParam({ name: 'id', description: 'Stat ID' }),
-    ApiResponse({ status: 200, description: 'Stat deleted successfully' }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Delete a portfolio stat' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'Stat ID' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Stat deleted successfully' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
@@ -141,8 +140,8 @@ __decorate([
 ], SettingsController.prototype, "deleteStat", null);
 __decorate([
     (0, common_1.Get)('social-links'),
-    ApiOperation({ summary: 'Get all social links' }),
-    ApiResponse({ status: 200, description: 'Return all social links' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all social links' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Return all social links' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
@@ -150,9 +149,9 @@ __decorate([
 __decorate([
     (0, common_1.Post)('social-links'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    ApiBearerAuth(),
-    ApiOperation({ summary: 'Create a new social link' }),
-    ApiResponse({ status: 201, description: 'Social link created successfully' }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a new social link' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Social link created successfully' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [social_link_dto_1.CreateSocialLinkDto]),
@@ -161,10 +160,10 @@ __decorate([
 __decorate([
     (0, common_1.Patch)('social-links/:id'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    ApiBearerAuth(),
-    ApiOperation({ summary: 'Update a social link' }),
-    ApiParam({ name: 'id', description: 'Social link ID' }),
-    ApiResponse({ status: 200, description: 'Social link updated successfully' }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Update a social link' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'Social link ID' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Social link updated successfully' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -174,10 +173,10 @@ __decorate([
 __decorate([
     (0, common_1.Delete)('social-links/:id'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    ApiBearerAuth(),
-    ApiOperation({ summary: 'Delete a social link' }),
-    ApiParam({ name: 'id', description: 'Social link ID' }),
-    ApiResponse({ status: 200, description: 'Social link deleted successfully' }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Delete a social link' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'Social link ID' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Social link deleted successfully' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
@@ -186,15 +185,15 @@ __decorate([
 __decorate([
     (0, common_1.Post)('initialize'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    ApiBearerAuth(),
-    ApiOperation({ summary: 'Initialize default settings data' }),
-    ApiResponse({ status: 200, description: 'Default data initialized successfully' }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Initialize default settings data' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Default data initialized successfully' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "initializeDefaultData", null);
 exports.SettingsController = SettingsController = __decorate([
     (0, common_1.Controller)('api/settings'),
-    __metadata("design:paramtypes", [typeof (_a = typeof settings_service_1.SettingsService !== "undefined" && settings_service_1.SettingsService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [settings_service_1.SettingsService])
 ], SettingsController);
 //# sourceMappingURL=settings.controller.js.map

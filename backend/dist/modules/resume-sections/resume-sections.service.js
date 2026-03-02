@@ -21,15 +21,13 @@ const education_entity_1 = require("./entities/education.entity");
 const skills_entity_1 = require("./entities/skills.entity");
 const certifications_entity_1 = require("./entities/certifications.entity");
 const languages_entity_1 = require("./entities/languages.entity");
-const portfolio_stats_entity_1 = require("./entities/portfolio-stats.entity");
 let ResumeSectionsService = class ResumeSectionsService {
-    constructor(workExperienceRepository, educationRepository, skillsRepository, certificationsRepository, languagesRepository, portfolioStatsRepository) {
+    constructor(workExperienceRepository, educationRepository, skillsRepository, certificationsRepository, languagesRepository) {
         this.workExperienceRepository = workExperienceRepository;
         this.educationRepository = educationRepository;
         this.skillsRepository = skillsRepository;
         this.certificationsRepository = certificationsRepository;
         this.languagesRepository = languagesRepository;
-        this.portfolioStatsRepository = portfolioStatsRepository;
     }
     async createWorkExperience(createDto) {
         const maxOrder = await this.workExperienceRepository
@@ -263,57 +261,6 @@ let ResumeSectionsService = class ResumeSectionsService {
             order: { orderIndex: 'ASC' },
         });
     }
-    async createPortfolioStat(createDto) {
-        const maxOrder = await this.portfolioStatsRepository
-            .createQueryBuilder('stat')
-            .orderBy('stat.orderIndex', 'DESC')
-            .getOne();
-        const portfolioStat = this.portfolioStatsRepository.create({
-            ...createDto,
-            orderIndex: createDto.orderIndex ?? (maxOrder?.orderIndex ?? 0) + 1,
-        });
-        return await this.portfolioStatsRepository.save(portfolioStat);
-    }
-    async getAllPortfolioStats() {
-        return this.portfolioStatsRepository.find({
-            where: { isActive: true },
-            order: { orderIndex: 'ASC' },
-        });
-    }
-    async getPortfolioStatById(id) {
-        const stat = await this.portfolioStatsRepository.findOne({ where: { id } });
-        if (!stat) {
-            throw new common_1.NotFoundException('Portfolio stat not found');
-        }
-        return stat;
-    }
-    async updatePortfolioStat(id, updateDto) {
-        await this.portfolioStatsRepository.update(id, updateDto);
-        const updated = await this.portfolioStatsRepository.findOne({ where: { id } });
-        if (!updated) {
-            throw new common_1.NotFoundException('Portfolio stat not found');
-        }
-        return updated;
-    }
-    async deletePortfolioStat(id) {
-        const stat = await this.portfolioStatsRepository.findOne({ where: { id } });
-        if (!stat) {
-            throw new common_1.NotFoundException('Portfolio stat not found');
-        }
-        await this.portfolioStatsRepository.delete(id);
-    }
-    async reorderPortfolioStats(reorderDto) {
-        const { ids, orderIndexes } = reorderDto;
-        for (let i = 0; i < ids.length; i++) {
-            await this.portfolioStatsRepository.update(ids[i], {
-                orderIndex: orderIndexes[i],
-            });
-        }
-        return this.portfolioStatsRepository.find({
-            where: { id: (0, typeorm_2.In)(ids) },
-            order: { orderIndex: 'ASC' },
-        });
-    }
     async getCompleteResume() {
         return {
             workExperience: await this.getAllWorkExperience(),
@@ -321,7 +268,6 @@ let ResumeSectionsService = class ResumeSectionsService {
             skills: await this.getAllSkills(),
             certifications: await this.getAllCertifications(),
             languages: await this.getAllLanguages(),
-            portfolioStats: await this.getAllPortfolioStats(),
         };
     }
 };
@@ -333,9 +279,7 @@ exports.ResumeSectionsService = ResumeSectionsService = __decorate([
     __param(2, (0, typeorm_1.InjectRepository)(skills_entity_1.Skill)),
     __param(3, (0, typeorm_1.InjectRepository)(certifications_entity_1.Certification)),
     __param(4, (0, typeorm_1.InjectRepository)(languages_entity_1.Language)),
-    __param(5, (0, typeorm_1.InjectRepository)(portfolio_stats_entity_1.PortfolioStat)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,

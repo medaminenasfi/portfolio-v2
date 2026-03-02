@@ -19,7 +19,7 @@ __decorate([
     __metadata("design:type", Number)
 ], SocialLink.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 50, unique: true }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 50, unique: true, nullable: true }),
     __metadata("design:type", String)
 ], SocialLink.prototype, "name", void 0);
 __decorate([
@@ -27,7 +27,7 @@ __decorate([
     __metadata("design:type", String)
 ], SocialLink.prototype, "url", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 50 }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 50, nullable: true }),
     __metadata("design:type", String)
 ], SocialLink.prototype, "icon", void 0);
 __decorate([

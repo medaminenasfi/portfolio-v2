@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { SettingsService } from './settings.service';
 import { CreateStatDto, UpdateStatDto } from './dto/settings.dto';
 import { CreateSocialLinkDto, UpdateSocialLinkDto } from './dto/social-link.dto';
@@ -144,8 +145,7 @@ export class SettingsController {
   @ApiOperation({ summary: 'Initialize default settings data' })
   @ApiResponse({ status: 200, description: 'Default data initialized successfully' })
   async initializeDefaultData() {
-    await this.settingsService.initializeDefaultStats();
-    await this.settingsService.initializeDefaultSocialLinks();
+    await this.settingsService.initializeDefaults();
     return {
       statusCode: HttpStatus.OK,
       message: 'Default settings data initialized successfully',

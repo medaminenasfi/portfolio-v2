@@ -574,39 +574,75 @@ export class ApiClient {
     });
   }
 
-  // Portfolio Stats endpoints
+  // Portfolio Stats endpoints (now in settings module)
   async getPortfolioStats() {
-    return this.request('/resume-sections/portfolio-stats');
+    return this.request('/api/settings/stats');
   }
 
   async getPortfolioStatById(id: string) {
-    return this.request(`/resume-sections/portfolio-stats/${id}`);
+    return this.request(`/api/settings/stats/${id}`);
   }
 
   async createPortfolioStat(data: any) {
-    return this.request('/resume-sections/portfolio-stats', {
+    return this.request('/api/settings/stats', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
   async updatePortfolioStat(id: string, data: any) {
-    return this.request(`/resume-sections/portfolio-stats/${id}`, {
+    return this.request(`/api/settings/stats/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
 
   async deletePortfolioStat(id: string) {
-    return this.request(`/resume-sections/portfolio-stats/${id}`, {
+    return this.request(`/api/settings/stats/${id}`, {
       method: 'DELETE',
     });
   }
 
-  async reorderPortfolioStats(reorderData: { ids: string[]; orderIndexes: number[] }) {
-    return this.request('/resume-sections/portfolio-stats/reorder', {
+  // Note: reorder endpoint not available in settings module
+  // async reorderPortfolioStats(reorderData: { ids: string[]; orderIndexes: number[] }) {
+  //   return this.request('/api/settings/stats/reorder', {
+  //     method: 'PATCH',
+  //     body: JSON.stringify(reorderData),
+  //   });
+  // }
+
+  // Social Links endpoints (new in settings module)
+  async getSocialLinks() {
+    return this.request('/api/settings/social-links');
+  }
+
+  async getSocialLinkById(id: string) {
+    return this.request(`/api/settings/social-links/${id}`);
+  }
+
+  async createSocialLink(data: any) {
+    return this.request('/api/settings/social-links', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateSocialLink(id: string, data: any) {
+    return this.request(`/api/settings/social-links/${id}`, {
       method: 'PATCH',
-      body: JSON.stringify(reorderData),
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteSocialLink(id: string) {
+    return this.request(`/api/settings/social-links/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async initializeSettings() {
+    return this.request('/api/settings/initialize', {
+      method: 'POST',
     });
   }
 }

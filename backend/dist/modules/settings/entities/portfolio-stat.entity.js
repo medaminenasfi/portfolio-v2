@@ -19,11 +19,11 @@ __decorate([
     __metadata("design:type", Number)
 ], PortfolioStat.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 20 }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 20, nullable: true }),
     __metadata("design:type", String)
 ], PortfolioStat.prototype, "number", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 100 }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 100, nullable: true }),
     __metadata("design:type", String)
 ], PortfolioStat.prototype, "label", void 0);
 __decorate([

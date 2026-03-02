@@ -3,17 +3,17 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 @Entity('portfolio_stats')
 export class PortfolioStat {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
-  @Column({ type: 'varchar', length: 20 })
-  number: string;
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  number!: string;
 
-  @Column({ type: 'varchar', length: 100 })
-  label: string;
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  label!: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

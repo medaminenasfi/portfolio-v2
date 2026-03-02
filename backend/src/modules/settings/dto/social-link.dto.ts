@@ -6,7 +6,7 @@ export class CreateSocialLinkDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
-  name: string;
+  name!: string;
 
   @ApiProperty({ example: 'https://github.com/username', description: 'The social link URL' })
   @IsString()
@@ -18,7 +18,7 @@ export class CreateSocialLinkDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
-  icon: string;
+  icon!: string;
 }
 
 export class UpdateSocialLinkDto {

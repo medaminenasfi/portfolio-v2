@@ -112,24 +112,6 @@ let ResumeSectionsController = class ResumeSectionsController {
     reorderLanguages(reorderDto) {
         return this.resumeSectionsService.reorderLanguages(reorderDto);
     }
-    getPortfolioStats() {
-        return this.resumeSectionsService.getAllPortfolioStats();
-    }
-    getPortfolioStatById(id) {
-        return this.resumeSectionsService.getPortfolioStatById(id);
-    }
-    createPortfolioStat(createDto) {
-        return this.resumeSectionsService.createPortfolioStat(createDto);
-    }
-    updatePortfolioStat(id, updateDto) {
-        return this.resumeSectionsService.updatePortfolioStat(id, updateDto);
-    }
-    deletePortfolioStat(id) {
-        return this.resumeSectionsService.deletePortfolioStat(id);
-    }
-    reorderPortfolioStats(reorderDto) {
-        return this.resumeSectionsService.reorderPortfolioStats(reorderDto);
-    }
     getCompleteResume() {
         return this.resumeSectionsService.getCompleteResume();
     }
@@ -370,53 +352,6 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], ResumeSectionsController.prototype, "reorderLanguages", null);
-__decorate([
-    (0, common_1.Get)('portfolio-stats'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], ResumeSectionsController.prototype, "getPortfolioStats", null);
-__decorate([
-    (0, common_1.Get)('portfolio-stats/:id'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], ResumeSectionsController.prototype, "getPortfolioStatById", null);
-__decorate([
-    (0, common_1.Post)('portfolio-stats'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], ResumeSectionsController.prototype, "createPortfolioStat", null);
-__decorate([
-    (0, common_1.Patch)('portfolio-stats/:id'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
-], ResumeSectionsController.prototype, "updatePortfolioStat", null);
-__decorate([
-    (0, common_1.Delete)('portfolio-stats/:id'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], ResumeSectionsController.prototype, "deletePortfolioStat", null);
-__decorate([
-    (0, common_1.Patch)('portfolio-stats/reorder'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], ResumeSectionsController.prototype, "reorderPortfolioStats", null);
 __decorate([
     (0, common_1.Get)('complete'),
     __metadata("design:type", Function),

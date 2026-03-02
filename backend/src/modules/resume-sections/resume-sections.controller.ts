@@ -220,42 +220,6 @@ export class ResumeSectionsController {
     return this.resumeSectionsService.reorderLanguages(reorderDto);
   }
 
-  // Portfolio Stats endpoints
-  @Get('portfolio-stats')
-  getPortfolioStats() {
-    return this.resumeSectionsService.getAllPortfolioStats();
-  }
-
-  @Get('portfolio-stats/:id')
-  @UseGuards(JwtAuthGuard)
-  getPortfolioStatById(@Param('id', ParseUUIDPipe) id: string) {
-    return this.resumeSectionsService.getPortfolioStatById(id);
-  }
-
-  @Post('portfolio-stats')
-  @UseGuards(JwtAuthGuard)
-  createPortfolioStat(@Body() createDto: any) {
-    return this.resumeSectionsService.createPortfolioStat(createDto);
-  }
-
-  @Patch('portfolio-stats/:id')
-  @UseGuards(JwtAuthGuard)
-  updatePortfolioStat(@Param('id', ParseUUIDPipe) id: string, @Body() updateDto: any) {
-    return this.resumeSectionsService.updatePortfolioStat(id, updateDto);
-  }
-
-  @Delete('portfolio-stats/:id')
-  @UseGuards(JwtAuthGuard)
-  deletePortfolioStat(@Param('id', ParseUUIDPipe) id: string) {
-    return this.resumeSectionsService.deletePortfolioStat(id);
-  }
-
-  @Patch('portfolio-stats/reorder')
-  @UseGuards(JwtAuthGuard)
-  reorderPortfolioStats(@Body() reorderDto: { ids: string[]; orderIndexes: number[] }) {
-    return this.resumeSectionsService.reorderPortfolioStats(reorderDto);
-  }
-
   // Get complete resume
   @Get('complete')
   getCompleteResume() {

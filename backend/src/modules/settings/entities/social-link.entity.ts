@@ -3,20 +3,20 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 @Entity('social_links')
 export class SocialLink {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
-  @Column({ type: 'varchar', length: 50, unique: true })
-  name: string;
+  @Column({ type: 'varchar', length: 50, unique: true, nullable: true })
+  name!: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  url: string;
+  url!: string;
 
-  @Column({ type: 'varchar', length: 50 })
-  icon: string;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  icon!: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }
