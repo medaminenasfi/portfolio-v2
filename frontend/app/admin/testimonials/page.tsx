@@ -31,6 +31,25 @@ export default function TestimonialsPage() {
     fetchTestimonials();
   }, []);
 
+  // Handle hash scrolling to specific testimonial
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash) {
+      // Wait a bit for content to load
+      setTimeout(() => {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Add highlight effect
+          element.classList.add('ring-2', 'ring-cyan-400', 'ring-offset-2', 'ring-offset-slate-900');
+          setTimeout(() => {
+            element.classList.remove('ring-2', 'ring-cyan-400', 'ring-offset-2', 'ring-offset-slate-900');
+          }, 3000);
+        }
+      }, 500);
+    }
+  }, [testimonials]); // Re-run when testimonials are loaded
+
   const fetchTestimonials = async () => {
     try {
       setLoading(true);
@@ -113,7 +132,7 @@ export default function TestimonialsPage() {
       ) : (
         <div className="grid gap-4">
           {testimonials.map((testimonial) => (
-            <Card key={testimonial.id} className="p-6">
+            <Card key={testimonial.id} id={testimonial.id} className="p-6 transition-all duration-300">
               <div className="flex justify-between items-start gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
