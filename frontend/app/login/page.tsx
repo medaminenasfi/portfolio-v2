@@ -76,7 +76,6 @@ export default function LoginPage() {
               className="mt-2 bg-secondary/30 border-border"
               required
             />
-            <p className="text-xs text-muted-foreground mt-1">Demo: admin</p>
           </div>
 
           <div>
@@ -104,7 +103,6 @@ export default function LoginPage() {
                 )}
               </button>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Demo: password</p>
           </div>
 
           <Button
@@ -124,11 +122,6 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <div className="mt-6 p-4 bg-secondary/30 rounded-lg border border-border">
-          <p className="text-xs text-muted-foreground mb-2">Demo Credentials:</p>
-          <p className="text-xs text-foreground">Username: admin</p>
-          <p className="text-xs text-foreground">Password: password</p>
-        </div>
       </Card>
     </div>
   );
