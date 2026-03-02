@@ -1,10 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { LayoutDashboard, Briefcase, FileText, MessageSquare, Settings, LogOut, ChevronRight, Sparkles, Code, BarChart3 } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
 
 interface AdminSidebarProps {
   open: boolean;
@@ -19,7 +21,27 @@ interface MenuItem {
 
 export default function AdminSidebar({ open }: AdminSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { logout } = useAuth();
   const [pendingTestimonials, setPendingTestimonials] = useState(0);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: 'Logged Out',
+        description: 'You have been successfully logged out.',
+      });
+      router.push('/admin');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to logout. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   // Fetch pending testimonials count
   useEffect(() => {
@@ -119,7 +141,10 @@ export default function AdminSidebar({ open }: AdminSidebarProps) {
       </nav>
 
       <div className="border-t border-cyan-500/20 p-3 md:p-4">
-        <button className="flex items-center gap-3 w-full px-3 md:px-4 py-2 md:py-3 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 border border-transparent hover:border-red-500/30">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-3 w-full px-3 md:px-4 py-2 md:py-3 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 border border-transparent hover:border-red-500/30"
+        >
           <LogOut size={18} />
           {open && <span className="text-xs md:text-sm font-medium">Logout</span>}
         </button>
