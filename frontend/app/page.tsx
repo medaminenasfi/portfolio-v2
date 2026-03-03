@@ -9,6 +9,7 @@ import CertificationsSection from '@/components/portfolio/CertificationsSection'
 import LanguagesSection from '@/components/portfolio/LanguagesSection';
 import SkillsSection from '@/components/portfolio/SkillsSection';
 import TestimonialsSection from '@/components/portfolio/TestimonialsSection';
+import ContactSection from '@/components/portfolio/ContactSection';
 import Navigation from '@/components/portfolio/Navigation';
 import Footer from '@/components/portfolio/Footer';
 import ScrollToTop from '@/components/portfolio/ScrollToTop';
@@ -44,6 +45,10 @@ export default function Page() {
       
       <div id="skills" className="scroll-mt-20">
         <SkillsSection />
+      </div>
+      
+      <div id="contact" className="scroll-mt-20">
+        <ContactSection />
       </div>
       
       <Footer />

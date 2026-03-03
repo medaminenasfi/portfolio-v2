@@ -16,6 +16,7 @@ export default function Navigation({ activeSection }: NavigationProps) {
     { label: 'Testimonials', href: '#testimonials', id: 'testimonials' },
     { label: 'Experience', href: '#experience', id: 'experience' },
     { label: 'Skills', href: '#skills', id: 'skills' },
+    { label: 'Contact', href: '#contact', id: 'contact' },
   ];
 
   return (
