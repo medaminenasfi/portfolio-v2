@@ -1,6 +1,7 @@
 'use client';
 
 import Hero from '@/components/portfolio/Hero';
+import StatsSection from '@/components/portfolio/StatsSection';
 import AboutSection from '@/components/portfolio/AboutSection';
 import ProjectsSection from '@/components/portfolio/ProjectsSection';
 import ExperienceSection from '@/components/portfolio/ExperienceSection';
@@ -21,6 +22,10 @@ export default function Page() {
       
       <Hero />
       
+      <div id="stats" className="scroll-mt-20">
+        <StatsSection />
+      </div>
+      
       <div id="about" className="scroll-mt-20">
         <AboutSection />
       </div>
@@ -37,11 +42,17 @@ export default function Page() {
         <ExperienceSection />
       </div>
       
-      <EducationSection />
+      <div id="education" className="scroll-mt-20">
+        <EducationSection />
+      </div>
       
-      <CertificationsSection />
+      <div id="certifications" className="scroll-mt-20">
+        <CertificationsSection />
+      </div>
       
-      <LanguagesSection />
+      <div id="languages" className="scroll-mt-20">
+        <LanguagesSection />
+      </div>
       
       <div id="testimonials" className="scroll-mt-20">
         <TestimonialsSection />

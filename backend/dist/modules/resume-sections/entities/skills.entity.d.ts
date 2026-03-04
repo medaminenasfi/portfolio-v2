@@ -15,9 +15,9 @@ export declare class Skill {
     name: string;
     photo: string;
     category: SkillCategory;
-    proficiency: SkillProficiency;
-    keywords: string[];
-    description: string;
+    proficiency?: SkillProficiency;
+    keywords?: string[];
+    description?: string;
     orderIndex: number;
     isActive: boolean;
     createdAt: Date;

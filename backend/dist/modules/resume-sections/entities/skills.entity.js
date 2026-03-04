@@ -51,6 +51,8 @@ __decorate([
     (0, typeorm_1.Column)({
         type: 'enum',
         enum: SkillProficiency,
+        nullable: true,
+        default: SkillProficiency.INTERMEDIATE,
     }),
     __metadata("design:type", String)
 ], Skill.prototype, "proficiency", void 0);
