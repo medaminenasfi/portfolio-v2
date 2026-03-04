@@ -25,12 +25,12 @@ export default function Page() {
         <AboutSection />
       </div>
       
-      <div id="projects" className="scroll-mt-20">
-        <ProjectsSection />
+      <div id="skills" className="scroll-mt-20">
+        <SkillsSection />
       </div>
       
-      <div id="testimonials" className="scroll-mt-20">
-        <TestimonialsSection />
+      <div id="projects" className="scroll-mt-20">
+        <ProjectsSection />
       </div>
       
       <div id="experience" className="scroll-mt-20">
@@ -43,8 +43,8 @@ export default function Page() {
       
       <LanguagesSection />
       
-      <div id="skills" className="scroll-mt-20">
-        <SkillsSection />
+      <div id="testimonials" className="scroll-mt-20">
+        <TestimonialsSection />
       </div>
       
       <div id="contact" className="scroll-mt-20">
