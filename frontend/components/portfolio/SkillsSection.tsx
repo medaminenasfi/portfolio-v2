@@ -20,26 +20,21 @@ interface Skill {
   id: string;
   name: string;
   photo?: string;
-  category: 'frontend' | 'backend' | 'tools' | 'soft_skills';
-  proficiency: 'beginner' | 'intermediate' | 'advanced' | 'expert';
-  keywords?: string[];
-  description?: string;
+  category: 'frontend' | 'backend' | 'tools' | 'soft_skills' | 'database' | 'mobile' | 'design' | 'devops_cloud' | 'desktop';
   orderIndex: number;
   isActive: boolean;
 }
-
-const proficiencyColors: Record<string, { bg: string; text: string; border: string }> = {
-  beginner: { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30' },
-  intermediate: { bg: 'bg-cyan-500/20', text: 'text-cyan-400', border: 'border-cyan-500/30' },
-  advanced: { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/30' },
-  expert: { bg: 'bg-violet-500/20', text: 'text-violet-400', border: 'border-violet-500/30' },
-};
 
 const categoryIcons: Record<string, any> = {
   frontend: Code,
   backend: Code,
   tools: Wrench,
   soft_skills: Star,
+  database: Wrench, // You can change to Database icon if available
+  mobile: Code, // You can change to Mobile icon if available
+  design: Star, // You can change to Design icon if available
+  devops_cloud: Wrench, // You can change to DevOps icon if available
+  desktop: Code, // You can change to Desktop icon if available
 };
 
 const categoryLabels: Record<string, string> = {
@@ -47,6 +42,11 @@ const categoryLabels: Record<string, string> = {
   backend: 'Backend',
   tools: 'Tools & DevOps',
   soft_skills: 'Soft Skills',
+  database: 'Database',
+  mobile: 'Mobile Development',
+  design: 'Design',
+  devops_cloud: 'DevOps & Cloud',
+  desktop: 'Desktop Software',
 };
 
 export default function SkillsSection() {
@@ -183,11 +183,10 @@ export default function SkillsSection() {
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {categorySkills.map((skill) => {
-                      const profColor = proficiencyColors[skill.proficiency];
                       return (
                         <div key={skill.id} className="group/skill relative">
                           <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-violet-500/10 rounded-lg blur opacity-0 group-hover/skill:opacity-100 transition-opacity duration-300"></div>
-                          <div className={`relative p-4 rounded-lg border ${profColor.border} bg-gradient-to-br from-slate-800/50 to-slate-900/30 hover:from-slate-800/70 hover:to-slate-900/50 transition-all duration-300 h-full flex flex-col items-center text-center gap-3 group-hover/skill:shadow-lg group-hover/skill:shadow-cyan-500/10`}>
+                          <div className="relative p-4 rounded-lg border border-cyan-500/30 bg-gradient-to-br from-slate-800/50 to-slate-900/30 hover:from-slate-800/70 hover:to-slate-900/50 transition-all duration-300 h-full flex flex-col items-center text-center gap-3 group-hover/skill:shadow-lg group-hover/skill:shadow-cyan-500/10">
                             {/* Skill Image */}
                             {skill.photo ? (
                               <div className="relative w-14 h-14 flex-shrink-0">
@@ -207,18 +206,6 @@ export default function SkillsSection() {
                             <div>
                               <h4 className="font-bold text-foreground text-sm leading-tight">{skill.name}</h4>
                             </div>
-
-                            {/* Proficiency Badge */}
-                            <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${profColor.bg} ${profColor.text} ${profColor.border} capitalize`}>
-                              {skill.proficiency}
-                            </span>
-
-                            {/* Description Tooltip */}
-                            {skill.description && (
-                              <p className="text-xs text-muted-foreground line-clamp-2 hidden group-hover/skill:block mt-2 pt-2 border-t border-cyan-500/20">
-                                {skill.description}
-                              </p>
-                            )}
                           </div>
                         </div>
                       );

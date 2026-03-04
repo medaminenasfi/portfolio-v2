@@ -34,10 +34,8 @@ export default function SkillsPage() {
   const [formData, setFormData] = useState({
     name: '',
     photo: '',
-    category: 'frontend' as 'frontend' | 'backend' | 'tools' | 'soft_skills',
-    proficiency: 'intermediate' as 'beginner' | 'intermediate' | 'advanced' | 'expert',
-    keywords: '',
-    description: '',
+    category: 'frontend' as 'frontend' | 'backend' | 'tools' | 'soft_skills' | 'database' | 'mobile' | 'design' | 'devops_cloud' | 'desktop',
+    orderIndex: 0,
   });
 
   useEffect(() => {
@@ -69,7 +67,7 @@ export default function SkillsPage() {
 
     try {
       setUploadingPhoto(true);
-      const result = await api.uploadSkillPhoto(file);
+      const result = await api.uploadSkillPhoto(file) as any;
       setFormData((prev) => ({ ...prev, photo: result.url }));
     } catch (error) {
       console.error('Failed to upload photo:', error);
@@ -84,9 +82,12 @@ export default function SkillsPage() {
     e.preventDefault();
     
     try {
+      // Get the next order index
+      const nextOrderIndex = skills.length > 0 ? Math.max(...skills.map(s => s.orderIndex)) + 1 : 0;
+      
       const skillData = {
         ...formData,
-        keywords: formData.keywords.split(',').map(k => k.trim()).filter(k => k),
+        orderIndex: editingSkill ? formData.orderIndex || 0 : nextOrderIndex,
       };
 
       if (editingSkill) {
@@ -100,10 +101,8 @@ export default function SkillsPage() {
       setFormData({
         name: '',
         photo: '',
-        category: 'frontend' as 'frontend' | 'backend' | 'tools' | 'soft_skills',
-        proficiency: 'intermediate' as 'beginner' | 'intermediate' | 'advanced' | 'expert',
-        keywords: '',
-        description: '',
+        category: 'frontend' as 'frontend' | 'backend' | 'tools' | 'soft_skills' | 'database' | 'mobile' | 'design' | 'devops_cloud' | 'desktop',
+        orderIndex: 0,
       });
       fetchSkills();
     } catch (error) {
@@ -118,9 +117,7 @@ export default function SkillsPage() {
       name: skill.name,
       photo: skill.photo || '',
       category: skill.category,
-      proficiency: skill.proficiency,
-      keywords: skill.keywords?.join(', ') || '',
-      description: skill.description || '',
+      orderIndex: skill.orderIndex,
     });
     setShowForm(true);
   };
@@ -205,62 +202,39 @@ export default function SkillsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {skills.map((skill) => (
           <Card key={skill.id} className="p-6 bg-card border-border">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  {skill.photo && (
-                    <img
-                      src={getPhotoUrl(skill.photo)}
-                      alt={skill.name}
-                      className="w-8 h-8 rounded object-cover"
-                    />
-                  )}
-                  <h3 className="font-semibold text-foreground">{skill.name}</h3>
-                </div>
-                <div className="flex gap-1">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                {skill.photo && (
+                  <img
+                    src={getPhotoUrl(skill.photo)}
+                    alt={skill.name}
+                    className="w-12 h-12 rounded-lg object-cover"
+                  />
+                )}
+                <div>
+                  <h3 className="font-semibold text-foreground text-lg">{skill.name}</h3>
                   <Badge className={getCategoryColor(skill.category)}>
                     {skill.category}
                   </Badge>
-                  <Badge className={getProficiencyColor(skill.proficiency)}>
-                    {skill.proficiency}
-                  </Badge>
                 </div>
               </div>
-              {renderStars(skill.proficiency)}
-            </div>
-
-            {skill.description && (
-              <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-                {skill.description}
-              </p>
-            )}
-
-            {skill.keywords && skill.keywords.length > 0 && (
-              <div className="flex flex-wrap gap-1 mb-4">
-                {skill.keywords.map((keyword, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {keyword}
-                  </Badge>
-                ))}
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEdit(skill)}
+                >
+                  <Edit size={16} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDelete(skill.id)}
+                  className="text-destructive hover:text-destructive"
+                >
+                  <Trash2 size={16} />
+                </Button>
               </div>
-            )}
-
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleEdit(skill)}
-              >
-                <Edit size={14} />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDelete(skill.id)}
-                className="text-destructive hover:text-destructive"
-              >
-                <Trash2 size={14} />
-              </Button>
             </div>
           </Card>
         ))}
@@ -283,10 +257,8 @@ export default function SkillsPage() {
                   setFormData({
                     name: '',
                     photo: '',
-                    category: 'frontend' as 'frontend' | 'backend' | 'tools' | 'soft_skills',
-                    proficiency: 'intermediate' as 'beginner' | 'intermediate' | 'advanced' | 'expert',
-                    keywords: '',
-                    description: '',
+                    category: 'frontend' as 'frontend' | 'backend' | 'tools' | 'soft_skills' | 'database' | 'mobile' | 'design' | 'devops_cloud' | 'desktop',
+                    orderIndex: 0,
                   });
                 }}
               >
@@ -346,51 +318,20 @@ export default function SkillsPage() {
                   <select
                     id="category"
                     value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value as 'frontend' | 'backend' | 'tools' | 'soft_skills' })}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value as 'frontend' | 'backend' | 'tools' | 'soft_skills' | 'database' | 'mobile' | 'design' | 'devops_cloud' | 'desktop' })}
                     className="w-full p-2 border border-border rounded-md bg-background"
                   >
                     <option value="frontend">Frontend</option>
                     <option value="backend">Backend</option>
                     <option value="tools">Tools</option>
                     <option value="soft_skills">Soft Skills</option>
+                    <option value="database">Database</option>
+                    <option value="mobile">Mobile</option>
+                    <option value="design">Design</option>
+                    <option value="devops_cloud">DevOps & Cloud</option>
+                    <option value="desktop">Desktop</option>
                   </select>
                 </div>
-
-                <div>
-                  <Label htmlFor="proficiency">Proficiency</Label>
-                  <select
-                    id="proficiency"
-                    value={formData.proficiency}
-                    onChange={(e) => setFormData({ ...formData, proficiency: e.target.value as 'beginner' | 'intermediate' | 'advanced' | 'expert' })}
-                    className="w-full p-2 border border-border rounded-md bg-background"
-                  >
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced">Advanced</option>
-                    <option value="expert">Expert</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="keywords">Keywords (comma-separated)</Label>
-                <Input
-                  id="keywords"
-                  value={formData.keywords}
-                  onChange={(e) => setFormData({ ...formData, keywords: e.target.value })}
-                  placeholder="javascript, react, typescript"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Describe your experience with this skill..."
-                  rows={3}
-                />
               </div>
 
               <div className="flex justify-end gap-2 pt-4">
@@ -404,9 +345,7 @@ export default function SkillsPage() {
                       name: '',
                       photo: '',
                       category: 'frontend',
-                      proficiency: 'intermediate',
-                      keywords: '',
-                      description: '',
+                      orderIndex: 0,
                     });
                   }}
                 >

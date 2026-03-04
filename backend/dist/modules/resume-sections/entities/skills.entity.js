@@ -17,6 +17,11 @@ var SkillCategory;
     SkillCategory["BACKEND"] = "backend";
     SkillCategory["TOOLS"] = "tools";
     SkillCategory["SOFT_SKILLS"] = "soft_skills";
+    SkillCategory["DATABASE"] = "database";
+    SkillCategory["MOBILE"] = "mobile";
+    SkillCategory["DESIGN"] = "design";
+    SkillCategory["DEVOPS_CLOUD"] = "devops_cloud";
+    SkillCategory["DESKTOP"] = "desktop";
 })(SkillCategory || (exports.SkillCategory = SkillCategory = {}));
 var SkillProficiency;
 (function (SkillProficiency) {
@@ -51,6 +56,8 @@ __decorate([
     (0, typeorm_1.Column)({
         type: 'enum',
         enum: SkillProficiency,
+        nullable: true,
+        default: SkillProficiency.INTERMEDIATE,
     }),
     __metadata("design:type", String)
 ], Skill.prototype, "proficiency", void 0);

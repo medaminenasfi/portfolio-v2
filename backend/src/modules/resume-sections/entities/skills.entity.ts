@@ -5,6 +5,11 @@ export enum SkillCategory {
   BACKEND = 'backend',
   TOOLS = 'tools',
   SOFT_SKILLS = 'soft_skills',
+  DATABASE = 'database',
+  MOBILE = 'mobile',
+  DESIGN = 'design',
+  DEVOPS_CLOUD = 'devops_cloud',
+  DESKTOP = 'desktop',
 }
 
 export enum SkillProficiency {
@@ -34,14 +39,16 @@ export class Skill {
   @Column({
     type: 'enum',
     enum: SkillProficiency,
+    nullable: true,
+    default: SkillProficiency.INTERMEDIATE,
   })
-  proficiency!: SkillProficiency;
+  proficiency?: SkillProficiency;
 
   @Column({ type: 'json', nullable: true })
-  keywords!: string[]; // Related keywords/tags
+  keywords?: string[]; // Related keywords/tags
 
   @Column({ type: 'text', nullable: true })
-  description!: string;
+  description?: string;
 
   @Column({ default: 0 })
   orderIndex!: number;

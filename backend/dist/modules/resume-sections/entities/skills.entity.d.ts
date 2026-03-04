@@ -2,7 +2,12 @@ export declare enum SkillCategory {
     FRONTEND = "frontend",
     BACKEND = "backend",
     TOOLS = "tools",
-    SOFT_SKILLS = "soft_skills"
+    SOFT_SKILLS = "soft_skills",
+    DATABASE = "database",
+    MOBILE = "mobile",
+    DESIGN = "design",
+    DEVOPS_CLOUD = "devops_cloud",
+    DESKTOP = "desktop"
 }
 export declare enum SkillProficiency {
     BEGINNER = "beginner",
@@ -15,9 +20,9 @@ export declare class Skill {
     name: string;
     photo: string;
     category: SkillCategory;
-    proficiency: SkillProficiency;
-    keywords: string[];
-    description: string;
+    proficiency?: SkillProficiency;
+    keywords?: string[];
+    description?: string;
     orderIndex: number;
     isActive: boolean;
     createdAt: Date;
