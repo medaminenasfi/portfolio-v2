@@ -20,7 +20,11 @@ interface Skill {
   id: string;
   name: string;
   photo?: string;
+<<<<<<< HEAD
   category: 'frontend' | 'backend' | 'tools' | 'soft_skills' | 'database' | 'mobile' | 'design' | 'devops_cloud' | 'desktop';
+=======
+  category: 'frontend' | 'backend' | 'tools' | 'soft_skills';
+>>>>>>> a5d5a420ece16407022b01c3103039b3c6eec770
   orderIndex: number;
   isActive: boolean;
 }

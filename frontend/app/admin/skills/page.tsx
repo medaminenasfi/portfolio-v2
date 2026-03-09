@@ -34,7 +34,11 @@ export default function SkillsPage() {
   const [formData, setFormData] = useState({
     name: '',
     photo: '',
+<<<<<<< HEAD
     category: 'frontend' as 'frontend' | 'backend' | 'tools' | 'soft_skills' | 'database' | 'mobile' | 'design' | 'devops_cloud' | 'desktop',
+=======
+    category: 'frontend' as 'frontend' | 'backend' | 'tools' | 'soft_skills',
+>>>>>>> a5d5a420ece16407022b01c3103039b3c6eec770
     orderIndex: 0,
   });
 
@@ -101,7 +105,11 @@ export default function SkillsPage() {
       setFormData({
         name: '',
         photo: '',
+<<<<<<< HEAD
         category: 'frontend' as 'frontend' | 'backend' | 'tools' | 'soft_skills' | 'database' | 'mobile' | 'design' | 'devops_cloud' | 'desktop',
+=======
+        category: 'frontend' as 'frontend' | 'backend' | 'tools' | 'soft_skills',
+>>>>>>> a5d5a420ece16407022b01c3103039b3c6eec770
         orderIndex: 0,
       });
       fetchSkills();
@@ -257,7 +265,11 @@ export default function SkillsPage() {
                   setFormData({
                     name: '',
                     photo: '',
+<<<<<<< HEAD
                     category: 'frontend' as 'frontend' | 'backend' | 'tools' | 'soft_skills' | 'database' | 'mobile' | 'design' | 'devops_cloud' | 'desktop',
+=======
+                    category: 'frontend' as 'frontend' | 'backend' | 'tools' | 'soft_skills',
+>>>>>>> a5d5a420ece16407022b01c3103039b3c6eec770
                     orderIndex: 0,
                   });
                 }}
