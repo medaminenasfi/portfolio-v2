@@ -13,3 +13,8 @@ dist
 .DS_Store
 .vscode
 .idea
+main-fixed.js
+start-server.js
+run-server.bat
+SWAGGER_*.md
+DEPLOYMENT_GUIDE.md
