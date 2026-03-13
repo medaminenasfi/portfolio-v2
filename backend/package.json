@@ -4,16 +4,16 @@
   "description": "API backend built with NestJS",
   "main": "dist/main.js",
   "scripts": {
-    "build": "nest build",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "dev": "npm run start:dev",
-    "lint": "eslint \"src/**/*.ts\" --fix",
+    "build": "npx tsc",
+    "start": "node dist/main-fixed.js",
+    "start:dev": "npx tsc && node dist/main-fixed.js",
+    "dev": "npm run start",
+    "run": "run-server.bat",
+    "lint": "npx eslint \"src/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "typeorm": "typeorm-ts-node-commonjs",
+    "typeorm": "npx typeorm-ts-node-commonjs",
     "migration:generate": "npm run typeorm -- migration:generate",
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert"
@@ -23,7 +23,6 @@
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
-    "@nestjs/cli": "^11.0.16",
     "@nestjs/common": "^11.1.14",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.1.14",
@@ -54,6 +53,7 @@
     "typeorm": "^0.3.28"
   },
   "devDependencies": {
+    "@nestjs/cli": "^11.0.16",
     "@nestjs/testing": "^11.1.14",
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",

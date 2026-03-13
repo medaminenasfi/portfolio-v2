@@ -7,11 +7,18 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+} from '@nestjs/swagger';
 
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -20,6 +27,35 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  @ApiOperation({ summary: 'Register a new admin user' })
+  @ApiBody({ type: RegisterDto })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'User successfully registered',
+    schema: {
+      example: {
+        message: 'User registered successfully',
+        user: {
+          id: 1,
+          username: 'admin',
+          email: 'admin@example.com'
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 409, 
+    description: 'User already exists or registration disabled',
+    schema: {
+      example: {
+        message: 'Registration disabled. Single admin user already exists.'
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Invalid input data' 
+  })
   async register(@Body() registerDto: RegisterDto) {
     // Check if any user already exists (single admin system)
     const userExists = await this.authService.userExists();
@@ -33,6 +69,37 @@ export class AuthController {
   }
 
   @Post('login')
+  @ApiOperation({ summary: 'Login user and return JWT token' })
+  @ApiBody({ type: LoginDto })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Login successful',
+    schema: {
+      example: {
+        message: 'admin connected successfully!',
+        username: 'admin',
+        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Invalid credentials',
+    schema: {
+      example: {
+        message: 'Invalid credentials'
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - Missing credentials',
+    schema: {
+      example: {
+        message: 'Username and password are required'
+      }
+    }
+  })
   async login(@Body() loginDto: LoginDto) {
     console.log('[AUTH] Login attempt received');
     console.log('[AUTH] Request body:', JSON.stringify(loginDto, null, 2));
