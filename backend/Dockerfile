@@ -2,14 +2,15 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy configuration files first
+# Copy all files needed for build
 COPY package*.json ./
 COPY tsconfig.json ./
+COPY src ./src
 
 # Install dependencies and build
 RUN npm install
 
-# Copy rest of the application
+# Copy remaining application files
 COPY . .
 
 # Build the application
