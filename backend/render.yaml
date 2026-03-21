@@ -4,7 +4,6 @@ services:
     name: portfolio-backend
     env: node
     plan: free
-    runtime: node-20
     buildCommand: npm install && npm run build
     startCommand: npm start
     healthCheckPath: /health

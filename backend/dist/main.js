@@ -36,6 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const core_1 = require("@nestjs/core");
+const swagger_1 = require("@nestjs/swagger");
 const express = __importStar(require("express"));
 const path_1 = require("path");
 const app_module_1 = require("./app.module");
@@ -60,9 +61,37 @@ async function bootstrap() {
     }));
     const port = configService.getOrThrow('app.port');
     const appName = configService.get('app.name', 'portfolio-api');
+    const config = new swagger_1.DocumentBuilder()
+        .setTitle('Portfolio API')
+        .setDescription('API documentation for Portfolio application')
+        .setVersion('1.0')
+        .addTag('auth', 'Authentication endpoints')
+        .addTag('projects', 'Project management')
+        .addTag('testimonials', 'Testimonials management')
+        .addTag('resume', 'Resume management')
+        .addTag('tech-stack', 'Technology stack management')
+        .addTag('contact', 'Contact form management')
+        .addTag('analytics', 'Analytics endpoints')
+        .addTag('settings', 'Application settings')
+        .addBearerAuth({
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+    }, 'JWT-auth')
+        .build();
+    const document = swagger_1.SwaggerModule.createDocument(app, config);
+    swagger_1.SwaggerModule.setup('docs', app, document, {
+        swaggerOptions: {
+            persistAuthorization: true,
+        },
+    });
     await app.listen(port);
     const logger = new common_1.Logger('Bootstrap');
     logger.log(`🚀 ${appName} is running at http://localhost:${port}/api`);
+    logger.log(`📚 Swagger docs available at http://localhost:${port}/docs`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

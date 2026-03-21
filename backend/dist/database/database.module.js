@@ -32,6 +32,7 @@ exports.DatabaseModule = DatabaseModule = __decorate([
                         logging: database.logging,
                         synchronize: appConfig.env !== 'production',
                         autoLoadEntities: true,
+                        ssl: database.ssl ? { rejectUnauthorized: false } : false,
                     };
                 },
             }),

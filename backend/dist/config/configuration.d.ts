@@ -10,6 +10,7 @@ export interface DatabaseConfig {
     password: string;
     name: string;
     logging: boolean;
+    ssl?: boolean;
 }
 export interface AppConfiguration {
     app: AppConfig;

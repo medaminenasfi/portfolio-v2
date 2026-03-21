@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
+const swagger_1 = require("@nestjs/swagger");
 const auth_service_1 = require("./auth.service");
 const login_dto_1 = require("./dto/login.dto");
 const register_dto_1 = require("./dto/register.dto");
@@ -62,6 +63,35 @@ let AuthController = class AuthController {
 exports.AuthController = AuthController;
 __decorate([
     (0, common_1.Post)('register'),
+    (0, swagger_1.ApiOperation)({ summary: 'Register a new admin user' }),
+    (0, swagger_1.ApiBody)({ type: register_dto_1.RegisterDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 201,
+        description: 'User successfully registered',
+        schema: {
+            example: {
+                message: 'User registered successfully',
+                user: {
+                    id: 1,
+                    username: 'admin',
+                    email: 'admin@example.com'
+                }
+            }
+        }
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 409,
+        description: 'User already exists or registration disabled',
+        schema: {
+            example: {
+                message: 'Registration disabled. Single admin user already exists.'
+            }
+        }
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'Bad request - Invalid input data'
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [register_dto_1.RegisterDto]),
@@ -69,12 +99,44 @@ __decorate([
 ], AuthController.prototype, "register", null);
 __decorate([
     (0, common_1.Post)('login'),
+    (0, swagger_1.ApiOperation)({ summary: 'Login user and return JWT token' }),
+    (0, swagger_1.ApiBody)({ type: login_dto_1.LoginDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Login successful',
+        schema: {
+            example: {
+                message: 'admin connected successfully!',
+                username: 'admin',
+                access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+            }
+        }
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 401,
+        description: 'Invalid credentials',
+        schema: {
+            example: {
+                message: 'Invalid credentials'
+            }
+        }
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'Bad request - Missing credentials',
+        schema: {
+            example: {
+                message: 'Username and password are required'
+            }
+        }
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [login_dto_1.LoginDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 exports.AuthController = AuthController = __decorate([
+    (0, swagger_1.ApiTags)('auth'),
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService,
         jwt_1.JwtService])

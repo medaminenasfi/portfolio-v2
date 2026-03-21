@@ -12,23 +12,41 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateProjectDto = exports.SeoDataDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
+const swagger_1 = require("@nestjs/swagger");
 const project_entity_1 = require("../entities/project.entity");
 class SeoDataDto {
 }
 exports.SeoDataDto = SeoDataDto;
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'SEO meta title',
+        example: 'My Awesome Project - Portfolio',
+        maxLength: 255,
+        type: String,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MaxLength)(255),
     __metadata("design:type", String)
 ], SeoDataDto.prototype, "metaTitle", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'SEO meta description',
+        example: 'A detailed description of my awesome project showcasing skills and technologies',
+        maxLength: 500,
+        type: String,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MaxLength)(500),
     __metadata("design:type", String)
 ], SeoDataDto.prototype, "metaDescription", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'SEO keywords',
+        example: ['react', 'nodejs', 'typescript', 'portfolio'],
+        type: [String],
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsString)({ each: true }),
@@ -38,154 +56,303 @@ class CreateProjectDto {
 }
 exports.CreateProjectDto = CreateProjectDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Project title',
+        example: 'E-commerce Platform with React and Node.js',
+        minLength: 1,
+        maxLength: 255,
+        type: String,
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(1),
     (0, class_validator_1.MaxLength)(255),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "title", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Detailed project description',
+        example: 'A full-featured e-commerce platform built with React, Node.js, and PostgreSQL. Includes user authentication, payment processing, and admin dashboard.',
+        minLength: 10,
+        type: String,
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(10),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "description", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Brief project summary',
+        example: 'Modern e-commerce solution with real-time inventory management',
+        maxLength: 500,
+        type: String,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MaxLength)(500),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "shortSummary", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Problem the project solves',
+        example: 'Small businesses need affordable e-commerce solutions with easy inventory management',
+        type: String,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "problem", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Solution implemented',
+        example: 'Built a scalable e-commerce platform with real-time inventory tracking and integrated payment processing',
+        type: String,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "solution", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Role in the project',
+        example: 'Full-stack Developer & Project Lead',
+        maxLength: 255,
+        type: String,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MaxLength)(255),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "role", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Key project highlights and achievements',
+        example: ['Implemented real-time inventory', 'Reduced page load time by 60%', 'Integrated multiple payment gateways'],
+        type: [String],
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)
 ], CreateProjectDto.prototype, "highlights", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Project results and outcomes',
+        example: 'Successfully launched with 100+ products, processing 1000+ orders monthly',
+        type: String,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "results", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Project difficulty level',
+        enum: project_entity_1.DifficultyLevel,
+        example: 'intermediate',
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(project_entity_1.DifficultyLevel),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "difficulty", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Client type',
+        enum: project_entity_1.ClientType,
+        example: 'startup',
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(project_entity_1.ClientType),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "clientType", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Live demo URL',
+        example: 'https://demo-ecommerce.example.com',
+        type: String,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsUrl)({}, { message: 'liveDemoUrl must be a valid URL address' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "liveDemoUrl", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'GitHub repository URL',
+        example: 'https://github.com/username/ecommerce-platform',
+        type: String,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsUrl)({}, { message: 'githubRepoUrl must be a valid URL address' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "githubRepoUrl", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Technology stack used in the project',
+        example: ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'Redis'],
+        type: [String],
+    }),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)
 ], CreateProjectDto.prototype, "techStack", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Project category',
+        enum: project_entity_1.ProjectCategory,
+        example: 'web',
+    }),
     (0, class_validator_1.IsEnum)(project_entity_1.ProjectCategory),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "category", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Project publication status',
+        enum: project_entity_1.ProjectStatus,
+        example: 'draft',
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(project_entity_1.ProjectStatus),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "status", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Project progress status',
+        enum: project_entity_1.ProjectProgressStatus,
+        example: 'in-progress',
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(project_entity_1.ProjectProgressStatus),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "progressStatus", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Whether project is featured',
+        example: false,
+        type: Boolean,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreateProjectDto.prototype, "isFeatured", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'SEO metadata for the project',
+        type: SeoDataDto,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.ValidateNested)(),
     (0, class_transformer_1.Type)(() => SeoDataDto),
     __metadata("design:type", SeoDataDto)
 ], CreateProjectDto.prototype, "seoData", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Scheduled publish date (ISO 8601 format)',
+        example: '2024-12-31T23:59:59.000Z',
+        type: String,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "scheduledPublishAt", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Banner image URLs',
+        example: ['/uploads/projects/banner1.jpg', '/uploads/projects/banner2.jpg'],
+        type: [String],
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)
 ], CreateProjectDto.prototype, "bannerImages", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Category photo URLs',
+        example: ['/uploads/projects/category1.jpg'],
+        type: [String],
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)
 ], CreateProjectDto.prototype, "categoryPhotos", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Video URL',
+        example: 'https://www.youtube.com/watch?v=demo',
+        type: String,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "videoUrl", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Video thumbnail URL',
+        example: '/uploads/projects/video-thumb.jpg',
+        type: String,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "videoThumbnail", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Project duration',
+        example: '3 months',
+        type: String,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "projectDuration", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Client name',
+        example: 'Tech Startup Inc.',
+        type: String,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "clientName", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Project start date (ISO 8601 format)',
+        example: '2024-01-15T00:00:00.000Z',
+        type: String,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)({}, { message: 'startDate must be a valid ISO 8601 date string' }),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "startDate", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Project end date (ISO 8601 format)',
+        example: '2024-04-15T00:00:00.000Z',
+        type: String,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)({}, { message: 'endDate must be a valid ISO 8601 date string' }),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "endDate", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Team size',
+        example: '4 developers',
+        type: String,
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "teamSize", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Tools and software used',
+        example: ['VS Code', 'Docker', 'Git', 'Figma'],
+        type: [String],
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsString)({ each: true }),

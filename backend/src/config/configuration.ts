@@ -11,6 +11,7 @@ export interface DatabaseConfig {
   password: string;
   name: string;
   logging: boolean;
+  ssl?: boolean;
 }
 
 export interface AppConfiguration {
@@ -33,6 +34,7 @@ export default (): AppConfiguration => {
       password: process.env.DB_PASSWORD ?? 'postgres',
       name: process.env.DB_NAME ?? 'portfolio',
       logging: env !== 'production',
+      ssl: process.env.DB_SSL === 'true' || process.env.DB_HOST?.includes('render.com'),
     },
   };
 };

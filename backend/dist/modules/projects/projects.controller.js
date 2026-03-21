@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PublicProjectsController = exports.ProjectsController = void 0;
 const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
+const swagger_1 = require("@nestjs/swagger");
 const multer_1 = require("multer");
 const path_1 = require("path");
 const uuid_1 = require("uuid");
@@ -101,6 +102,31 @@ let ProjectsController = class ProjectsController {
 exports.ProjectsController = ProjectsController;
 __decorate([
     (0, common_1.Post)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a new project' }),
+    (0, swagger_1.ApiBody)({ type: create_project_dto_1.CreateProjectDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 201,
+        description: 'Project created successfully',
+        schema: {
+            example: {
+                id: 'uuid-string',
+                title: 'My Awesome Project',
+                description: 'Detailed project description',
+                category: 'web',
+                status: 'draft',
+                isFeatured: false,
+                createdAt: '2024-01-01T00:00:00.000Z'
+            }
+        }
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'Bad request - Invalid data'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 401,
+        description: 'Unauthorized'
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_project_dto_1.CreateProjectDto]),
@@ -108,6 +134,34 @@ __decorate([
 ], ProjectsController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all projects with filtering and pagination' }),
+    (0, swagger_1.ApiQuery)({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' }),
+    (0, swagger_1.ApiQuery)({ name: 'category', required: false, enum: ['web', 'mobile', 'desktop', 'ai', 'other'], description: 'Filter by category' }),
+    (0, swagger_1.ApiQuery)({ name: 'status', required: false, enum: ['draft', 'published', 'archived'], description: 'Filter by status' }),
+    (0, swagger_1.ApiQuery)({ name: 'featured', required: false, type: Boolean, description: 'Filter featured projects' }),
+    (0, swagger_1.ApiQuery)({ name: 'search', required: false, type: String, description: 'Search in title and description' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Projects retrieved successfully',
+        schema: {
+            example: {
+                data: [
+                    {
+                        id: 'uuid-string',
+                        title: 'My Awesome Project',
+                        category: 'web',
+                        status: 'published',
+                        isFeatured: true
+                    }
+                ],
+                total: 1,
+                page: 1,
+                limit: 10,
+                totalPages: 1
+            }
+        }
+    }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [query_projects_dto_1.QueryProjectsDto]),
@@ -115,12 +169,47 @@ __decorate([
 ], ProjectsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)('statistics'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get projects statistics' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Statistics retrieved successfully',
+        schema: {
+            example: {
+                totalProjects: 25,
+                publishedProjects: 20,
+                draftProjects: 5,
+                featuredProjects: 8,
+                projectsByCategory: {
+                    web: 15,
+                    mobile: 5,
+                    desktop: 3,
+                    ai: 2
+                },
+                recentActivity: 12
+            }
+        }
+    }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], ProjectsController.prototype, "getStatistics", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get project by ID' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'Project UUID',
+        type: 'string'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Project retrieved successfully',
+        type: create_project_dto_1.CreateProjectDto
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'Project not found'
+    }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -128,6 +217,26 @@ __decorate([
 ], ProjectsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update project' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'Project UUID',
+        type: 'string'
+    }),
+    (0, swagger_1.ApiBody)({ type: update_project_dto_1.UpdateProjectDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Project updated successfully',
+        type: create_project_dto_1.CreateProjectDto
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'Project not found'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'Bad request - Invalid data'
+    }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -137,6 +246,20 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
+    (0, swagger_1.ApiOperation)({ summary: 'Delete project' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'Project UUID',
+        type: 'string'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 204,
+        description: 'Project deleted successfully'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'Project not found'
+    }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -144,6 +267,29 @@ __decorate([
 ], ProjectsController.prototype, "remove", null);
 __decorate([
     (0, common_1.Post)(':id/duplicate'),
+    (0, swagger_1.ApiOperation)({ summary: 'Duplicate project' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'Project UUID to duplicate',
+        type: 'string'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 201,
+        description: 'Project duplicated successfully',
+        schema: {
+            example: {
+                id: 'new-uuid-string',
+                title: 'My Awesome Project (Copy)',
+                description: 'Detailed project description',
+                category: 'web',
+                status: 'draft'
+            }
+        }
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'Project not found'
+    }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -151,6 +297,18 @@ __decorate([
 ], ProjectsController.prototype, "duplicate", null);
 __decorate([
     (0, common_1.Patch)('bulk/publish'),
+    (0, swagger_1.ApiOperation)({ summary: 'Bulk publish/unpublish projects' }),
+    (0, swagger_1.ApiBody)({ type: bulk_operations_dto_1.BulkPublishDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Projects updated successfully',
+        schema: {
+            example: {
+                updated: 5,
+                message: '5 projects updated successfully'
+            }
+        }
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [bulk_operations_dto_1.BulkPublishDto]),
@@ -158,6 +316,18 @@ __decorate([
 ], ProjectsController.prototype, "bulkPublish", null);
 __decorate([
     (0, common_1.Delete)('bulk/delete'),
+    (0, swagger_1.ApiOperation)({ summary: 'Bulk delete projects' }),
+    (0, swagger_1.ApiBody)({ type: bulk_operations_dto_1.BulkDeleteDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Projects deleted successfully',
+        schema: {
+            example: {
+                deleted: 3,
+                message: '3 projects deleted successfully'
+            }
+        }
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [bulk_operations_dto_1.BulkDeleteDto]),
@@ -165,6 +335,18 @@ __decorate([
 ], ProjectsController.prototype, "bulkDelete", null);
 __decorate([
     (0, common_1.Patch)('bulk/feature'),
+    (0, swagger_1.ApiOperation)({ summary: 'Bulk feature/unfeature projects' }),
+    (0, swagger_1.ApiBody)({ type: bulk_operations_dto_1.BulkFeatureDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Projects updated successfully',
+        schema: {
+            example: {
+                updated: 4,
+                message: '4 projects updated successfully'
+            }
+        }
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [bulk_operations_dto_1.BulkFeatureDto]),
@@ -172,6 +354,57 @@ __decorate([
 ], ProjectsController.prototype, "bulkFeature", null);
 __decorate([
     (0, common_1.Post)(':id/media'),
+    (0, swagger_1.ApiOperation)({ summary: 'Upload media file for project' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'Project UUID',
+        type: 'string'
+    }),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, swagger_1.ApiBody)({
+        description: 'Upload media file (image or video)',
+        schema: {
+            type: 'object',
+            properties: {
+                file: {
+                    type: 'string',
+                    format: 'binary',
+                    description: 'Media file (jpeg, jpg, png, gif, webp, mp4, avi, mov) - Max 50MB'
+                },
+                category: {
+                    type: 'string',
+                    enum: ['banner', 'category', 'video', 'thumbnail'],
+                    description: 'Media category (optional, default: banner)'
+                }
+            },
+            required: ['file']
+        }
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 201,
+        description: 'Media uploaded successfully',
+        schema: {
+            example: {
+                id: 'media-uuid',
+                type: 'image',
+                filename: 'unique-filename.jpg',
+                originalName: 'project-screenshot.jpg',
+                mimeType: 'image/jpeg',
+                size: 1024000,
+                url: '/uploads/projects/unique-filename.jpg',
+                category: 'banner',
+                order: 0
+            }
+        }
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'Bad request - Invalid file type or size'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'Project not found'
+    }),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
         storage: (0, multer_1.diskStorage)({
             destination: (req, file, cb) => {
@@ -208,6 +441,25 @@ __decorate([
 ], ProjectsController.prototype, "uploadMedia", null);
 __decorate([
     (0, common_1.Patch)(':id/media/order'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update media order for project' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'Project UUID',
+        type: 'string'
+    }),
+    (0, swagger_1.ApiBody)({
+        description: 'Media order array',
+        schema: {
+            example: [
+                { id: 'media-uuid-1', order: 0 },
+                { id: 'media-uuid-2', order: 1 }
+            ]
+        }
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Media order updated successfully'
+    }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -216,6 +468,20 @@ __decorate([
 ], ProjectsController.prototype, "updateMediaOrder", null);
 __decorate([
     (0, common_1.Delete)('media/:mediaId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Remove media from project' }),
+    (0, swagger_1.ApiParam)({
+        name: 'mediaId',
+        description: 'Media UUID',
+        type: 'string'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Media removed successfully'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'Media not found'
+    }),
     __param(0, (0, common_1.Param)('mediaId', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -223,6 +489,33 @@ __decorate([
 ], ProjectsController.prototype, "removeMedia", null);
 __decorate([
     (0, common_1.Patch)(':id/cover-image'),
+    (0, swagger_1.ApiOperation)({ summary: 'Set project cover image' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'Project UUID',
+        type: 'string'
+    }),
+    (0, swagger_1.ApiBody)({
+        description: 'Media ID to set as cover',
+        schema: {
+            type: 'object',
+            properties: {
+                mediaId: {
+                    type: 'string',
+                    description: 'Media UUID to set as cover image'
+                }
+            },
+            required: ['mediaId']
+        }
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Cover image set successfully'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'Project or media not found'
+    }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)('mediaId', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
@@ -230,6 +523,8 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ProjectsController.prototype, "setCoverImage", null);
 exports.ProjectsController = ProjectsController = __decorate([
+    (0, swagger_1.ApiTags)('projects'),
+    (0, swagger_1.ApiBearerAuth)('JWT-auth'),
     (0, common_1.Controller)('projects'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:paramtypes", [projects_service_1.ProjectsService])
@@ -254,6 +549,33 @@ let PublicProjectsController = class PublicProjectsController {
 exports.PublicProjectsController = PublicProjectsController;
 __decorate([
     (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all projects (public access)' }),
+    (0, swagger_1.ApiQuery)({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' }),
+    (0, swagger_1.ApiQuery)({ name: 'category', required: false, enum: ['web', 'mobile', 'desktop', 'ai', 'other'], description: 'Filter by category' }),
+    (0, swagger_1.ApiQuery)({ name: 'search', required: false, type: String, description: 'Search in title and description' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Projects retrieved successfully',
+        schema: {
+            example: {
+                data: [
+                    {
+                        id: 'uuid-string',
+                        title: 'My Awesome Project',
+                        category: 'web',
+                        status: 'published',
+                        isFeatured: true,
+                        shortSummary: 'Brief project description'
+                    }
+                ],
+                total: 1,
+                page: 1,
+                limit: 10,
+                totalPages: 1
+            }
+        }
+    }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [query_projects_dto_1.QueryProjectsDto]),
@@ -261,6 +583,26 @@ __decorate([
 ], PublicProjectsController.prototype, "getAllProjects", null);
 __decorate([
     (0, common_1.Get)('featured'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get featured projects (public access)' }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', required: false, type: Number, description: 'Limit number of results' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Featured projects retrieved successfully',
+        schema: {
+            example: {
+                data: [
+                    {
+                        id: 'uuid-string',
+                        title: 'Featured Project',
+                        category: 'web',
+                        shortSummary: 'Brief description',
+                        coverImage: '/uploads/projects/cover.jpg'
+                    }
+                ],
+                total: 1
+            }
+        }
+    }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [query_projects_dto_1.QueryProjectsDto]),
@@ -268,6 +610,19 @@ __decorate([
 ], PublicProjectsController.prototype, "getFeaturedProjects", null);
 __decorate([
     (0, common_1.Get)('by-category/:category'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get projects by category (public access)' }),
+    (0, swagger_1.ApiParam)({
+        name: 'category',
+        description: 'Project category',
+        enum: ['web', 'mobile', 'desktop', 'ai', 'other'],
+        type: 'string'
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Projects by category retrieved successfully'
+    }),
     __param(0, (0, common_1.Param)('category')),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -276,12 +631,28 @@ __decorate([
 ], PublicProjectsController.prototype, "getProjectsByCategory", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get project by ID (public access)' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'Project UUID',
+        type: 'string'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Project retrieved successfully',
+        type: create_project_dto_1.CreateProjectDto
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'Project not found'
+    }),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], PublicProjectsController.prototype, "getProjectById", null);
 exports.PublicProjectsController = PublicProjectsController = __decorate([
+    (0, swagger_1.ApiTags)('public-projects'),
     (0, common_1.Controller)('public/projects'),
     __metadata("design:paramtypes", [projects_service_1.ProjectsService])
 ], PublicProjectsController);

@@ -25,6 +25,7 @@ import { AppConfig, AppConfiguration, DatabaseConfig } from '../config/configura
           logging: database.logging,
           synchronize: appConfig.env !== 'production',
           autoLoadEntities: true,
+          ssl: database.ssl ? { rejectUnauthorized: false } : false,
         };
       },
     }),

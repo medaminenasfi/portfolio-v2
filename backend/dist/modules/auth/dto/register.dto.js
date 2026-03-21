@@ -11,15 +11,37 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegisterDto = void 0;
 const class_validator_1 = require("class-validator");
+const swagger_1 = require("@nestjs/swagger");
 class RegisterDto {
 }
 exports.RegisterDto = RegisterDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Username for the new admin user',
+        example: 'admin',
+        type: String,
+    }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "username", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Email address for the new admin user',
+        example: 'admin@example.com',
+        type: String,
+    }),
+    (0, class_validator_1.IsEmail)(),
+    __metadata("design:type", String)
+], RegisterDto.prototype, "email", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Password for the new admin user (minimum 6 characters)',
+        example: 'password123',
+        type: String,
+        minLength: 6,
+    }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(6),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "password", void 0);
 //# sourceMappingURL=register.dto.js.map
