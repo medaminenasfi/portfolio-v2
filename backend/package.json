@@ -4,9 +4,9 @@
   "description": "API backend built with NestJS",
   "main": "dist/main.js",
   "scripts": {
-    "build": "node node_modules/typescript/bin/tsc",
+    "build": "node node_modules/typescript/bin/tsc -p tsconfig.json",
     "start": "node dist/main.js",
-    "start:dev": "node node_modules/typescript/bin/tsc && node dist/main.js",
+    "start:dev": "node node_modules/typescript/bin/tsc -p tsconfig.json && node dist/main.js",
     "dev": "npm run start",
     "run": "run-server.bat",
     "lint": "npx eslint \"src/**/*.ts\" --fix",
